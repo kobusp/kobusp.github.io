@@ -115,7 +115,7 @@
             width: 800px;
             height: 100px;
             top: 100px;
-            left: 36%;
+            left: 27%;
             color: #eeeeee;
             animation: glowingText 1300ms infinite;
             display: none;
@@ -182,45 +182,45 @@
         container = {},
         vis = {};
 
-    var names = ["Punya", "Sam", "Nobby", "Lebo", "Phephi", "Oliver", "Kobus", "Marco", "Tshepo", "Wayne", "Fabio", "Mangaliso"];
+    var names = ["Punya", "Sam", "Nobby", "Lebo", "Phephi", "Oliver", "Kobus", "Marco", "Tshepo", "Wayne", "Fabio", "Sebastian"];
     var data = [];
 
     function mapData() {
         names.forEach(function (n) {
-            data.push({"label": n, "value": 1, "question": n})
+            data.push({"label": n, "value": 1})
         });
     }
 
     function drawAttendees() {
-        var innerHTML = document.getElementById("attendeesList");
         names.map(function (n) {
-            var li = document.createElement("li");
-            var input = document.createElement("input");
-            input.setAttribute("type", "checkbox");
-            input.setAttribute("id", "check_" + n);
-            input.setAttribute("checked", true);
-            li.append(input);
-            var label = document.createElement("label");
-            label.setAttribute("for", "check_" + n);
-            label.innerHTML = n;
-            li.append(label);
-            innerHTML.append(li);
+            drawAttendee(n);
         });
+    }
+
+    function drawAttendee(n) {
+        var innerHTML = document.getElementById("attendeesList");
+        var li = document.createElement("li");
+        var input = document.createElement("input");
+        input.setAttribute("type", "checkbox");
+        input.setAttribute("id", "check_" + n);
+        input.setAttribute("checked", true);
+        li.append(input);
+        var label = document.createElement("label");
+        label.setAttribute("for", "check_" + n);
+        label.innerHTML = n;
+        li.append(label);
+        innerHTML.append(li);
     }
 
     function addAttendee() {
         var name = document.getElementById("attendeeName").value;
         names.push(name);
-        // delete attendees html
-        document.getElementById("attendeesList").innerHTML = "";
-
         data.push({
             "label": name,
-            "value": 1,
-            "question": name + ", What is done? Plan today? Any impediments?"
+            "value": 1
         });
 
-        drawAttendees();
+        drawAttendee(name);
         drawSpinner(data);
         document.getElementById("attendeeName").value = "";
     }
@@ -295,21 +295,21 @@
 
         container.select("circle").on("click", null);
 
-        var ps = 360 / data.length,
-            pieslice = Math.round(1440 / data.length),
+        var degreesPerAttendee = 360 / data.length,
             rng = Math.floor((Math.random() * 1440) + 360);
 
-        rotation = (Math.round(rng / ps) * ps);
+        rotation = (Math.round(rng / degreesPerAttendee) * degreesPerAttendee);
 
-        picked = Math.round(data.length - (rotation % 360) / ps);
+        picked = Math.round(data.length - (rotation % 360) / degreesPerAttendee);
         picked = picked >= data.length ? (picked % data.length) : picked;
         if (oldpick.indexOf(picked) !== -1) {
+            // A previous attendee was selected, so spin again
             d3.select(this).call(spin);
             return;
         } else {
             oldpick.push(picked);
         }
-        rotation += 90 - Math.round(ps / 2);
+        rotation += 90 - Math.round(degreesPerAttendee / 2);
         vis.transition()
             .duration(3000)
             .attrTween("transform", rotTween)
@@ -318,25 +318,32 @@
                 d3.select(".slice:nth-child(" + (picked + 1) + ") path")
                     .attr("fill", "#111")
                 d3.select("#question h1")
-                    .text(data[picked].question + " what is done? Plan for today? Any impediments?");
+                    .text(data[picked].label + " what is done? Plan for today? Any impediments?");
                 oldrotation = rotation;
 
                 container.select("circle").on("click", spin);
 
-                let remainingAttendees = data.length - oldpick.length;
+                let remainingAttendees = [];
+                for(var i = 0; i < data.length; i++) {
+                    if (oldpick.indexOf(i) === -1) {
+                        remainingAttendees.push(data[i]);
+                    }
+                }
+                let remainingAttendeesCount = data.length - oldpick.length;
 
-                if (remainingAttendees === 0) {
+                if (remainingAttendeesCount === 0) {
                     console.log("done");
                     return;
                 }
 
-                if (remainingAttendees === 2) {
+                if (remainingAttendeesCount === 2) {
+                    document.getElementById("voteMessage").innerHTML = "Time to vote! " + remainingAttendees[0].label + " or " + remainingAttendees[1].label;
                     document.getElementById("voteMessage").style.display = "block";
                 } else {
                     document.getElementById("voteMessage").style.display = "none";
                 }
 
-                if(remainingAttendees === 1) {
+                if(remainingAttendeesCount === 1) {
                     document.getElementById("spinWinner").innerHTML = "The winner is " + data[picked].label + "!";
                     document.getElementById("spinWinner").style.display = "block";
                 }
@@ -361,8 +368,7 @@
                 if (e.target.checked) {
                     data.push({
                         "label": name,
-                        "value": 1,
-                        "question": name + ", What is done? Plan today? Any impediments?"
+                        "value": 1
                     });
                 } else {
                     data[index].value = 0;
