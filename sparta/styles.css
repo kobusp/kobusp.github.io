@@ -1,0 +1,141 @@
+body {
+    background-image: url('MS-Teams-Background_VSS_2024_v2.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+text {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    pointer-events: none;
+}
+
+#content {
+    position: absolute;
+    top: 25%;
+    left: 35%;
+    margin-top: -50px;
+    margin-left: -50px;
+}
+
+#attendees {
+    position: absolute;
+    width: 200px;
+    height: 800px;
+    top: 20%;
+    left: 10%;
+    color: white;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 30px;
+}
+
+#attendees ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+#chart {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    top: 0;
+    left: 0;
+}
+
+#question {
+    position: absolute;
+    width: 400px;
+    height: 500px;
+    top: 0;
+    left: 520px;
+}
+
+#question h1 {
+    font-size: 30px;
+    font-weight: bold;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    position: absolute;
+    padding: 0;
+    margin: 0;
+    top: 50%;
+    color: #eeeeee;
+    -webkit-transform: translate(0, -50%);
+    transform: translate(0, -50%);
+    text-shadow: 5px 5px 30px rgba(0, 0, 0, 0.9);
+}
+
+@keyframes glowing {
+    0% {
+        background-color: #2ba805;
+        box-shadow: 0 0 5px #2ba805;
+    }
+
+    50% {
+        background-color: #49e819;
+        box-shadow: 0 0 20px #49e819;
+    }
+
+    100% {
+        background-color: #2ba805;
+        box-shadow: 0 0 5px #2ba805;
+    }
+}
+
+
+@keyframes glowingText {
+    0% {
+        color: #2ba805;
+        text-shadow: 0 0 5px #2ba805;
+    }
+
+    50% {
+        color: #49e819;
+        text-shadow: 0 0 20px #49e819;
+    }
+
+    100% {
+        color: #2ba805;
+        text-shadow: 0 0 5px #2ba805;
+    }
+}
+
+#voteMessage, #spinWinner {
+    font-size: 50px;
+    font-weight: bold;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    position: absolute;
+    width: 800px;
+    height: 100px;
+    top: 100px;
+    left: 27%;
+    color: #eeeeee;
+    animation: glowingText 1300ms infinite;
+    display: none;
+}
+
+#spinWinner {
+    left: 32%;
+}
+
+.button {
+    background-color: #1c87c9;
+    -webkit-border-radius: 60px;
+    border-radius: 60px;
+    border: none;
+    color: #eeeeee;
+    cursor: pointer;
+    display: inline-block;
+    font-family: sans-serif;
+    font-size: 20px;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.button {
+    animation: glowing 1300ms infinite;
+    float: right;
+    margin-top: 20px;
+    margin-right: 90px;
+}
