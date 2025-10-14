@@ -10,7 +10,7 @@ var padding = {top: 20, right: 40, bottom: 0, left: 0},
     container = {},
     vis = {};
 
-var names = ["Punya", "Sam", "Nobby", "Lebo", "Phephi", "Oliver", "Kobus", "Marco", "Tshepo", "Wayne", "Fabio", "Sebastian", "Bongane"];
+var names = ["Punya", "Sam", "Nobby", "Lebo", "Phephi", "Oliver", "Kobus", "Marco", "Tshepo", "Wayne", "Fabio", "Sebastian"];
 var data = [];
 
 function mapData() {
