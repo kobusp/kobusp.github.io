@@ -1,4 +1,4 @@
-var names = ["Punya", "Sam", "Nobby", "Lebo", "Kobus", "Marco", "Tshepo", "Fabio", "Sebastian", "Felix", "Simon", "Wayne"];
+var names = ["Punya", "Sam", "Nobby", "Lebo", "Kobus", "Marco", "Tshepo", "Fabio", "Sebastian", "Felix", "Simon", "Eduard", "Wayne"];
 
 var padding = {top: 20, right: 40, bottom: 0, left: 0},
     w = 500 - padding.left - padding.right,
