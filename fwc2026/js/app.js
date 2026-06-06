@@ -55,7 +55,7 @@ const playerInitials = {
   'Aiden': 'A',
   'Cameron': 'C',
   'Gary': 'G',
-  'Jizelle': 'J',
+  'Gizelle': 'G',
   'Jo': 'Jo',
   'Kobus': 'K',
   'Lindsay': 'L',
@@ -81,6 +81,11 @@ class WorldCupApp {
     }
   }
 
+  getCurrentDateAndTime() {
+    // return new Date('2026-07-06T00:00:00Z');
+    return new Date();
+  }
+
   setupEventListeners() {
     document.getElementById('navToggle').addEventListener('click', () => {
       document.getElementById('navMenu').classList.toggle('active');
@@ -88,7 +93,7 @@ class WorldCupApp {
   }
 
   getCurrentStage() {
-    const now = new Date('2026-06-06T00:00:00Z');
+    const now = this.getCurrentDateAndTime();
     const stages = this.data.tournament.stageDates;
 
     if (now < new Date(stages.group.end)) return 'group';
@@ -101,7 +106,7 @@ class WorldCupApp {
   }
 
   getNextMatch() {
-    const now = new Date('2026-06-06T00:00:00Z');
+    const now = this.getCurrentDateAndTime();
     for (let match of this.data.matches) {
       if (new Date(match.date) >= now && match.status !== 'completed') {
         return match;
@@ -131,12 +136,24 @@ class WorldCupApp {
   }
 
   getPlayersForMatch(match) {
-    const homePlayers = this.getTeamPlayerNames(match.home.team);
-    const awayPlayers = this.getTeamPlayerNames(match.away.team);
-    const homePlayerIds = this.getTeamPlayerIds(match.home.team);
-    const awayPlayerIds = this.getTeamPlayerIds(match.away.team);
-    return { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds };
-  }
+     const homePlayers = this.getTeamPlayerNames(match.home.team);
+     const awayPlayers = this.getTeamPlayerNames(match.away.team);
+     const homePlayerIds = this.getTeamPlayerIds(match.home.team);
+     const awayPlayerIds = this.getTeamPlayerIds(match.away.team);
+     const homePlayerObjects = this.getTeamPlayerObjects(match.home.team);
+     const awayPlayerObjects = this.getTeamPlayerObjects(match.away.team);
+     return { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds, homePlayerObjects, awayPlayerObjects };
+   }
+
+   getTeamPlayerObjects(teamName) {
+     const players = [];
+     for (let player of this.data.players) {
+       if (player.teams.includes(teamName)) {
+         players.push(player);
+       }
+     }
+     return players;
+   }
 
   calculatePlayerScores() {
     const scores = {};
@@ -204,59 +221,85 @@ class WorldCupApp {
     return ranked;
   }
 
-  renderMatchCard(match) {
-    const homeFlag = countryFlags[match.home.team] || '🏴';
-    const awayFlag = countryFlags[match.away.team] || '🏴';
-    const dateObj = new Date(match.date);
-    const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+   renderMatchCard(match) {
+     const homeFlag = countryFlags[match.home.team] || '🏴';
+     const awayFlag = countryFlags[match.away.team] || '🏴';
+     const dateObj = new Date(match.date);
+     const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+     const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-    const { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds } = this.getPlayersForMatch(match);
-    const homePlayersStr = homePlayers.length ? homePlayers.join(', ') : 'No one';
-    const awayPlayersStr = awayPlayers.length ? awayPlayers.join(', ') : 'No one';
+     const { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds, homePlayerObjects, awayPlayerObjects } = this.getPlayersForMatch(match);
+     const homePlayersStr = homePlayers.length ? homePlayers.join(', ') : 'No one';
+     const awayPlayersStr = awayPlayers.length ? awayPlayers.join(', ') : 'No one';
 
-    const stageName = match.stage.replace(/_/g, ' ').toUpperCase();
+      // Build player avatars HTML
+      const homeAvatarsHtml = homePlayerObjects.map(p => {
+        const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.2rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
+        return `<div class="match-avatar-small" title="${p.name}">${avatarImg}</div>`;
+      }).join('');
 
-    return `
-      <div class="match-card" onclick="app.showMatchDetail('${match.id}')">
-        <div class="match-header">
-          <span class="match-stage">${stageName}</span>
-          <span class="match-status ${match.status}">${match.status.charAt(0).toUpperCase() + match.status.slice(1)}</span>
-          <div style="font-size: 0.85rem; margin-top: 0.5rem;">${dateStr} at ${timeStr}</div>
-        </div>
-        <div class="match-body">
-          <div class="team-info">
-            <div class="team-flag">${homeFlag}</div>
-            <div class="team-name">${match.home.team}</div>
-            <div class="team-players">${homePlayersStr}</div>
-          </div>
-          <div class="score-display">
-            ${match.status === 'completed' ? `
-              <div class="score-number">${match.score.home}</div>
-              <div class="vs-text">vs</div>
-              <div class="score-number">${match.score.away}</div>
-            ` : `
-              <div class="vs-text">vs</div>
-            `}
-          </div>
-          <div class="team-info">
-            <div class="team-flag">${awayFlag}</div>
-            <div class="team-name">${match.away.team}</div>
-            <div class="team-players">${awayPlayersStr}</div>
-          </div>
-        </div>
-        <div class="match-footer">${match.venue}</div>
-      </div>
-    `;
-  }
+      const awayAvatarsHtml = awayPlayerObjects.map(p => {
+        const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.2rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
+        return `<div class="match-avatar-small" title="${p.name}">${avatarImg}</div>`;
+      }).join('');
 
-  showLanding() {
-    this.closePage();
-    const page = document.getElementById('landingPage');
+     const stageName = match.stage.replace(/_/g, ' ').toUpperCase();
 
-    // Next match
-    const nextMatch = this.getNextMatch();
-    document.getElementById('nextMatchDisplay').innerHTML = this.renderMatchCard(nextMatch);
+     return `
+       <div class="match-card" onclick="app.showMatchDetail('${match.id}')">
+         <div class="match-header">
+           <span class="match-stage">${stageName}</span>
+           <span class="match-status ${match.status}">${match.status.charAt(0).toUpperCase() + match.status.slice(1)}</span>
+           <div style="font-size: 0.85rem; margin-top: 0.5rem;">${dateStr} at ${timeStr}</div>
+         </div>
+         <div class="match-body">
+           <div class="team-info">
+             <div class="team-flag">${homeFlag}</div>
+             <div class="team-avatars-row">${homeAvatarsHtml}</div>
+             <div class="team-name">${match.home.team}</div>
+             <div class="team-players">${homePlayersStr}</div>
+           </div>
+           <div class="score-display">
+             ${match.status === 'completed' ? `
+               <div class="score-number">${match.score.home}</div>
+               <div class="vs-text">vs</div>
+               <div class="score-number">${match.score.away}</div>
+             ` : `
+               <div class="vs-text">vs</div>
+             `}
+           </div>
+           <div class="team-info">
+             <div class="team-flag">${awayFlag}</div>
+             <div class="team-avatars-row">${awayAvatarsHtml}</div>
+             <div class="team-name">${match.away.team}</div>
+             <div class="team-players">${awayPlayersStr}</div>
+           </div>
+         </div>
+         <div class="match-footer">${match.venue}</div>
+       </div>
+     `;
+   }
+
+   showLanding() {
+     this.closePage();
+     const page = document.getElementById('landingPage');
+
+     // Current stage
+     const currentStage = this.getCurrentStage();
+     const stageNames = {
+       'group': 'Group Stage',
+       'round_of_32': 'Round of 32',
+       'round_of_16': 'Round of 16',
+       'quarter_final': 'Quarterfinals',
+       'semi_final': 'Semifinals',
+       'third_place': '3rd Place Match',
+       'final': 'Final'
+     };
+     document.getElementById('currentStageDisplay').innerHTML = `<div class="stage-display">${stageNames[currentStage]}</div>`;
+
+     // Next match
+     const nextMatch = this.getNextMatch();
+     document.getElementById('nextMatchDisplay').innerHTML = this.renderMatchCard(nextMatch);
 
     // Schedule by date
     const matchesByDate = {};
@@ -508,75 +551,93 @@ class WorldCupApp {
     this.currentPage = 'playerDetail';
   }
 
-  showMatchDetail(matchId) {
-    this.closePage();
-    const page = document.getElementById('matchDetailPage');
-    const match = this.data.matches.find(m => m.id === matchId);
-    if (!match) return;
+   showMatchDetail(matchId) {
+     this.closePage();
+     const page = document.getElementById('matchDetailPage');
+     const match = this.data.matches.find(m => m.id === matchId);
+     if (!match) return;
 
-    const homeFlag = countryFlags[match.home.team] || '🏴';
-    const awayFlag = countryFlags[match.away.team] || '🏴';
-    const dateObj = new Date(match.date);
-    const dateStr = dateObj.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
-    });
-    const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+     const homeFlag = countryFlags[match.home.team] || '🏴';
+     const awayFlag = countryFlags[match.away.team] || '🏴';
+     const dateObj = new Date(match.date);
+     const dateStr = dateObj.toLocaleDateString('en-US', {
+       weekday: 'long',
+       month: 'long',
+       day: 'numeric',
+       year: 'numeric'
+     });
+     const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-    const stageName = match.stage.replace(/_/g, ' ').toUpperCase();
-    const { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds } = this.getPlayersForMatch(match);
+     const stageName = match.stage.replace(/_/g, ' ').toUpperCase();
+     const { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds, homePlayerObjects, awayPlayerObjects } = this.getPlayersForMatch(match);
 
-    const html = `
-      <div style="background: white; border-radius: 10px; padding: 2rem;">
-        <div style="background: linear-gradient(135deg, #1a472a 0%, #003f7f 100%); color: white; padding: 2rem; border-radius: 10px; margin-bottom: 2rem; text-align: center;">
-          <div style="font-size: 0.9rem; margin-bottom: 1rem;">
-            <span style="background: #ffd700; color: #1a472a; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600;">${stageName}</span>
-          </div>
-          <p style="margin-bottom: 1rem;">${dateStr}</p>
-          <p>${timeStr} at ${match.venue}</p>
-        </div>
+      // Build home team avatars HTML
+      const homeAvatarsHtml = homePlayerObjects.map(p => {
+        const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.5rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
+        return `<div class="match-detail-avatar" title="${p.name}">${avatarImg}</div>`;
+      }).join('');
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-          <div style="text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 0.5rem;">${homeFlag}</div>
-            <h2 style="color: #1a472a; margin: 0.5rem 0;">${match.home.team}</h2>
-            <div style="color: #666; font-size: 0.9rem;">${homePlayers.join(', ') || 'No one'}</div>
-          </div>
-          <div style="text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 0.5rem;">${awayFlag}</div>
-            <h2 style="color: #1a472a; margin: 0.5rem 0;">${match.away.team}</h2>
-            <div style="color: #666; font-size: 0.9rem;">${awayPlayers.join(', ') || 'No one'}</div>
-          </div>
-        </div>
+      // Build away team avatars HTML
+      const awayAvatarsHtml = awayPlayerObjects.map(p => {
+        const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.5rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
+        return `<div class="match-detail-avatar" title="${p.name}">${avatarImg}</div>`;
+      }).join('');
 
-        ${match.status === 'completed' ? `
-          <div style="background: #f0f0f0; padding: 2rem; border-radius: 10px; text-align: center; margin-bottom: 2rem;">
-            <p style="color: #666; margin-bottom: 1rem;">Final Score</p>
-            <div style="font-size: 3rem; font-weight: bold; color: #003f7f; display: flex; justify-content: center; align-items: center; gap: 1rem;">
-              <span>${match.score.home}</span>
-              <span style="font-size: 1.5rem; color: #666;">-</span>
-              <span>${match.score.away}</span>
-            </div>
-            <p style="margin-top: 1rem; color: #666;">
-              ${match.winner === 'home' ? `${match.home.team} wins!` :
-                match.winner === 'away' ? `${match.away.team} wins!` :
-                'Match ended in a draw'}
-            </p>
-          </div>
-        ` : `
-          <div style="background: #f0f0f0; padding: 2rem; border-radius: 10px; text-align: center;">
-            <p style="color: #666;">Match not yet played</p>
-          </div>
-        `}
-      </div>
-    `;
+     const html = `
+       <div style="background: white; border-radius: 10px; padding: 2rem;">
+         <div style="background: linear-gradient(135deg, #1a472a 0%, #003f7f 100%); color: white; padding: 2rem; border-radius: 10px; margin-bottom: 2rem; text-align: center;">
+           <div style="font-size: 0.9rem; margin-bottom: 1rem;">
+             <span style="background: #ffd700; color: #1a472a; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600;">${stageName}</span>
+           </div>
+           <p style="margin-bottom: 1rem;">${dateStr}</p>
+           <p>${timeStr} at ${match.venue}</p>
+         </div>
 
-    document.getElementById('matchDetailContent').innerHTML = html;
-    page.classList.remove('hidden');
-    this.currentPage = 'matchDetail';
-  }
+         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+           <div style="text-align: center;">
+             <div style="font-size: 3rem; margin-bottom: 0.5rem;">${homeFlag}</div>
+             <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+               ${homeAvatarsHtml}
+             </div>
+             <h2 style="color: #1a472a; margin: 0.5rem 0;">${match.home.team}</h2>
+             <div style="color: #666; font-size: 0.9rem;">${homePlayers.join(', ') || 'No one'}</div>
+           </div>
+           <div style="text-align: center;">
+             <div style="font-size: 3rem; margin-bottom: 0.5rem;">${awayFlag}</div>
+             <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+               ${awayAvatarsHtml}
+             </div>
+             <h2 style="color: #1a472a; margin: 0.5rem 0;">${match.away.team}</h2>
+             <div style="color: #666; font-size: 0.9rem;">${awayPlayers.join(', ') || 'No one'}</div>
+           </div>
+         </div>
+
+         ${match.status === 'completed' ? `
+           <div style="background: #f0f0f0; padding: 2rem; border-radius: 10px; text-align: center; margin-bottom: 2rem;">
+             <p style="color: #666; margin-bottom: 1rem;">Final Score</p>
+             <div style="font-size: 3rem; font-weight: bold; color: #003f7f; display: flex; justify-content: center; align-items: center; gap: 1rem;">
+               <span>${match.score.home}</span>
+               <span style="font-size: 1.5rem; color: #666;">-</span>
+               <span>${match.score.away}</span>
+             </div>
+             <p style="margin-top: 1rem; color: #666;">
+               ${match.winner === 'home' ? `${match.home.team} wins!` :
+                 match.winner === 'away' ? `${match.away.team} wins!` :
+                 'Match ended in a draw'}
+             </p>
+           </div>
+         ` : `
+           <div style="background: #f0f0f0; padding: 2rem; border-radius: 10px; text-align: center;">
+             <p style="color: #666;">Match not yet played</p>
+           </div>
+         `}
+       </div>
+     `;
+
+     document.getElementById('matchDetailContent').innerHTML = html;
+     page.classList.remove('hidden');
+     this.currentPage = 'matchDetail';
+   }
 
   closePage() {
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));

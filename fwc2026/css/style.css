@@ -149,8 +149,45 @@ section h2 {
 }
 
 section h3 {
-  color: var(--secondary);
-  margin: 1rem 0;
+   color: var(--secondary);
+   margin: 1rem 0;
+}
+
+/* Current Stage Section */
+.current-stage {
+   background: linear-gradient(135deg, #1a472a 0%, #003f7f 100%);
+   color: white;
+   padding: 2rem;
+   margin-bottom: 2rem;
+   border-radius: 10px;
+   box-shadow: var(--shadow);
+   text-align: center;
+}
+
+.current-stage h2 {
+   color: white;
+   border: none;
+   padding: 0;
+   margin-bottom: 1rem;
+}
+
+.stage-badge {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+.stage-display {
+   background: var(--accent-yellow);
+   color: var(--primary);
+   font-size: 1.8rem;
+   font-weight: 700;
+   padding: 1rem 2rem;
+   border-radius: 50px;
+   display: inline-block;
+   text-transform: uppercase;
+   letter-spacing: 1px;
+   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Buttons */
@@ -263,8 +300,42 @@ section h3 {
 }
 
 .team-players {
-  font-size: 0.85rem;
-  color: var(--text-light);
+   font-size: 0.85rem;
+   color: var(--text-light);
+}
+
+.team-avatars-row {
+   display: flex;
+   justify-content: center;
+   gap: 0.6rem;
+   margin: 0.5rem 0;
+   flex-wrap: wrap;
+}
+
+.match-avatar-small {
+   width: 60px;
+   height: 60px;
+   border-radius: 50%;
+   background: var(--light-bg);
+   border: 2px solid var(--accent-yellow);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 1.2rem;
+   flex-shrink: 0;
+}
+
+.match-detail-avatar {
+   width: 100px;
+   height: 100px;
+   border-radius: 50%;
+   background: var(--light-bg);
+   border: 3px solid var(--accent-yellow);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 1.5rem;
+   flex-shrink: 0;
 }
 
 .score-display {
