@@ -636,6 +636,11 @@ section h3 {
   display: none;
 }
 
+/* Allow filters to be collapsed using the same hidden utility */
+.filters-section.hidden {
+  display: none;
+}
+
 .schedule-day {
   margin-bottom: 2rem;
 }
@@ -820,7 +825,7 @@ section h3 {
   }
 
   .match-body {
-    flex-direction: column;
+    /*flex-direction: column;*/
     gap: 0.5rem;
   }
 

@@ -86,7 +86,9 @@
       <div id="matchesPage" class="page hidden">
         <h1>All Matches</h1>
 
-        <section class="filters-section">
+        <button class="btn btn-secondary" onclick="(function(b,e){e.classList.toggle('hidden'); b.textContent = e.classList.contains('hidden') ? 'Show Filters ▼' : 'Hide Filters ▲'})(this, document.getElementById('filtersToggle'))">Hide Filters ▲</button>
+
+        <section id="filtersToggle" class="filters-section">
           <h3>Filters</h3>
           <div class="filters-grid">
             <div class="filter-group">
