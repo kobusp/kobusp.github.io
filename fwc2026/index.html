@@ -1,0 +1,110 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FIFA World Cup 2026 - Family Football Fever</title>
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="description" content="A fun game for friends during FIFA World Cup 2026">
+
+  <meta property="og:title" content="FIFA World Cup 2026 - Football Fever">
+  <meta property="og:type" content="website">
+  <meta property="og:description" content="A fun lucky draw game">
+
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#1a472a">
+</head>
+
+<body>
+  <div id="app">
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-brand">⚽ FIFA 2026 Football Fever</div>
+        <button class="nav-toggle" id="navToggle">☰</button>
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="#" onclick="app.showLanding()">Home</a></li>
+          <li><a href="#" onclick="app.showLeaderboard()">Leaderboard</a></li>
+          <li><a href="#" onclick="app.showMatches()">Matches</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Pages Container -->
+    <div class="container">
+      <!-- Landing Page -->
+      <div id="landingPage" class="page">
+        <section class="hero">
+          <h1>⚽ FIFA 2026 Football Fever</h1>
+          <p class="subtitle">FIFA World Cup 2026 Random Draw Game</p>
+        </section>
+
+        <section class="next-match">
+          <h2>Next Match</h2>
+          <div id="nextMatchDisplay" class="match-card"></div>
+          <button class="btn btn-secondary" onclick="document.getElementById('scheduleToggle').classList.toggle('hidden')">
+            View Full Schedule ▼
+          </button>
+          <div id="scheduleToggle" class="hidden schedule-container">
+            <h3>Upcoming Matches</h3>
+            <div id="scheduleList"></div>
+          </div>
+        </section>
+
+        <section class="top-players">
+          <h2>Top 3 Players</h2>
+          <div id="topPlayersDisplay" class="players-grid"></div>
+          <button class="btn btn-secondary" onclick="app.showLeaderboard()">
+            View Full Leaderboard ▼
+          </button>
+        </section>
+      </div>
+
+      <!-- Leaderboard Page -->
+      <div id="leaderboardPage" class="page hidden">
+        <h1>Leaderboard</h1>
+        <div class="leaderboard-info">
+          <p id="leaderboardStage">Current Stage: Group Stage</p>
+        </div>
+        <div id="leaderboardDisplay" class="leaderboard-table"></div>
+        <button class="btn btn-primary" onclick="app.showLanding()">← Back</button>
+      </div>
+
+      <!-- Matches Page -->
+      <div id="matchesPage" class="page hidden">
+        <h1>All Matches</h1>
+        <div id="matchesDisplay" class="matches-container"></div>
+        <button class="btn btn-primary" onclick="app.showLanding()">← Back</button>
+      </div>
+
+      <!-- Player Page -->
+      <div id="playerPage" class="page hidden">
+        <button class="btn btn-primary" onclick="app.showLanding()">← Back</button>
+        <div id="playerDetails"></div>
+      </div>
+
+      <!-- Match Detail Page -->
+      <div id="matchDetailPage" class="page hidden">
+        <button class="btn btn-primary" onclick="app.showLanding()">← Back</button>
+        <div id="matchDetailContent"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>FIFA World Cup 2026 • Family Football Fever</p>
+    </footer>
+  </div>
+
+  <script src="js/app.js"></script>
+
+</body>
+
+</html>
