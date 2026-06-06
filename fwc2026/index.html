@@ -85,6 +85,49 @@
       <!-- Matches Page -->
       <div id="matchesPage" class="page hidden">
         <h1>All Matches</h1>
+
+        <section class="filters-section">
+          <h3>Filters</h3>
+          <div class="filters-grid">
+            <div class="filter-group">
+              <label for="stageFilter">Stage:</label>
+              <select id="stageFilter" onchange="app.applyMatchFilters()">
+                <option value="">All Stages</option>
+                <option value="group">Group Stage</option>
+                <option value="round_of_32">Round of 32</option>
+                <option value="round_of_16">Round of 16</option>
+                <option value="quarter_final">Quarterfinals</option>
+                <option value="semi_final">Semifinals</option>
+                <option value="third_place">3rd Place Match</option>
+                <option value="final">Final</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="statusFilter">Status:</label>
+              <select id="statusFilter" onchange="app.applyMatchFilters()">
+                <option value="">All Statuses</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="teamFilter">Team:</label>
+              <select id="teamFilter" onchange="app.applyMatchFilters()">
+                <option value="">All Teams</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="playerFilter">Player:</label>
+              <select id="playerFilter" onchange="app.applyMatchFilters()">
+                <option value="">All Players</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
         <div id="matchesDisplay" class="matches-container"></div>
         <button class="btn btn-primary" onclick="app.showLanding()">← Back</button>
       </div>

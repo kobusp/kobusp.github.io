@@ -225,8 +225,8 @@ class WorldCupApp {
      const homeFlag = countryFlags[match.home.team] || '🏴';
      const awayFlag = countryFlags[match.away.team] || '🏴';
      const dateObj = new Date(match.date);
-     const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-     const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+     const dateStr = dateObj.toLocaleDateString('en-ZA', { weekday: 'short', month: 'short', day: 'numeric' });
+     const timeStr = dateObj.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
 
      const { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds, homePlayerObjects, awayPlayerObjects } = this.getPlayersForMatch(match);
      const homePlayersStr = homePlayers.length ? homePlayers.join(', ') : 'No one';
@@ -304,7 +304,7 @@ class WorldCupApp {
     // Schedule by date
     const matchesByDate = {};
     for (let match of this.data.matches) {
-      const date = new Date(match.date).toLocaleDateString('en-US', {
+      const date = new Date(match.date).toLocaleDateString('en-ZA', {
         weekday: 'short',
         month: 'short',
         day: 'numeric'
@@ -411,17 +411,105 @@ class WorldCupApp {
     this.currentPage = 'leaderboard';
   }
 
-  showMatches() {
-    this.closePage();
-    const page = document.getElementById('matchesPage');
-    let html = '';
-    for (let match of this.data.matches) {
-      html += this.renderMatchCard(match);
-    }
-    document.getElementById('matchesDisplay').innerHTML = html;
-    page.classList.remove('hidden');
-    this.currentPage = 'matches';
-  }
+   showMatches() {
+     this.closePage();
+     const page = document.getElementById('matchesPage');
+
+     // Initialize filters
+     this.initializeMatchFilters();
+
+     // Apply filters to display matches
+     this.applyMatchFilters();
+
+     page.classList.remove('hidden');
+     this.currentPage = 'matches';
+   }
+
+   initializeMatchFilters() {
+     // Populate team filter
+     const teamFilter = document.getElementById('teamFilter');
+     // Clear existing options except the first one
+     while (teamFilter.options.length > 1) {
+       teamFilter.remove(1);
+     }
+     const teams = [...new Set(this.data.teams.map(t => t.name))];
+     teams.sort();
+     for (let team of teams) {
+       const option = document.createElement('option');
+       option.value = team;
+       option.textContent = team;
+       teamFilter.appendChild(option);
+     }
+
+     // Populate player filter
+     const playerFilter = document.getElementById('playerFilter');
+     // Clear existing options except the first one
+     while (playerFilter.options.length > 1) {
+       playerFilter.remove(1);
+     }
+     const players = this.data.players.map(p => p.name);
+     players.sort();
+     for (let player of players) {
+       const option = document.createElement('option');
+       option.value = player;
+       option.textContent = player;
+       playerFilter.appendChild(option);
+     }
+
+     // Reset all filters
+     document.getElementById('stageFilter').value = '';
+     document.getElementById('statusFilter').value = '';
+     document.getElementById('teamFilter').value = '';
+     document.getElementById('playerFilter').value = '';
+   }
+
+   applyMatchFilters() {
+     const stageFilter = document.getElementById('stageFilter').value;
+     const statusFilter = document.getElementById('statusFilter').value;
+     const teamFilter = document.getElementById('teamFilter').value;
+     const playerFilter = document.getElementById('playerFilter').value;
+
+     let filteredMatches = this.data.matches;
+
+     // Filter by stage
+     if (stageFilter) {
+       filteredMatches = filteredMatches.filter(m => m.stage === stageFilter);
+     }
+
+     // Filter by status
+     if (statusFilter) {
+       filteredMatches = filteredMatches.filter(m => m.status === statusFilter);
+     }
+
+     // Filter by team
+     if (teamFilter) {
+       filteredMatches = filteredMatches.filter(m =>
+         m.home.team === teamFilter || m.away.team === teamFilter
+       );
+     }
+
+     // Filter by player
+     if (playerFilter) {
+       filteredMatches = filteredMatches.filter(m => {
+         const homePlayerIds = this.getTeamPlayerIds(m.home.team);
+         const awayPlayerIds = this.getTeamPlayerIds(m.away.team);
+         const playerObj = this.data.players.find(p => p.name === playerFilter);
+         if (!playerObj) return false;
+         return homePlayerIds.includes(playerObj.id) || awayPlayerIds.includes(playerObj.id);
+       });
+     }
+
+     // Render filtered matches
+     let html = '';
+     if (filteredMatches.length === 0) {
+       html = '<div style="text-align: center; padding: 2rem; color: #666;">No matches found matching the selected filters.</div>';
+     } else {
+       for (let match of filteredMatches) {
+         html += this.renderMatchCard(match);
+       }
+     }
+     document.getElementById('matchesDisplay').innerHTML = html;
+   }
 
   showPlayerDetail(playerName) {
     this.closePage();
@@ -473,7 +561,7 @@ class WorldCupApp {
         const homeFlag = countryFlags[match.home.team] || '🏴';
         const awayFlag = countryFlags[match.away.team] || '🏴';
         const dateObj = new Date(match.date);
-        const dateStr = dateObj.toLocaleDateString('en-US');
+        const dateStr = dateObj.toLocaleDateString('en-ZA');
 
         let resultHtml = '';
         if (match.status === 'completed') {
@@ -560,13 +648,13 @@ class WorldCupApp {
      const homeFlag = countryFlags[match.home.team] || '🏴';
      const awayFlag = countryFlags[match.away.team] || '🏴';
      const dateObj = new Date(match.date);
-     const dateStr = dateObj.toLocaleDateString('en-US', {
+     const dateStr = dateObj.toLocaleDateString('en-ZA', {
        weekday: 'long',
        month: 'long',
        day: 'numeric',
        year: 'numeric'
      });
-     const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+     const timeStr = dateObj.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
 
      const stageName = match.stage.replace(/_/g, ' ').toUpperCase();
      const { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds, homePlayerObjects, awayPlayerObjects } = this.getPlayersForMatch(match);

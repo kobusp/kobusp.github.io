@@ -564,9 +564,65 @@ section h3 {
 
 /* Matches Container */
 .matches-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+   gap: 1.5rem;
+}
+
+/* Filters Section */
+.filters-section {
+   background: white;
+   padding: 2rem;
+   margin-bottom: 2rem;
+   border-radius: 10px;
+   box-shadow: var(--shadow);
+}
+
+.filters-section h3 {
+   color: var(--primary);
+   margin-top: 0;
+   margin-bottom: 1.5rem;
+   border-bottom: 2px solid var(--accent-yellow);
+   padding-bottom: 0.75rem;
+}
+
+.filters-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+   gap: 1.5rem;
+}
+
+.filter-group {
+   display: flex;
+   flex-direction: column;
+}
+
+.filter-group label {
+   font-weight: 600;
+   color: var(--primary);
+   margin-bottom: 0.5rem;
+   font-size: 0.95rem;
+}
+
+.filter-group select {
+   padding: 0.75rem;
+   border: 2px solid var(--border-color);
+   border-radius: 5px;
+   font-size: 1rem;
+   color: var(--text-dark);
+   background: white;
+   cursor: pointer;
+   transition: all 0.3s ease;
+}
+
+.filter-group select:focus {
+   outline: none;
+   border-color: var(--accent-yellow);
+   box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
+
+.filter-group select:hover {
+   border-color: var(--secondary);
 }
 
 /* Schedule */
@@ -798,7 +854,11 @@ section h3 {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .teams-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
+   .teams-list {
+     grid-template-columns: repeat(2, 1fr);
+   }
+
+   .filters-grid {
+     grid-template-columns: 1fr;
+   }
 }
