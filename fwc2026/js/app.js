@@ -345,7 +345,7 @@ class WorldCupApp {
       leaderboardHtml += `
         <div class="leaderboard-row ${topClass}">
           <div class="rank ${rankClass}"></div>
-          <div class="leaderboard-player">
+          <div class="leaderboard-player" onclick="app.showPlayerDetail('${player.name}'); event.stopPropagation();">
             <div class="leaderboard-avatar">${avatarHtml}</div>
             <div class="leaderboard-name">
               <div class="leaderboard-name-text">${player.name}</div>
