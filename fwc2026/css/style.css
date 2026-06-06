@@ -180,7 +180,7 @@ section h3 {
 .stage-display {
    background: var(--accent-yellow);
    color: var(--primary);
-   font-size: 1.8rem;
+   font-size: 1.2rem;
    font-weight: 700;
    padding: 1rem 2rem;
    border-radius: 50px;
@@ -829,7 +829,7 @@ section h3 {
   }
 
   .leaderboard-row {
-    grid-template-columns: 40px 1fr 60px;
+    grid-template-columns: 40px 1fr 70px 60px;
     padding: 0.75rem;
   }
 
