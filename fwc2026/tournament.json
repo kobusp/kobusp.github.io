@@ -14,55 +14,55 @@
   },
 
   "players": [
-    {
-      "id": "P1",
-      "name": "Aiden",
-      "avatarUrl": "img/Aiden.jpg",
-      "teams": ["Mexico","South Korea","Switzerland","Czechia","Canada","Bosnia and Herzegovina"]
-    },
-    {
-      "id": "P2",
-      "name": "Cameron",
-      "avatarUrl": "img/Cameron.jpg",
-      "teams": ["Qatar","South Africa","Brazil","Morocco","Haiti","Scotland"]
-    },
-    {
-      "id": "P3",
-      "name": "Gary",
-      "avatarUrl": "img/Gary.jpg",
-      "teams": ["USA","Paraguay","Australia","Turkey","Germany","Curaçao"]
-    },
-    {
-      "id": "P4",
-      "name": "Gizelle",
-      "avatarUrl": "img/Gizelle.jpg",
-      "teams": ["Ivory Coast","Ecuador","Netherlands","Japan","Sweden","Tunisia"]
-    },
-    {
-      "id": "P5",
-      "name": "Jo",
-      "avatarUrl": "img/Jo.jpg",
-      "teams": ["Belgium","Egypt","Iran","New Zealand","Spain","Cape Verde"]
-    },
-    {
-      "id": "P6",
-      "name": "Kobus",
-      "avatarUrl": "img/Kobus.jpg",
-      "teams": ["Saudi Arabia","Uruguay","France","Senegal","Iraq","Norway"]
-    },
-    {
-      "id": "P7",
-      "name": "Lindsay",
-      "avatarUrl": "img/Lindsay.jpg",
-      "teams": ["Argentina","Algeria","Austria","Jordan","Portugal","DR Congo"]
-    },
-    {
-      "id": "P8",
-      "name": "Seth",
-      "avatarUrl": "img/Seth.jpg",
-      "teams": ["Uzbekistan","Colombia","England","Croatia","Ghana","Panama"]
-    }
-  ],
+  {
+    "id": "P1",
+    "name": "Aiden",
+    "avatarUrl": "img/Aiden.jpg",
+    "teams": ["Japan","Scotland","Panama","Bosnia and Herzegovina","Mexico","Portugal"]
+  },
+  {
+    "id": "P2",
+    "name": "Cameron",
+    "avatarUrl": "img/Cameron.jpg",
+    "teams": ["Colombia","Turkey","Tunisia","New Zealand","Paraguay","Brazil"]
+  },
+  {
+    "id": "P3",
+    "name": "Gary",
+    "avatarUrl": "img/Gary.jpg",
+    "teams": ["Switzerland","Haiti","Germany","Czechia","Algeria","France"]
+  },
+  {
+    "id": "P4",
+    "name": "Gizelle",
+    "avatarUrl": "img/Gizelle.jpg",
+    "teams": ["DR Congo","Ghana","Ivory Coast","South Korea","Cape Verde","Netherlands"]
+  },
+  {
+    "id": "P5",
+    "name": "Jo",
+    "avatarUrl": "img/Jo.jpg",
+    "teams": ["Sweden","Ecuador","South Africa","Iraq","Croatia","Spain"]
+  },
+  {
+    "id": "P6",
+    "name": "Kobus",
+    "avatarUrl": "img/Kobus.jpg",
+    "teams": ["Canada","Austria","Uzbekistan","Curaçao","Morocco","Belgium"]
+  },
+  {
+    "id": "P7",
+    "name": "Lindsay",
+    "avatarUrl": "img/Lindsay.jpg",
+    "teams": ["Australia","USA","Norway","Iran","Qatar","England"]
+  },
+  {
+    "id": "P8",
+    "name": "Seth",
+    "avatarUrl": "img/Seth.jpg",
+    "teams": ["Saudi Arabia","Uruguay","Senegal","Egypt","Jordan","Argentina"]
+  }
+],
 
   "teams": [
     { "name": "Mexico", "group": "A" },
