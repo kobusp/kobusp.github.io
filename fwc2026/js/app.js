@@ -882,6 +882,7 @@ class WorldCupApp {
      const statusFilter = document.getElementById('statusFilter').value;
      const teamFilter = document.getElementById('teamFilter').value;
      const playerFilter = document.getElementById('playerFilter').value;
+     const matchesCountElement = document.getElementById('matchesCount');
 
      let filteredMatches = this.data.matches;
 
@@ -922,6 +923,9 @@ class WorldCupApp {
          html += this.renderMatchCard(match);
        }
      }
+
+     const matchWord = filteredMatches.length === 1 ? 'match' : 'matches';
+     matchesCountElement.textContent = `Showing ${filteredMatches.length} ${matchWord}`;
      document.getElementById('matchesDisplay').innerHTML = html;
    }
 
