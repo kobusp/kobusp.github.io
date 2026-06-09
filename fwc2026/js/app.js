@@ -75,7 +75,11 @@ class WorldCupApp {
       const response = await fetch('tournament.json');
       this.data = await response.json();
       this.setupEventListeners();
-      this.showLanding();
+      if (window.location.hash) {
+        this.routeFromHash();
+      } else {
+        this.setHash('home');
+      }
     } catch (error) {
       console.error('Error loading tournament data:', error);
       document.getElementById('landingPage').innerHTML = '<p>Error loading tournament data</p>';
@@ -91,6 +95,92 @@ class WorldCupApp {
     document.getElementById('navToggle').addEventListener('click', () => {
       document.getElementById('navMenu').classList.toggle('active');
     });
+
+    window.addEventListener('hashchange', () => {
+      this.routeFromHash();
+    });
+  }
+
+  setHash(route) {
+    const nextHash = route.startsWith('#') ? route : `#${route}`;
+    if (window.location.hash !== nextHash) {
+      window.location.hash = nextHash;
+    }
+  }
+
+  getNavRouteFromHash() {
+    const hash = window.location.hash.replace(/^#/, '');
+    const [routePart] = hash.split('?');
+    const route = (routePart || 'home').toLowerCase();
+
+    if (route.startsWith('match/')) return 'matches';
+    if (route.startsWith('player/')) return 'leaderboard';
+    if (route === 'landing') return 'home';
+    if (['home', 'leaderboard', 'matches', 'teams', 'prizes'].includes(route)) return route;
+    return 'home';
+  }
+
+  updateActiveNav() {
+    const activeRoute = this.getNavRouteFromHash();
+    document.querySelectorAll('#navMenu a').forEach(link => {
+      const href = link.getAttribute('href') || '';
+      const linkRoute = href.startsWith('#') ? href.slice(1).toLowerCase() : '';
+      link.classList.toggle('active', linkRoute === activeRoute);
+    });
+  }
+
+  routeFromHash() {
+    this.updateActiveNav();
+
+    const hash = window.location.hash.replace(/^#/, '');
+    if (!hash) {
+      this.showLanding(false);
+      return;
+    }
+
+    const [routePart, queryPart = ''] = hash.split('?');
+    const route = routePart.toLowerCase();
+    const params = new URLSearchParams(queryPart);
+
+    if (route === 'home' || route === 'landing') {
+      this.showLanding(false);
+      return;
+    }
+
+    if (route === 'leaderboard') {
+      this.showLeaderboard(false);
+      return;
+    }
+
+    if (route === 'matches') {
+      const team = params.get('team');
+      this.showMatches(team ? decodeURIComponent(team) : null, false);
+      return;
+    }
+
+    if (route === 'teams') {
+      this.showTeams(false);
+      return;
+    }
+
+    if (route === 'prizes') {
+      this.showPrizes(false);
+      return;
+    }
+
+    if (route.startsWith('player/')) {
+      const playerName = decodeURIComponent(routePart.slice('player/'.length));
+      this.showPlayerDetail(playerName, false);
+      return;
+    }
+
+    if (route.startsWith('match/')) {
+      const matchId = decodeURIComponent(routePart.slice('match/'.length));
+      this.showMatchDetail(matchId, false);
+      return;
+    }
+
+    this.showLanding(false);
   }
 
   getCurrentStage() {
@@ -479,9 +569,13 @@ class WorldCupApp {
      `;
    }
 
-   showLanding() {
+   showLanding(updateHash = true) {
      this.closePage();
      const page = document.getElementById('landingPage');
+
+     if (updateHash) {
+       this.setHash('home');
+     }
 
      // Current stage
      const currentStage = this.getCurrentStage();
@@ -555,9 +649,14 @@ class WorldCupApp {
     `;
   }
 
-  showLeaderboard() {
+  showLeaderboard(updateHash = true) {
     this.closePage();
     const page = document.getElementById('leaderboardPage');
+
+    if (updateHash) {
+      this.setHash('leaderboard');
+    }
+
     const ranked = this.getRankedPlayers();
 
     const currentStage = this.getCurrentStage();
@@ -611,9 +710,17 @@ class WorldCupApp {
     this.currentPage = 'leaderboard';
   }
 
-   showMatches(preselectedTeam = null) {
+   showMatches(preselectedTeam = null, updateHash = true) {
      this.closePage();
      const page = document.getElementById('matchesPage');
+
+     if (updateHash) {
+       if (preselectedTeam) {
+         this.setHash(`matches?team=${encodeURIComponent(preselectedTeam)}`);
+       } else {
+         this.setHash('matches');
+       }
+     }
 
      // Initialize filters
      this.initializeMatchFilters();
@@ -629,9 +736,13 @@ class WorldCupApp {
      this.currentPage = 'matches';
    }
 
-   showTeams() {
+   showTeams(updateHash = true) {
      this.closePage();
      const page = document.getElementById('teamsPage');
+
+     if (updateHash) {
+       this.setHash('teams');
+     }
 
      const groupedTeams = {};
      for (let team of this.data.teams) {
@@ -679,22 +790,22 @@ class WorldCupApp {
      this.currentPage = 'teams';
    }
 
-   showMatchesByTeam(encodedTeamName) {
+   showMatchesByTeam(encodedTeamName, updateHash = true) {
      const teamName = decodeURIComponent(encodedTeamName);
-     this.showMatches(teamName);
+     this.showMatches(teamName, updateHash);
    }
 
-   showPrizes() {
+   showPrizes(updateHash = true) {
      this.closePage();
      const page = document.getElementById('prizesPage');
+
+     if (updateHash) {
+       this.setHash('prizes');
+     }
+
      const prizeAssignments = this.getPrizeAssignments();
-     const prizePool = Number(this.data.tournament.prizePool || 0);
 
      let html = `
-       <div class="prizes-overview">
-         <p>Prize pool: <strong>${this.formatRand(prizePool)}</strong></p>
-         <p><strong>${this.formatRand(prizePool * 0.40)}</strong> (1st), <strong>${this.formatRand(prizePool * 0.30)}</strong> (2nd), <strong>${this.formatRand(prizePool * 0.20)}</strong> (3rd), <strong>${this.formatRand(prizePool * 0.10)}</strong> (Most Group Stage Points)</p>
-       </div>
        <div class="prizes-grid">
      `;
 
@@ -806,9 +917,14 @@ class WorldCupApp {
      document.getElementById('matchesDisplay').innerHTML = html;
    }
 
-  showPlayerDetail(playerName) {
+  showPlayerDetail(playerName, updateHash = true) {
     this.closePage();
     const page = document.getElementById('playerPage');
+
+    if (updateHash) {
+      this.setHash(`player/${encodeURIComponent(playerName)}`);
+    }
+
     const player = this.data.players.find(p => p.name === playerName);
     if (!player) return;
 
@@ -934,9 +1050,14 @@ class WorldCupApp {
     this.currentPage = 'playerDetail';
   }
 
-   showMatchDetail(matchId) {
+   showMatchDetail(matchId, updateHash = true) {
      this.closePage();
      const page = document.getElementById('matchDetailPage');
+
+     if (updateHash) {
+       this.setHash(`match/${encodeURIComponent(matchId)}`);
+     }
+
      const match = this.data.matches.find(m => m.id === matchId);
      if (!match) return;
 
@@ -951,7 +1072,10 @@ class WorldCupApp {
      });
      const timeStr = dateObj.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
 
-     const stageName = match.stage.replace(/_/g, ' ').toUpperCase();
+     let stageName = match.stage.replace(/_/g, ' ').toUpperCase();
+     if (match.stage === 'group' && match.group) {
+       stageName = `GROUP ${match.group}`;
+     }
      const { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds, homePlayerObjects, awayPlayerObjects } = this.getPlayersForMatch(match);
 
       // Build home team avatars HTML
@@ -1023,9 +1147,14 @@ class WorldCupApp {
    }
 
   closePage() {
+    this.scrollToTop();
     this.stopNextMatchCountdown();
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
     document.getElementById('navMenu').classList.remove('active');
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }
 }
 

@@ -73,6 +73,12 @@ body {
   color: var(--accent-yellow);
 }
 
+.nav-menu a.active {
+  color: var(--accent-yellow);
+  border-bottom: 2px solid var(--accent-yellow);
+  padding-bottom: 0.2rem;
+}
+
 .nav-toggle {
   display: none;
   background: none;
@@ -1079,17 +1085,48 @@ section h3 {
   }
 
   .groups-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .group-card {
+    padding: 0.75rem;
+  }
+
+  .group-card h3 {
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.35rem;
+    font-size: 0.95rem;
+  }
+
+  .group-teams-list {
+    gap: 0.45rem;
   }
 
   .team-chip {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
+    gap: 0.45rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.85rem;
   }
 
   .team-chip-owner {
-    font-size: 0.8rem;
-    align-self: flex-end;
+    font-size: 0.72rem;
+    align-self: center;
+    gap: 0.3rem;
+  }
+
+  .team-chip-owner-avatar {
+    width: 24px;
+    height: 24px;
+    border-width: 1px;
+  }
+
+  .team-chip-owner-name {
+    max-width: 54px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .player-stats {
@@ -1103,4 +1140,10 @@ section h3 {
    .filters-grid {
      grid-template-columns: 1fr;
    }
+}
+
+@media (max-width: 420px) {
+  .groups-container {
+    grid-template-columns: 1fr;
+  }
 }
