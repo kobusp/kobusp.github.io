@@ -390,6 +390,16 @@ section h3 {
    flex-shrink: 0;
 }
 
+.match-detail-avatar-clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.match-detail-avatar-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
 .score-display {
   flex: 0 0 auto;
   text-align: center;
@@ -513,7 +523,7 @@ section h3 {
 
 .leaderboard-row {
   display: grid;
-  grid-template-columns: 50px 1fr 80px 100px;
+  grid-template-columns: 50px minmax(0, 1fr) 80px 100px;
   gap: 1rem;
   padding: 1rem;
   border-bottom: 1px solid var(--border-color);
@@ -567,6 +577,7 @@ section h3 {
   display: flex;
   align-items: center;
   gap: 1rem;
+  min-width: 0;
 }
 
 .leaderboard-avatar {
@@ -584,12 +595,16 @@ section h3 {
 
 .leaderboard-name {
   flex: 1;
+  min-width: 0;
 }
 
 .leaderboard-name-text {
   font-weight: 600;
   color: var(--primary);
   margin-bottom: 0.25rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .leaderboard-teams-remaining {
@@ -612,6 +627,7 @@ section h3 {
   font-size: 0.75rem;
   color: var(--text-light);
   text-transform: uppercase;
+  line-height: 1.05;
 }
 
 /* Matches Container */
@@ -1059,7 +1075,7 @@ section h3 {
   }
 
   .leaderboard-row {
-    grid-template-columns: 40px 1fr 70px 70px;
+    grid-template-columns: 40px minmax(0, 1fr) 20px 80px;
     padding: 0.75rem;
   }
 

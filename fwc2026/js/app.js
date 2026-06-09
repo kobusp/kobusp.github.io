@@ -697,7 +697,7 @@ class WorldCupApp {
           </div>
           <div class="leaderboard-score">
             <span class="leaderboard-score-value">${player.groupStagePoints}</span>
-            <span class="leaderboard-score-label">Group Pts</span>
+            <span class="leaderboard-score-label">GROUP<br>PTS</span>
           </div>
           <div style="text-align: center; padding: 0.5rem;">
             <div style="font-weight: 600; color: #003f7f;">${player.wins}-${player.draws}-${player.losses}</div>
@@ -801,6 +801,11 @@ class WorldCupApp {
    showMatchesByTeam(encodedTeamName, updateHash = true) {
      const teamName = decodeURIComponent(encodedTeamName);
      this.showMatches(teamName, updateHash);
+   }
+
+   showPlayerDetailByEncodedName(encodedPlayerName, updateHash = true) {
+     const playerName = decodeURIComponent(encodedPlayerName);
+     this.showPlayerDetail(playerName, updateHash);
    }
 
    showPrizes(updateHash = true) {
@@ -1093,13 +1098,13 @@ class WorldCupApp {
       // Build home team avatars HTML
       const homeAvatarsHtml = homePlayerObjects.map(p => {
         const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.5rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
-        return `<div class="match-detail-avatar" title="${p.name}">${avatarImg}</div>`;
+        return `<button type="button" class="match-detail-avatar match-detail-avatar-clickable" title="${p.name}" aria-label="View ${p.name} details" onclick="app.showPlayerDetailByEncodedName('${encodeURIComponent(p.name)}')">${avatarImg}</button>`;
       }).join('');
 
       // Build away team avatars HTML
       const awayAvatarsHtml = awayPlayerObjects.map(p => {
         const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.5rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
-        return `<div class="match-detail-avatar" title="${p.name}">${avatarImg}</div>`;
+        return `<button type="button" class="match-detail-avatar match-detail-avatar-clickable" title="${p.name}" aria-label="View ${p.name} details" onclick="app.showPlayerDetailByEncodedName('${encodeURIComponent(p.name)}')">${avatarImg}</button>`;
       }).join('');
 
      const html = `
