@@ -5,7 +5,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FIFA World Cup 2026 - FIFA Football Fever</title>
-  <link rel="stylesheet" href="css/style.css">
+  <script>
+    (function () {
+      // Force fresh asset URLs on every load to avoid stale GitHub Pages caches.
+      var cacheBust = String(Date.now());
+      window.__CACHE_BUST__ = cacheBust;
+
+      var stylesheet = document.createElement('link');
+      stylesheet.rel = 'stylesheet';
+      stylesheet.href = 'css/style.css?v=' + encodeURIComponent(cacheBust);
+      document.head.appendChild(stylesheet);
+    })();
+  </script>
   <meta name="description" content="A fun game for friends during FIFA World Cup 2026">
 
   <meta property="og:title" content="FIFA World Cup 2026 - Football Fever">
@@ -85,9 +96,9 @@
       <div id="matchesPage" class="page hidden">
         <h1>All Matches</h1>
 
-        <button class="btn btn-secondary" onclick="(function(b,e){e.classList.toggle('hidden'); b.textContent = e.classList.contains('hidden') ? 'Show Filters ▼' : 'Hide Filters ▲'})(this, document.getElementById('filtersToggle'))">Hide Filters ▲</button>
+        <button id="filtersToggleButton" class="btn btn-secondary" onclick="(function(b,e){e.classList.toggle('hidden'); b.textContent = e.classList.contains('hidden') ? 'Show Filters ▼' : 'Hide Filters ▲'})(this, document.getElementById('filtersToggle'))">Show Filters ▼</button>
 
-        <section id="filtersToggle" class="filters-section">
+        <section id="filtersToggle" class="filters-section hidden">
           <h3>Filters</h3>
           <div class="filters-grid">
             <div class="filter-group">
@@ -166,7 +177,14 @@
     </footer>
   </div>
 
-  <script src="js/app.js"></script>
+  <script>
+    (function () {
+      var cacheBust = window.__CACHE_BUST__ || String(Date.now());
+      var appScript = document.createElement('script');
+      appScript.src = 'js/app.js?v=' + encodeURIComponent(cacheBust);
+      document.body.appendChild(appScript);
+    })();
+  </script>
 
 </body>
 

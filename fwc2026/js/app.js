@@ -72,7 +72,8 @@ class WorldCupApp {
 
   async init() {
     try {
-      const response = await fetch('tournament.json');
+      const cacheBust = window.__CACHE_BUST__ ? `?v=${encodeURIComponent(window.__CACHE_BUST__)}` : '';
+      const response = await fetch(`tournament.json${cacheBust}`, { cache: 'no-store' });
       this.data = await response.json();
       this.setupEventListeners();
       if (window.location.hash) {
@@ -713,6 +714,8 @@ class WorldCupApp {
    showMatches(preselectedTeam = null, updateHash = true) {
      this.closePage();
      const page = document.getElementById('matchesPage');
+     const filtersPanel = document.getElementById('filtersToggle');
+     const filtersToggleButton = document.getElementById('filtersToggleButton');
 
      if (updateHash) {
        if (preselectedTeam) {
@@ -727,6 +730,11 @@ class WorldCupApp {
 
      if (preselectedTeam) {
        document.getElementById('teamFilter').value = preselectedTeam;
+       filtersPanel.classList.remove('hidden');
+       filtersToggleButton.textContent = 'Hide Filters ▲';
+     } else {
+       filtersPanel.classList.add('hidden');
+       filtersToggleButton.textContent = 'Show Filters ▼';
      }
 
      // Apply filters to display matches
