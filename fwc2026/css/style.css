@@ -153,6 +153,52 @@ section h3 {
    margin: 1rem 0;
 }
 
+.next-match-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid var(--accent-yellow);
+}
+
+.next-match-heading h2 {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.kickoff-countdown {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.kickoff-countdown.live-now {
+  background: linear-gradient(135deg, #d90429 0%, #ef233c 100%);
+  color: white;
+  letter-spacing: 0.08em;
+  animation: livePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%,
+  100% {
+    box-shadow: 0 3px 10px rgba(217, 4, 41, 0.35);
+  }
+  50% {
+    box-shadow: 0 3px 16px rgba(239, 35, 60, 0.65);
+  }
+}
+
 /* Current Stage Section */
 .current-stage {
    background: linear-gradient(135deg, #1a472a 0%, #003f7f 100%);
@@ -569,6 +615,167 @@ section h3 {
    gap: 1.5rem;
 }
 
+/* Prizes */
+.prizes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.prizes-overview {
+  background: white;
+  border: 2px solid var(--border-color);
+  border-left: 4px solid var(--accent-yellow);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  color: var(--text-dark);
+}
+
+.prizes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.prize-card {
+  background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.prize-header {
+  margin-bottom: 0.35rem;
+}
+
+.prize-title {
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1.3;
+}
+
+.prize-share {
+  display: inline-block;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--secondary);
+  margin-bottom: 0.7rem;
+}
+
+.prize-status {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.prize-status.assigned {
+  background: var(--accent-green);
+  color: white;
+}
+
+.prize-status.pending {
+  background: #e3e3e3;
+  color: var(--text-dark);
+}
+
+.prize-winner {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--secondary);
+  margin-bottom: 0.5rem;
+}
+
+.prize-info {
+  font-size: 0.86rem;
+  color: var(--text-light);
+}
+
+/* Teams */
+.groups-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.group-card {
+  margin: 0;
+  padding: 1rem;
+  border: 2px solid var(--border-color);
+}
+
+.group-card h3 {
+  margin: 0 0 0.85rem 0;
+  border-bottom: 2px solid var(--accent-yellow);
+  padding-bottom: 0.5rem;
+}
+
+.group-teams-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.team-chip {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: white;
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.team-chip-main {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.team-chip-owner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-left: auto;
+  color: var(--text-light);
+  font-size: 0.82rem;
+}
+
+.team-chip-owner-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-yellow);
+  background: var(--light-bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.team-chip-owner-name {
+  white-space: nowrap;
+}
+
+.team-chip:hover {
+  border-color: var(--accent-yellow);
+  background: #fffdf2;
+  transform: translateY(-1px);
+}
+
 /* Filters Section */
 .filters-section {
    background: white;
@@ -824,6 +1031,18 @@ section h3 {
     font-size: 1.8rem;
   }
 
+  .next-match-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .kickoff-countdown {
+    width: 100%;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+
   .match-body {
     /*flex-direction: column;*/
     gap: 0.5rem;
@@ -853,6 +1072,24 @@ section h3 {
 
   .matches-container {
     grid-template-columns: 1fr;
+  }
+
+  .prizes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .groups-container {
+    grid-template-columns: 1fr;
+  }
+
+  .team-chip {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .team-chip-owner {
+    font-size: 0.8rem;
+    align-self: flex-end;
   }
 
   .player-stats {

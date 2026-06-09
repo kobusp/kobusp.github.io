@@ -12,9 +12,8 @@
   <meta property="og:type" content="website">
   <meta property="og:description" content="A fun random draw game">
 
-<!--  <link rel="icon" href="icon.svg" type="image/svg+xml">-->
   <link rel="icon" href="icon2.png" sizes="any">
-  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="apple-touch-icon" href="icon2.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
 
@@ -33,6 +32,8 @@
           <li><a href="#" onclick="app.showLanding()">Home</a></li>
           <li><a href="#" onclick="app.showLeaderboard()">Leaderboard</a></li>
           <li><a href="#" onclick="app.showMatches()">Matches</a></li>
+          <li><a href="#" onclick="app.showTeams()">Teams</a></li>
+          <li><a href="#" onclick="app.showPrizes()">Prizes</a></li>
         </ul>
       </div>
     </nav>
@@ -41,18 +42,16 @@
     <div class="container">
       <!-- Landing Page -->
       <div id="landingPage" class="page">
-<!--        <section class="hero">-->
-<!--          <h1>⚽ FIFA Football Fever</h1>-->
-<!--          <p class="subtitle">FIFA World Cup 2026 Random Draw Game</p>-->
-<!--        </section>-->
-
         <section class="current-stage">
           <h2>Current Stage</h2>
           <div id="currentStageDisplay" class="stage-badge"></div>
         </section>
 
         <section class="next-match">
-          <h2>Next Match</h2>
+          <div class="next-match-heading">
+            <h2>Next Match</h2>
+            <div id="nextMatchCountdown" class="kickoff-countdown" aria-live="polite">Kickoff in --d --h --m --s</div>
+          </div>
           <div id="nextMatchDisplay" class="match-card"></div>
           <button class="btn btn-secondary" onclick="document.getElementById('scheduleToggle').classList.toggle('hidden')">
             View Full Schedule ▼
@@ -131,6 +130,20 @@
         </section>
 
         <div id="matchesDisplay" class="matches-container"></div>
+        <button class="btn btn-primary" onclick="app.showLanding()">← Back</button>
+      </div>
+
+      <!-- Prizes Page -->
+      <div id="prizesPage" class="page hidden">
+        <h1>Prizes</h1>
+        <div id="prizesDisplay" class="prizes-container"></div>
+        <button class="btn btn-primary" onclick="app.showLanding()">← Back</button>
+      </div>
+
+      <!-- Teams Page -->
+      <div id="teamsPage" class="page hidden">
+        <h1>Teams</h1>
+        <div id="teamsDisplay" class="groups-container"></div>
         <button class="btn btn-primary" onclick="app.showLanding()">← Back</button>
       </div>
 

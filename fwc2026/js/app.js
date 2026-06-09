@@ -66,6 +66,7 @@ class WorldCupApp {
   constructor() {
     this.data = null;
     this.currentPage = 'landing';
+    this.nextMatchCountdownInterval = null;
     this.init();
   }
 
@@ -107,12 +108,74 @@ class WorldCupApp {
 
   getNextMatch() {
     const now = this.getCurrentDateAndTime();
+
+    // Prefer an ongoing non-completed match (kickoff + 2 hours window)
+    for (let match of this.data.matches) {
+      if (match.status === 'completed') continue;
+      const kickoff = new Date(match.date);
+      const matchEnd = new Date(kickoff.getTime() + (2 * 60 * 60 * 1000));
+      if (now >= kickoff && now < matchEnd) {
+        return match;
+      }
+    }
+
+    // Otherwise pick the next upcoming non-completed match
     for (let match of this.data.matches) {
       if (new Date(match.date) >= now && match.status !== 'completed') {
         return match;
       }
     }
     return this.data.matches[this.data.matches.length - 1];
+  }
+
+  stopNextMatchCountdown() {
+    if (this.nextMatchCountdownInterval) {
+      clearInterval(this.nextMatchCountdownInterval);
+      this.nextMatchCountdownInterval = null;
+    }
+  }
+
+  startNextMatchCountdown(nextMatch) {
+    const countdownElement = document.getElementById('nextMatchCountdown');
+    if (!countdownElement || !nextMatch) return;
+
+    this.stopNextMatchCountdown();
+    const kickoff = new Date(nextMatch.date);
+    const matchEnd = new Date(kickoff.getTime() + (2 * 60 * 60 * 1000));
+
+    const updateCountdown = () => {
+      const now = this.getCurrentDateAndTime();
+      const diffMs = kickoff.getTime() - now.getTime();
+
+      if (nextMatch.status !== 'completed' && now >= kickoff && now < matchEnd) {
+        countdownElement.textContent = 'LIVE NOW';
+        countdownElement.classList.add('live-now');
+        return;
+      }
+
+      countdownElement.classList.remove('live-now');
+
+      if (nextMatch.status === 'completed') {
+        countdownElement.textContent = 'Match completed';
+        return;
+      }
+
+      if (diffMs <= 0) {
+        countdownElement.textContent = 'Kickoff now';
+        return;
+      }
+
+      const totalSeconds = Math.floor(diffMs / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      countdownElement.textContent = `Kickoff in ${days}d ${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+    };
+
+    updateCountdown();
+    this.nextMatchCountdownInterval = setInterval(updateCountdown, 1000);
   }
 
   getTeamPlayerIds(teamName) {
@@ -221,6 +284,139 @@ class WorldCupApp {
     return ranked;
   }
 
+  awardGroupMatchPoints(match, pointsMap) {
+    if (match.stage !== 'group' || match.status !== 'completed') return;
+
+    const homePlayerIds = this.getTeamPlayerIds(match.home.team);
+    const awayPlayerIds = this.getTeamPlayerIds(match.away.team);
+
+    if (match.winner === 'home') {
+      for (let pid of homePlayerIds) pointsMap[pid] += 3;
+    } else if (match.winner === 'away') {
+      for (let pid of awayPlayerIds) pointsMap[pid] += 3;
+    } else if (match.winner === 'draw') {
+      for (let pid of [...homePlayerIds, ...awayPlayerIds]) pointsMap[pid] += 1;
+    }
+  }
+
+  getGroupStagePrizeWinner() {
+    const completedGroupMatches = this.data.matches
+      .filter(match => match.stage === 'group' && match.status === 'completed')
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (completedGroupMatches.length === 0) return null;
+
+    const finalPoints = {};
+    const playerOrder = {};
+    for (let i = 0; i < this.data.players.length; i++) {
+      const player = this.data.players[i];
+      finalPoints[player.id] = 0;
+      playerOrder[player.id] = i;
+    }
+
+    for (let match of completedGroupMatches) {
+      this.awardGroupMatchPoints(match, finalPoints);
+    }
+
+    const maxPoints = Math.max(...Object.values(finalPoints));
+    const topPlayerIds = Object.keys(finalPoints).filter(pid => finalPoints[pid] === maxPoints);
+
+    if (topPlayerIds.length === 1) {
+      const winner = this.data.players.find(player => player.id === topPlayerIds[0]);
+      return {
+        winnerName: winner ? winner.name : 'Unknown',
+        points: maxPoints,
+        tieBreakApplied: false
+      };
+    }
+
+    const runningPoints = {};
+    const reachedAt = {};
+    for (let player of this.data.players) {
+      runningPoints[player.id] = 0;
+      reachedAt[player.id] = null;
+    }
+
+    for (let match of completedGroupMatches) {
+      this.awardGroupMatchPoints(match, runningPoints);
+      for (let pid of topPlayerIds) {
+        if (reachedAt[pid] === null && runningPoints[pid] >= maxPoints) {
+          reachedAt[pid] = new Date(match.date).getTime();
+        }
+      }
+    }
+
+    const winnerId = topPlayerIds.sort((a, b) => {
+      const timeA = reachedAt[a] === null ? Infinity : reachedAt[a];
+      const timeB = reachedAt[b] === null ? Infinity : reachedAt[b];
+      if (timeA !== timeB) return timeA - timeB;
+      return playerOrder[a] - playerOrder[b];
+    })[0];
+
+    const winner = this.data.players.find(player => player.id === winnerId);
+    return {
+      winnerName: winner ? winner.name : 'Unknown',
+      points: maxPoints,
+      tieBreakApplied: true
+    };
+  }
+
+  getPrizeAssignments() {
+    const prizePool = Number(this.data.tournament.prizePool || 0);
+    const payoutShares = {
+      first: 0.40,
+      second: 0.30,
+      third: 0.20,
+      group: 0.10
+    };
+
+    const rankedPlayers = this.getRankedPlayers();
+    const currentStage = this.getCurrentStage();
+    const groupStageAssigned = currentStage !== 'group';
+    const thirdPlaceMatch = this.data.matches.find(match => match.stage === 'third_place');
+    const finalMatch = this.data.matches.find(match => match.stage === 'final');
+    const thirdPlaceAssigned = !!(thirdPlaceMatch && thirdPlaceMatch.status === 'completed');
+    const firstSecondAssigned = !!(finalMatch && finalMatch.status === 'completed');
+    const groupStageWinner = groupStageAssigned ? this.getGroupStagePrizeWinner() : null;
+
+    return [
+      {
+        title: '1st Place Finisher',
+        amount: prizePool * payoutShares.first,
+        assigned: firstSecondAssigned,
+        winner: firstSecondAssigned && rankedPlayers[0] ? rankedPlayers[0].name : null,
+        info: 'Assigned when the final is completed.'
+      },
+      {
+        title: '2nd Place Finisher',
+        amount: prizePool * payoutShares.second,
+        assigned: firstSecondAssigned,
+        winner: firstSecondAssigned && rankedPlayers[1] ? rankedPlayers[1].name : null,
+        info: 'Assigned when the final is completed.'
+      },
+      {
+        title: '3rd Place Finisher',
+        amount: prizePool * payoutShares.third,
+        assigned: thirdPlaceAssigned,
+        winner: thirdPlaceAssigned && rankedPlayers[2] ? rankedPlayers[2].name : null,
+        info: 'Assigned when the 3rd-place playoff is completed.'
+      },
+      {
+        title: 'Most Group Stage Points',
+        amount: prizePool * payoutShares.group,
+        assigned: groupStageAssigned && !!groupStageWinner,
+        winner: groupStageAssigned && groupStageWinner ? `${groupStageWinner.winnerName} (${groupStageWinner.points} pts)` : null,
+        info: groupStageWinner && groupStageWinner.tieBreakApplied
+          ? 'Tie-break applied: first player to reach the top score wins.'
+          : 'Assigned when the tournament enters the Round of 32.'
+      }
+    ];
+  }
+
+  formatRand(amount) {
+    return `R${Math.round(amount).toLocaleString('en-ZA')}`;
+  }
+
    renderMatchCard(match) {
      const homeFlag = countryFlags[match.home.team] || '🏴';
      const awayFlag = countryFlags[match.away.team] || '🏴';
@@ -243,7 +439,10 @@ class WorldCupApp {
         return `<div class="match-avatar-small" title="${p.name}">${avatarImg}</div>`;
       }).join('');
 
-     const stageName = match.stage.replace(/_/g, ' ').toUpperCase();
+     let stageName = match.stage.replace(/_/g, ' ').toUpperCase();
+     if (match.stage === 'group' && match.group) {
+       stageName = `GROUP ${match.group}`;
+     }
 
      return `
        <div class="match-card" onclick="app.showMatchDetail('${match.id}')">
@@ -300,6 +499,7 @@ class WorldCupApp {
      // Next match
      const nextMatch = this.getNextMatch();
      document.getElementById('nextMatchDisplay').innerHTML = this.renderMatchCard(nextMatch);
+     this.startNextMatchCountdown(nextMatch);
 
     // Schedule by date
     const matchesByDate = {};
@@ -411,18 +611,113 @@ class WorldCupApp {
     this.currentPage = 'leaderboard';
   }
 
-   showMatches() {
+   showMatches(preselectedTeam = null) {
      this.closePage();
      const page = document.getElementById('matchesPage');
 
      // Initialize filters
      this.initializeMatchFilters();
 
+     if (preselectedTeam) {
+       document.getElementById('teamFilter').value = preselectedTeam;
+     }
+
      // Apply filters to display matches
      this.applyMatchFilters();
 
      page.classList.remove('hidden');
      this.currentPage = 'matches';
+   }
+
+   showTeams() {
+     this.closePage();
+     const page = document.getElementById('teamsPage');
+
+     const groupedTeams = {};
+     for (let team of this.data.teams) {
+       if (!groupedTeams[team.group]) groupedTeams[team.group] = [];
+       groupedTeams[team.group].push(team.name);
+     }
+
+     const sortedGroups = Object.keys(groupedTeams).sort();
+     let html = '';
+
+     for (let group of sortedGroups) {
+       const teams = groupedTeams[group].slice().sort((a, b) => a.localeCompare(b));
+       html += `
+         <section class="group-card">
+           <h3>Group ${group}</h3>
+           <div class="group-teams-list">
+             ${teams.map(teamName => {
+               const teamFlag = countryFlags[teamName] || '🏴';
+               const teamPlayers = this.getTeamPlayerObjects(teamName);
+               const owner = teamPlayers.length ? teamPlayers[0] : null;
+               const ownerInitial = owner ? (playerInitials[owner.name] || owner.name.charAt(0)) : '?';
+               const ownerAvatar = owner
+                 ? (owner.avatarUrl
+                     ? `<img src="${owner.avatarUrl}" alt="${owner.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+                     : `<span>${ownerInitial}</span>`)
+                 : '<span>?</span>';
+               const ownerName = owner ? owner.name : 'Unassigned';
+               return `
+                 <button class="team-chip" onclick="app.showMatchesByTeam('${encodeURIComponent(teamName)}')" aria-label="View matches for ${teamName}">
+                   <span class="team-chip-main">${teamFlag} ${teamName}</span>
+                   <span class="team-chip-owner">
+                     <span class="team-chip-owner-name">${ownerName}</span>
+                     <span class="team-chip-owner-avatar">${ownerAvatar}</span>
+                   </span>
+                 </button>
+               `;
+             }).join('')}
+           </div>
+         </section>
+       `;
+     }
+
+     document.getElementById('teamsDisplay').innerHTML = html;
+     page.classList.remove('hidden');
+     this.currentPage = 'teams';
+   }
+
+   showMatchesByTeam(encodedTeamName) {
+     const teamName = decodeURIComponent(encodedTeamName);
+     this.showMatches(teamName);
+   }
+
+   showPrizes() {
+     this.closePage();
+     const page = document.getElementById('prizesPage');
+     const prizeAssignments = this.getPrizeAssignments();
+     const prizePool = Number(this.data.tournament.prizePool || 0);
+
+     let html = `
+       <div class="prizes-overview">
+         <p>Prize pool: <strong>${this.formatRand(prizePool)}</strong></p>
+         <p><strong>${this.formatRand(prizePool * 0.40)}</strong> (1st), <strong>${this.formatRand(prizePool * 0.30)}</strong> (2nd), <strong>${this.formatRand(prizePool * 0.20)}</strong> (3rd), <strong>${this.formatRand(prizePool * 0.10)}</strong> (Most Group Stage Points)</p>
+       </div>
+       <div class="prizes-grid">
+     `;
+
+     for (let prize of prizeAssignments) {
+       const statusClass = prize.assigned ? 'assigned' : 'pending';
+       const statusText = prize.assigned ? 'Assigned' : 'Pending';
+       html += `
+         <div class="prize-card">
+           <div class="prize-header">
+             <div class="prize-title">${prize.title}</div>
+           </div>
+           <div class="prize-share">${this.formatRand(prize.amount)}</div>
+           <div class="prize-status ${statusClass}">${statusText}</div>
+           <div class="prize-winner">${prize.winner ? prize.winner : 'TBD'}</div>
+           <div class="prize-info">${prize.info}</div>
+         </div>
+       `;
+     }
+
+     html += '</div>';
+     document.getElementById('prizesDisplay').innerHTML = html;
+     page.classList.remove('hidden');
+     this.currentPage = 'prizes';
    }
 
    initializeMatchFilters() {
@@ -728,6 +1023,7 @@ class WorldCupApp {
    }
 
   closePage() {
+    this.stopNextMatchCountdown();
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
     document.getElementById('navMenu').classList.remove('active');
   }
