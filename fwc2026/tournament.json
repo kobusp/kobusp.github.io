@@ -128,7 +128,7 @@
   ],
 
   "matches": [
-    { "id": "M01", "stage": "group", "group": "A", "date": "2026-06-11T19:00:00Z", "status": "scheduled", "score": { "home": null, "away": null }, "home": { "team": "Mexico" }, "away": { "team": "South Africa" }, "winner": null, "venue": "Estadio Azteca, Mexico City" },
+    { "id": "M01", "stage": "group", "group": "A", "date": "2026-06-11T19:00:00Z", "status": "scheduled", "score": { "home": 1, "away": 0 }, "home": { "team": "Mexico" }, "away": { "team": "South Africa" }, "winner": null, "venue": "Estadio Azteca, Mexico City" },
     { "id": "M02", "stage": "group", "group": "A", "date": "2026-06-12T02:00:00Z", "status": "scheduled", "score": { "home": null, "away": null }, "home": { "team": "South Korea" }, "away": { "team": "Czechia" }, "winner": null, "venue": "Estadio Akron, Zapopan" },
     { "id": "M03", "stage": "group", "group": "B", "date": "2026-06-12T19:00:00Z", "status": "scheduled", "score": { "home": null, "away": null }, "home": { "team": "Canada" }, "away": { "team": "Bosnia and Herzegovina" }, "winner": null, "venue": "BMO Field, Toronto" },
     { "id": "M04", "stage": "group", "group": "D", "date": "2026-06-13T01:00:00Z", "status": "scheduled", "score": { "home": null, "away": null }, "home": { "team": "USA" }, "away": { "team": "Paraguay" }, "winner": null, "venue": "SoFi Stadium, Inglewood" },
