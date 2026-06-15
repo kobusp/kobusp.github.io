@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FIFA World Cup 2026 - Admin</title>
+  <meta name="color-scheme" content="light dark">
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel-2: #eef3f8;
+      --text: #14324a;
+      --muted: #637487;
+      --primary: #1a472a;
+      --primary-2: #003f7f;
+      --accent: #ffd700;
+      --danger: #b42318;
+      --success: #067647;
+      --border: #d8e0ea;
+      --shadow: 0 8px 24px rgba(20, 50, 74, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #edf3f8 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    header {
+      padding: 1.25rem 1rem 1rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    header .wrap,
+    main,
+    footer {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.4rem;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.9rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      font-size: 0.85rem;
+    }
+
+    main {
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.2fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1rem 1rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #fff 0%, #fafcff 100%);
+    }
+
+    .card-header h2,
+    .card-header h3 {
+      margin: 0 0 0.3rem;
+    }
+
+    .card-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .card-body {
+      padding: 1rem;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .toolbar .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      color: var(--text);
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      font: inherit;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-top: 0.5rem;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, opacity 0.12s ease, background 0.12s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { cursor: not-allowed; opacity: 0.55; transform: none; }
+
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: #e7edf4; color: var(--text); }
+    .btn-warning { background: #fef0c7; color: #7a4b00; }
+    .btn-accent { background: var(--accent); color: #3d2f00; }
+
+    .status-bar {
+      margin-top: 0.9rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.22);
+      color: #fff;
+      font-size: 0.92rem;
+    }
+
+    .status-bar.error { background: #4d1111; }
+    .status-bar.success { background: rgba(6, 118, 71, 0.9); }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .summary-tile {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.85rem;
+    }
+
+    .summary-tile .value {
+      display: block;
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 0.1rem;
+      color: var(--primary-2);
+    }
+
+    .summary-tile .label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .match-list {
+      display: grid;
+      gap: 0.65rem;
+      max-height: calc(100vh - 320px);
+      overflow: auto;
+      padding-right: 0.2rem;
+    }
+
+    .match-item {
+      width: 100%;
+      text-align: left;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.85rem;
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    .match-item.active {
+      border-color: var(--primary-2);
+      box-shadow: 0 0 0 3px rgba(0, 63, 127, 0.12);
+    }
+
+    .match-item .topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: center;
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .match-item .teams {
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .match-item .score {
+      font-size: 0.92rem;
+      color: var(--primary-2);
+      font-weight: 700;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      border-radius: 999px;
+      padding: 0.28rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 800;
+      background: #eef3f8;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .pill.completed { background: #dcfce7; color: var(--success); }
+    .pill.scheduled { background: #eff6ff; color: var(--primary-2); }
+    .pill.pending { background: #fff4cc; color: #8a6a00; }
+    .pill.in_progress { background: #ffe08a; color: #6b4f00; }
+
+    .editor-empty {
+      color: var(--muted);
+      padding: 1.25rem;
+      background: var(--panel-2);
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+    }
+
+    .editor-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+
+    .editor-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 0.35rem;
+      line-height: 1.35;
+    }
+
+    .notice {
+      margin-top: 0.85rem;
+      padding: 0.8rem 0.9rem;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    .notice.error {
+      background: #fff1f0;
+      border-color: #ffd0cb;
+      color: var(--danger);
+    }
+
+    .notice.success {
+      background: #ecfdf3;
+      border-color: #b7ebc6;
+      color: var(--success);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .footer {
+      padding: 0 1rem 1.5rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .match-list {
+        max-height: 380px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header { padding: 1rem; }
+      main { padding: 0.75rem; }
+      .summary-grid,
+      .editor-grid,
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+      .actions {
+        flex-direction: column;
+      }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>FIFA World Cup 2026 Admin</h1>
+      <div id="statusBar" class="status-bar">Loading tournament.json and results.json…</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="card-header">
+        <h2>Matches</h2>
+        <p>Search and pick a match to edit.</p>
+      </div>
+      <div class="card-body">
+        <div class="summary-grid" id="summaryGrid">
+          <div class="summary-tile"><span class="value">—</span><span class="label">Total matches</span></div>
+          <div class="summary-tile"><span class="value">—</span><span class="label">Completed</span></div>
+          <div class="summary-tile"><span class="value">—</span><span class="label">In Progress</span></div>
+          <div class="summary-tile"><span class="value">—</span><span class="label">Changed</span></div>
+        </div>
+
+        <div class="toolbar">
+          <div class="full">
+            <label for="fileInput">Load local results JSON</label>
+            <input id="fileInput" type="file" accept="application/json,.json">
+            <div class="helper">Use this if you already downloaded <code>results.json</code> and want to continue editing from it.</div>
+          </div>
+          <div>
+            <label for="searchInput">Search</label>
+            <input id="searchInput" type="text" placeholder="Team, match ID, or venue">
+          </div>
+          <div>
+            <label for="stageFilter">Stage</label>
+            <select id="stageFilter">
+              <option value="all">All stages</option>
+              <option value="group">Group stage</option>
+              <option value="round_of_32">Round of 32</option>
+              <option value="round_of_16">Round of 16</option>
+              <option value="quarter_final">Quarter-finals</option>
+              <option value="semi_final">Semi-finals</option>
+              <option value="third_place">Third place</option>
+              <option value="final">Final</option>
+            </select>
+          </div>
+          <div>
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter">
+              <option value="all">All statuses</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="reloadButton" class="btn-secondary" type="button">Reload from `tournament.json` + `results.json`</button>
+          <button id="resetButton" class="btn-warning" type="button">Reset draft</button>
+        </div>
+
+        <p class="helper" id="matchCount">Showing 0 matches</p>
+        <div id="matchList" class="match-list" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Editor</h2>
+        <p>Edit the selected match, then download the updated <code>results.json</code> file.</p>
+      </div>
+      <div class="card-body">
+        <div id="editorEmpty" class="editor-empty">Select a match from the list to edit its score.</div>
+
+        <form id="editorForm" class="hidden" autocomplete="off">
+          <div class="editor-grid">
+            <div class="full">
+              <label for="matchLabel">Match</label>
+              <input id="matchLabel" type="text" readonly>
+            </div>
+            <div>
+              <label for="matchId">Match ID</label>
+              <input id="matchId" type="text" readonly>
+            </div>
+            <div>
+              <label for="matchStage">Stage</label>
+              <input id="matchStage" type="text" readonly>
+            </div>
+            <div>
+              <label for="matchDate">Date & time</label>
+              <input id="matchDate" type="text" readonly>
+            </div>
+            <div>
+              <label for="matchVenue">Venue</label>
+              <input id="matchVenue" type="text" readonly>
+            </div>
+            <div>
+              <label for="homeScore">Home score</label>
+              <input id="homeScore" type="number" min="0" step="1" inputmode="numeric" placeholder="Blank = null">
+            </div>
+            <div>
+              <label for="awayScore">Away score</label>
+              <input id="awayScore" type="number" min="0" step="1" inputmode="numeric" placeholder="Blank = null">
+            </div>
+            <div>
+              <label for="statusSelect">Status</label>
+              <select id="statusSelect">
+                <option value="scheduled">Scheduled</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="winnerSelect">Winner</label>
+              <select id="winnerSelect"></select>
+              <div class="helper">For group-stage draws, pick <strong>Draw</strong>. For knockout matches, equal scores are rejected.</div>
+            </div>
+            <div class="full">
+              <label for="matchNotes">Validation</label>
+              <textarea id="matchNotes" readonly></textarea>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="applyButton" class="btn-primary" type="submit">Apply to draft</button>
+            <button id="downloadButton" class="btn-accent" type="button">Download `results.json`</button>
+            <button id="copyButton" class="btn-secondary" type="button">Copy `results.json`</button>
+          </div>
+          <p class="helper">After downloading, upload or commit the JSON from GitHub on your phone.</p>
+        </form>
+
+        <div id="editorNotice" class="notice" hidden></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Open this page directly as <code>admin.html</code>. It stays separate from the main site.
+  </footer>
+
+  <script src="js/admin.js" defer></script>
+</body>
+</html>

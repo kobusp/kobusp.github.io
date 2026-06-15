@@ -328,6 +328,16 @@ section h3 {
   color: var(--text-dark);
 }
 
+.match-status.pending {
+  background: #fff4cc;
+  color: #8a6a00;
+}
+
+.match-status.in_progress {
+  background: #ffe08a;
+  color: #6b4f00;
+}
+
 .match-body {
   display: flex;
   justify-content: space-around;
@@ -402,10 +412,13 @@ section h3 {
 
 .score-display {
   flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 }
 
-.score-number {
+.score-line {
   font-size: 2rem;
   font-weight: bold;
   color: var(--primary);
@@ -719,7 +732,7 @@ section h3 {
 /* Teams */
 .groups-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
 }

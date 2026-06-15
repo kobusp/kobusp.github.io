@@ -65,6 +65,7 @@ const playerInitials = {
 class WorldCupApp {
   constructor() {
     this.data = null;
+    this.resultsByMatchId = new Map();
     this.currentPage = 'landing';
     this.nextMatchCountdownInterval = null;
     this.init();
@@ -73,8 +74,24 @@ class WorldCupApp {
   async init() {
     try {
       const cacheBust = window.__CACHE_BUST__ ? `?v=${encodeURIComponent(window.__CACHE_BUST__)}` : '';
-      const response = await fetch(`tournament.json${cacheBust}`, { cache: 'no-store' });
-      this.data = await response.json();
+      const [tournamentResponse, resultsResponse] = await Promise.all([
+        fetch(`tournament.json${cacheBust}`, { cache: 'no-store' }),
+        fetch(`results.json${cacheBust}`, { cache: 'no-store' })
+      ]);
+
+      if (!tournamentResponse.ok) {
+        throw new Error(`Failed to load tournament.json (HTTP ${tournamentResponse.status})`);
+      }
+      if (!resultsResponse.ok) {
+        throw new Error(`Failed to load results.json (HTTP ${resultsResponse.status})`);
+      }
+
+      const tournamentData = await tournamentResponse.json();
+      const resultsData = await resultsResponse.json();
+
+      this.resultsByMatchId = new Map((resultsData.matches || []).map(result => [result.id, result]));
+      tournamentData.matches = this.mergeMatchesWithResults(tournamentData.matches || []);
+      this.data = tournamentData;
       this.setupEventListeners();
       if (window.location.hash) {
         this.routeFromHash();
@@ -107,6 +124,55 @@ class WorldCupApp {
     if (window.location.hash !== nextHash) {
       window.location.hash = nextHash;
     }
+  }
+
+  formatMatchStatus(status) {
+    if (!status) return '';
+    if (status === 'in_progress') return 'In Progress';
+    return status
+      .split('_')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
+
+  getDisplayMatchStatus(match, now = this.getCurrentDateAndTime()) {
+    const status = match?.status || 'scheduled';
+    if (status !== 'scheduled') return status;
+
+    const kickoff = new Date(match.date);
+    if (Number.isNaN(kickoff.getTime())) return status;
+
+    const twoHoursMs = 2 * 60 * 60 * 1000;
+    return now.getTime() - kickoff.getTime() > twoHoursMs ? 'pending' : status;
+  }
+
+  hasVisibleScore(match) {
+    return match?.score?.home !== null && match?.score?.home !== undefined
+      && match?.score?.away !== null && match?.score?.away !== undefined;
+  }
+
+  getDefaultMatchResult() {
+    return {
+      status: 'scheduled',
+      score: { home: null, away: null },
+      winner: null
+    };
+  }
+
+  mergeMatchesWithResults(matches) {
+    return matches.map(match => {
+      const result = this.resultsByMatchId.get(match.id) || this.getDefaultMatchResult();
+      const score = result.score || { home: null, away: null };
+      return {
+        ...match,
+        status: result.status || 'scheduled',
+        score: {
+          home: score.home ?? null,
+          away: score.away ?? null
+        },
+        winner: result.winner ?? null
+      };
+    });
   }
 
   getNavRouteFromHash() {
@@ -200,6 +266,12 @@ class WorldCupApp {
   getNextMatch() {
     const now = this.getCurrentDateAndTime();
 
+    for (let match of this.data.matches) {
+      if (match.status === 'in_progress') {
+        return match;
+      }
+    }
+
     // Prefer an ongoing non-completed match (kickoff + 2 hours window)
     for (let match of this.data.matches) {
       if (match.status === 'completed') continue;
@@ -237,6 +309,12 @@ class WorldCupApp {
     const updateCountdown = () => {
       const now = this.getCurrentDateAndTime();
       const diffMs = kickoff.getTime() - now.getTime();
+
+      if (nextMatch.status === 'in_progress') {
+        countdownElement.textContent = 'LIVE NOW';
+        countdownElement.classList.add('live-now');
+        return;
+      }
 
       if (nextMatch.status !== 'completed' && now >= kickoff && now < matchEnd) {
         countdownElement.textContent = 'LIVE NOW';
@@ -308,6 +386,25 @@ class WorldCupApp {
      }
      return players;
    }
+
+  calculateTeamGroupPoints() {
+    const points = {};
+    for (let team of this.data.teams) {
+      points[team.name] = 0;
+    }
+    for (let match of this.data.matches) {
+      if (match.stage !== 'group' || match.status !== 'completed') continue;
+      if (match.winner === 'home') {
+        points[match.home.team] = (points[match.home.team] || 0) + 3;
+      } else if (match.winner === 'away') {
+        points[match.away.team] = (points[match.away.team] || 0) + 3;
+      } else if (match.winner === 'draw') {
+        points[match.home.team] = (points[match.home.team] || 0) + 1;
+        points[match.away.team] = (points[match.away.team] || 0) + 1;
+      }
+    }
+    return points;
+  }
 
   calculatePlayerScores() {
     const scores = {};
@@ -509,7 +606,9 @@ class WorldCupApp {
   }
 
    renderMatchCard(match) {
-     const homeFlag = countryFlags[match.home.team] || '🏴';
+      const displayStatus = this.getDisplayMatchStatus(match);
+      const hasScore = this.hasVisibleScore(match);
+      const homeFlag = countryFlags[match.home.team] || '🏴';
      const awayFlag = countryFlags[match.away.team] || '🏴';
      const dateObj = new Date(match.date);
      const dateStr = dateObj.toLocaleDateString('en-ZA', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -539,7 +638,7 @@ class WorldCupApp {
        <div class="match-card" onclick="app.showMatchDetail('${match.id}')">
          <div class="match-header">
            <span class="match-stage">${stageName}</span>
-           <span class="match-status ${match.status}">${match.status.charAt(0).toUpperCase() + match.status.slice(1)}</span>
+            <span class="match-status ${displayStatus}">${this.formatMatchStatus(displayStatus)}</span>
            <div style="font-size: 0.85rem; margin-top: 0.5rem;">${dateStr} at ${timeStr}</div>
          </div>
          <div class="match-body">
@@ -550,10 +649,9 @@ class WorldCupApp {
              <div class="team-players">${homePlayersStr}</div>
            </div>
            <div class="score-display">
-             ${match.status === 'completed' ? `
-               <div class="score-number">${match.score.home}</div>
-               <div class="vs-text">vs</div>
-               <div class="score-number">${match.score.away}</div>
+              ${hasScore ? `
+                <div class="score-line">${match.score.home} - ${match.score.away}</div>
+                <div class="vs-text">vs</div>
              ` : `
                <div class="vs-text">vs</div>
              `}
@@ -752,17 +850,22 @@ class WorldCupApp {
        this.setHash('teams');
      }
 
-     const groupedTeams = {};
-     for (let team of this.data.teams) {
-       if (!groupedTeams[team.group]) groupedTeams[team.group] = [];
-       groupedTeams[team.group].push(team.name);
-     }
+      const teamPoints = this.calculateTeamGroupPoints();
 
-     const sortedGroups = Object.keys(groupedTeams).sort();
-     let html = '';
+      const groupedTeams = {};
+      for (let team of this.data.teams) {
+        if (!groupedTeams[team.group]) groupedTeams[team.group] = [];
+        groupedTeams[team.group].push(team.name);
+      }
 
-     for (let group of sortedGroups) {
-       const teams = groupedTeams[group].slice().sort((a, b) => a.localeCompare(b));
+      const sortedGroups = Object.keys(groupedTeams).sort();
+      let html = '';
+
+      for (let group of sortedGroups) {
+        const teams = groupedTeams[group].slice().sort((a, b) => {
+          const ptsDiff = (teamPoints[b] || 0) - (teamPoints[a] || 0);
+          return ptsDiff !== 0 ? ptsDiff : a.localeCompare(b);
+        });
        html += `
          <section class="group-card">
            <h3>Group ${group}</h3>
@@ -778,9 +881,9 @@ class WorldCupApp {
                      : `<span>${ownerInitial}</span>`)
                  : '<span>?</span>';
                const ownerName = owner ? owner.name : 'Unassigned';
-               return `
-                 <button class="team-chip" onclick="app.showMatchesByTeam('${encodeURIComponent(teamName)}')" aria-label="View matches for ${teamName}">
-                   <span class="team-chip-main">${teamFlag} ${teamName}</span>
+                return `
+                  <button class="team-chip" onclick="app.showMatchesByTeam('${encodeURIComponent(teamName)}')" aria-label="View matches for ${teamName}">
+                    <span class="team-chip-main">${teamFlag} ${teamName} (${teamPoints[teamName] || 0})</span>
                    <span class="team-chip-owner">
                      <span class="team-chip-owner-name">${ownerName}</span>
                      <span class="team-chip-owner-avatar">${ownerAvatar}</span>
@@ -898,7 +1001,7 @@ class WorldCupApp {
 
      // Filter by status
      if (statusFilter) {
-       filteredMatches = filteredMatches.filter(m => m.status === statusFilter);
+       filteredMatches = filteredMatches.filter(m => this.getDisplayMatchStatus(m) === statusFilter);
      }
 
      // Filter by team
@@ -992,17 +1095,19 @@ class WorldCupApp {
         const dateStr = dateObj.toLocaleDateString('en-ZA');
 
         let resultHtml = '';
-        if (match.status === 'completed') {
+        if (this.hasVisibleScore(match)) {
           resultHtml = `${match.score.home} - ${match.score.away}`;
         } else {
           resultHtml = 'TBD';
         }
 
+        const displayStatus = this.getDisplayMatchStatus(match);
+
         matchesHtml += `
           <div class="match-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
               <span style="font-size: 0.85rem; color: #666;">${dateStr}</span>
-              <span class="match-status ${match.status}">${match.status === 'completed' ? 'Done' : 'Pending'}</span>
+                <span class="match-status ${displayStatus}">${this.formatMatchStatus(displayStatus)}</span>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <div style="flex: 1;">
@@ -1077,6 +1182,8 @@ class WorldCupApp {
 
      const match = this.data.matches.find(m => m.id === matchId);
      if (!match) return;
+     const displayStatus = this.getDisplayMatchStatus(match);
+     const hasScore = this.hasVisibleScore(match);
 
      const homeFlag = countryFlags[match.home.team] || '🏴';
      const awayFlag = countryFlags[match.away.team] || '🏴';
@@ -1136,18 +1243,23 @@ class WorldCupApp {
            </div>
          </div>
 
-         ${match.status === 'completed' ? `
+          ${hasScore ? `
            <div style="background: #f0f0f0; padding: 2rem; border-radius: 10px; text-align: center; margin-bottom: 2rem;">
-             <p style="color: #666; margin-bottom: 1rem;">Final Score</p>
+              <p style="color: #666; margin-bottom: 1rem;">${displayStatus === 'completed' ? 'Final Score' : 'Current Score'}</p>
              <div style="font-size: 3rem; font-weight: bold; color: #003f7f; display: flex; justify-content: center; align-items: center; gap: 1rem;">
                <span>${match.score.home}</span>
                <span style="font-size: 1.5rem; color: #666;">-</span>
                <span>${match.score.away}</span>
              </div>
              <p style="margin-top: 1rem; color: #666;">
-               ${match.winner === 'home' ? `${match.home.team} wins!` :
-                 match.winner === 'away' ? `${match.away.team} wins!` :
-                 'Match ended in a draw'}
+                ${displayStatus === 'in_progress' ? 'Match currently in progress' :
+                  displayStatus === 'pending' ? 'Pending score confirmation' :
+                  displayStatus === 'completed' ? (
+                    match.winner === 'home' ? `${match.home.team} wins!` :
+                    match.winner === 'away' ? `${match.away.team} wins!` :
+                    'Match ended in a draw'
+                  ) :
+                  'Live score update'}
              </p>
            </div>
          ` : `
