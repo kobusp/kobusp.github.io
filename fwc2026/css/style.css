@@ -909,7 +909,7 @@ section h3 {
   padding: 0.2rem 0.25rem;
   border-right: 1px solid #e0e6ef;
   border-bottom: 1px solid #e0e6ef;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 600;
   color: var(--text-dark);
 }
@@ -939,7 +939,8 @@ section h3 {
 
 .lb-stat-pts {
   color: var(--secondary);
-  font-size: 0.92rem;
+  font-size: 1.08rem;
+  font-weight: 700;
 }
 
 /* Matches Container */
