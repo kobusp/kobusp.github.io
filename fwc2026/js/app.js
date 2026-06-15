@@ -766,14 +766,40 @@ class WorldCupApp {
     return `${flag} ${teamName} (${ownerName})`;
   }
 
+  formatWhatsAppBold(text) {
+    return `*${text}*`;
+  }
+
+  formatShareCenteredScore(scoreText, width) {
+    const targetWidth = Math.max(width || 0, scoreText.length);
+    const leftPadding = Math.floor((targetWidth - scoreText.length) / 2);
+    return `${' '.repeat(leftPadding)}${scoreText}`;
+  }
+
+  formatShareMatchBlock(match) {
+    const homeLine = this.formatShareTeam(match.home.team);
+    const awayLine = this.formatShareTeam(match.away.team);
+    const scoreLine = `${match.score.home} - ${match.score.away}`;
+    const contentWidth = Math.max(homeLine.length, awayLine.length, scoreLine.length);
+    const centeredScoreLine = this.formatShareCenteredScore(this.formatWhatsAppBold(scoreLine), contentWidth);
+
+    return [homeLine, centeredScoreLine, awayLine].join('\n');
+  }
+
+  formatLeaderboardMovement(movement) {
+    if (movement > 0) return `(+${movement})`;
+    if (movement < 0) return `(${movement})`;
+    return '(0)';
+  }
+
   buildLatestResultsShareText() {
     const siteUrl = this.getSiteBaseUrl();
     const recentMatches = this.getCompletedMatchesInLast24Hours();
     const ranked = this.getRankedPlayers().slice(0, 3);
+    const movements = this.getLeaderboardMovements();
     const matchLines = [];
 
-    matchLines.push(`${this.getFootballEmoji()} FIFA Football Fever Latest Results`);
-    matchLines.push(siteUrl);
+    matchLines.push(`${this.getFootballEmoji()} FIFA Football Fever Latest 24 Hour Results`);
     matchLines.push('');
 
     if (recentMatches.length === 0) {
@@ -787,21 +813,21 @@ class WorldCupApp {
           month: 'long'
         });
         if (dateLabel !== lastDateLabel) {
-          matchLines.push(dateLabel);
+          matchLines.push(this.formatWhatsAppBold(dateLabel));
           lastDateLabel = dateLabel;
         }
 
-        matchLines.push(
-          `${this.formatShareTeam(match.home.team)} ${match.score.home} - ${match.score.away} ${this.formatShareTeam(match.away.team)}`
-        );
+        matchLines.push(this.formatShareMatchBlock(match));
+        matchLines.push('');
       }
     }
 
     matchLines.push('');
-    matchLines.push('Leaderboard Top 3:');
+    matchLines.push(this.formatWhatsAppBold('Leaderboard Top 3:'));
 
     ranked.forEach((player, index) => {
-      matchLines.push(`${index + 1}. ${player.name} (${player.wins}W ${player.draws}D ${player.losses}L) ${player.groupStagePoints} PTS`);
+      const movement = movements[player.name] ?? 0;
+      matchLines.push(`${index + 1}. ${player.name} (${player.wins}W ${player.draws}D ${player.losses}L) ${player.groupStagePoints} PTS ${this.formatLeaderboardMovement(movement)}`);
     });
 
     matchLines.push('');
