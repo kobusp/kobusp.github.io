@@ -110,12 +110,12 @@
     },
     {
       "id": "M13",
-      "status": "in_progress",
+      "status": "completed",
       "score": {
         "home": 0,
         "away": 0
       },
-      "winner": null
+      "winner": "draw"
     },
     {
       "id": "M14",
