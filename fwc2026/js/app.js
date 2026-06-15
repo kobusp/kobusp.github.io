@@ -770,18 +770,15 @@ class WorldCupApp {
     return `*${text}*`;
   }
 
-  formatShareCenteredScore(scoreText, width) {
-    const targetWidth = Math.max(width || 0, scoreText.length);
-    const leftPadding = Math.floor((targetWidth - scoreText.length) / 2);
-    return `${' '.repeat(leftPadding)}${scoreText}`;
+  formatShareIndentedScore(scoreText) {
+    return `${' '.repeat(8)}${scoreText}`;
   }
 
   formatShareMatchBlock(match) {
     const homeLine = this.formatShareTeam(match.home.team);
     const awayLine = this.formatShareTeam(match.away.team);
     const scoreLine = `${match.score.home} - ${match.score.away}`;
-    const contentWidth = Math.max(homeLine.length, awayLine.length, scoreLine.length);
-    const centeredScoreLine = this.formatShareCenteredScore(this.formatWhatsAppBold(scoreLine), contentWidth);
+    const centeredScoreLine = this.formatShareIndentedScore(this.formatWhatsAppBold(scoreLine));
 
     return [homeLine, centeredScoreLine, awayLine].join('\n');
   }
