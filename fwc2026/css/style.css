@@ -275,6 +275,18 @@ section h3 {
   transform: translateY(-2px);
 }
 
+.btn-whatsapp {
+  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+  color: white;
+  margin-top: 1rem;
+}
+
+.btn-whatsapp:hover {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
 /* Match Cards */
 .match-card {
   background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);

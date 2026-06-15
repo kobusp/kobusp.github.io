@@ -734,6 +734,92 @@ class WorldCupApp {
     return `R${Math.round(amount).toLocaleString('en-ZA')}`;
   }
 
+  getFootballEmoji() {
+    return String.fromCodePoint(0x26BD, 0xFE0F);
+  }
+
+  getFallbackFlagEmoji() {
+    return String.fromCodePoint(0x1F3F4);
+  }
+
+  getSiteBaseUrl() {
+    return new URL('./', window.location.href).href;
+  }
+
+  getTeamOwnerName(teamName) {
+    const owner = this.getTeamPlayerObjects(teamName)[0];
+    return owner ? owner.name : 'Unassigned';
+  }
+
+  getCompletedMatchesInLast24Hours() {
+    const now = this.getCurrentDateAndTime();
+    const cutoff = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+
+    return this.data.matches
+      .filter(match => match.status === 'completed' && new Date(match.date) >= cutoff && new Date(match.date) <= now)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  }
+
+  formatShareTeam(teamName) {
+    const flag = countryFlags[teamName] || this.getFallbackFlagEmoji();
+    const ownerName = this.getTeamOwnerName(teamName);
+    return `${flag} ${teamName} (${ownerName})`;
+  }
+
+  buildLatestResultsShareText() {
+    const siteUrl = this.getSiteBaseUrl();
+    const recentMatches = this.getCompletedMatchesInLast24Hours();
+    const ranked = this.getRankedPlayers().slice(0, 3);
+    const matchLines = [];
+
+    matchLines.push(`${this.getFootballEmoji()} FIFA Football Fever Latest Results`);
+    matchLines.push(siteUrl);
+    matchLines.push('');
+
+    if (recentMatches.length === 0) {
+      matchLines.push('No completed matches in the last 24 hours.');
+    } else {
+      let lastDateLabel = '';
+      for (const match of recentMatches) {
+        const dateLabel = new Date(match.date).toLocaleDateString('en-ZA', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long'
+        });
+        if (dateLabel !== lastDateLabel) {
+          matchLines.push(dateLabel);
+          lastDateLabel = dateLabel;
+        }
+
+        matchLines.push(
+          `${this.formatShareTeam(match.home.team)} ${match.score.home} - ${match.score.away} ${this.formatShareTeam(match.away.team)}`
+        );
+      }
+    }
+
+    matchLines.push('');
+    matchLines.push('Leaderboard Top 3:');
+
+    ranked.forEach((player, index) => {
+      matchLines.push(`${index + 1}. ${player.name} (${player.wins}W ${player.draws}D ${player.losses}L) ${player.groupStagePoints} PTS`);
+    });
+
+    matchLines.push('');
+    matchLines.push(`Follow the action: ${siteUrl}`);
+
+    return matchLines.join('\n');
+  }
+
+  shareLatestResults() {
+    const shareText = this.buildLatestResultsShareText();
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+
+    const opened = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    if (!opened) {
+      window.location.href = whatsappUrl;
+    }
+  }
+
    renderMatchCard(match) {
       const displayStatus = this.getDisplayMatchStatus(match);
       const hasScore = this.hasVisibleScore(match);
