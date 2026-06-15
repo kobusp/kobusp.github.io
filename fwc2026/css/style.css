@@ -661,6 +661,17 @@ section h3 {
    font-size: 0.9rem;
    transition: all 0.3s ease;
    flex-shrink: 0;
+   display: inline-flex;
+   align-items: center;
+   gap: 0.35rem;
+}
+
+.timeline-btn-icon {
+   line-height: 1;
+}
+
+.timeline-btn-label {
+   line-height: 1;
 }
 
 .timeline-btn:hover {
@@ -1448,17 +1459,28 @@ section h3 {
     }
 
    .timeline-controls {
-     flex-direction: column;
+     flex-direction: row;
      width: 100%;
+     justify-content: space-between;
+     gap: 0.35rem;
    }
 
    .timeline-btn {
-     width: 100%;
+     width: auto;
+     min-width: 2rem;
+     padding: 0.45rem 0.55rem;
+     justify-content: center;
+     font-size: 0.95rem;
+   }
+
+   .timeline-btn-label {
+     display: none;
    }
 
    .timeline-slider {
      width: 100%;
      margin: 0.5rem 0;
+     order: -1;
    }
 
    .timeline-match-display {

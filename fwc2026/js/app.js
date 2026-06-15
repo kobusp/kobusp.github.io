@@ -69,6 +69,7 @@ class WorldCupApp {
      this.currentPage = 'landing';
      this.nextMatchCountdownInterval = null;
      this.leaderboardTimelineIndex = null; // null = current; 0+ = after match N
+     this.leaderboardTimelineExpanded = false;
      this.init();
    }
 
@@ -537,6 +538,69 @@ class WorldCupApp {
      return this.getLeaderboardMovementsFromMatches(beforeMatches, afterMatches, currentStage);
    }
 
+   updateLeaderboardTimelineContent() {
+     const completedMatches = this.getCompletedGroupMatches();
+     if (completedMatches.length === 0) return;
+
+     const clampedIndex = Math.max(0, Math.min(this.leaderboardTimelineIndex, completedMatches.length - 1));
+     this.leaderboardTimelineIndex = clampedIndex;
+
+     const currentStage = this.getCurrentStage();
+     const showTeamsRemaining = currentStage !== 'group';
+     const currentMatch = completedMatches[clampedIndex];
+
+     const homeFlag = countryFlags[currentMatch.home.team] || '🏴';
+     const awayFlag = countryFlags[currentMatch.away.team] || '🏴';
+     const hasScore = this.hasVisibleScore(currentMatch);
+     const scoreText = hasScore ? `${currentMatch.score.home} - ${currentMatch.score.away}` : 'TBD';
+     const matchDateObj = new Date(currentMatch.date);
+     const matchDateStr = matchDateObj.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric', year: '2-digit' });
+
+     const counterEl = document.getElementById('leaderboardTimelineCounter');
+     const homeFlagEl = document.getElementById('leaderboardTimelineHomeFlag');
+     const homeTeamEl = document.getElementById('leaderboardTimelineHomeTeam');
+     const scoreEl = document.getElementById('leaderboardTimelineScore');
+     const awayFlagEl = document.getElementById('leaderboardTimelineAwayFlag');
+     const awayTeamEl = document.getElementById('leaderboardTimelineAwayTeam');
+     const dateEl = document.getElementById('leaderboardTimelineDate');
+     const sliderEl = document.getElementById('leaderboardMatchSlider');
+     const firstBtnEl = document.getElementById('leaderboardTimelineFirstBtn');
+     const prevBtnEl = document.getElementById('leaderboardTimelinePrevBtn');
+     const nextBtnEl = document.getElementById('leaderboardTimelineNextBtn');
+     const latestBtnEl = document.getElementById('leaderboardTimelineLatestBtn');
+
+     if (counterEl) counterEl.textContent = `Match ${clampedIndex + 1} / ${completedMatches.length}`;
+     if (homeFlagEl) homeFlagEl.textContent = homeFlag;
+     if (homeTeamEl) homeTeamEl.textContent = currentMatch.home.team;
+     if (scoreEl) scoreEl.textContent = scoreText;
+     if (awayFlagEl) awayFlagEl.textContent = awayFlag;
+     if (awayTeamEl) awayTeamEl.textContent = currentMatch.away.team;
+     if (dateEl) dateEl.textContent = matchDateStr;
+
+     if (sliderEl) {
+       sliderEl.max = String(completedMatches.length - 1);
+       sliderEl.value = String(clampedIndex);
+     }
+
+     const atStart = clampedIndex === 0;
+     const atEnd = clampedIndex === completedMatches.length - 1;
+     if (firstBtnEl) firstBtnEl.disabled = atStart;
+     if (prevBtnEl) prevBtnEl.disabled = atStart;
+     if (nextBtnEl) nextBtnEl.disabled = atEnd;
+     if (latestBtnEl) latestBtnEl.disabled = atEnd;
+
+     const rankedAtIndex = this.getLeaderboardAtMatchIndex(clampedIndex);
+     let movements = {};
+     if (clampedIndex > 0) {
+       movements = this.getMovementsBetweenMatches(clampedIndex - 1, clampedIndex);
+     }
+
+     const tableContainer = document.getElementById('leaderboardTableContainer');
+     if (tableContainer && rankedAtIndex) {
+       tableContainer.innerHTML = this.renderLeaderboardTable(rankedAtIndex, movements, showTeamsRemaining);
+     }
+   }
+
   awardGroupMatchPoints(match, pointsMap) {
     if (match.stage !== 'group' || match.status !== 'completed') return;
 
@@ -900,7 +964,7 @@ class WorldCupApp {
        return;
      }
 
-     // Render timeline control
+      // Render timeline control
      let timelineControlHtml = '';
      if (completedMatches.length > 0) {
        const currentIndex = Math.min(this.leaderboardTimelineIndex, completedMatches.length - 1);
@@ -914,33 +978,33 @@ class WorldCupApp {
 
        timelineControlHtml = `
          <div class="leaderboard-timeline-control">
-           <button class="timeline-toggle-btn" onclick="app.toggleLeaderboardTimeline()">
+            <button class="timeline-toggle-btn ${this.leaderboardTimelineExpanded ? 'expanded' : ''}" onclick="app.toggleLeaderboardTimeline()">
              <span class="timeline-toggle-icon">⏱️</span>
              <span class="timeline-toggle-text">View Match Progress</span>
              <span class="timeline-toggle-arrow">▼</span>
            </button>
-           <div class="leaderboard-timeline-panel hidden" id="leaderboardTimelinePanel">
+            <div class="leaderboard-timeline-panel ${this.leaderboardTimelineExpanded ? '' : 'hidden'}" id="leaderboardTimelinePanel">
              <div class="timeline-match-info">
-               <div class="timeline-match-header">Match ${currentIndex + 1} / ${completedMatches.length}</div>
+                <div class="timeline-match-header" id="leaderboardTimelineCounter">Match ${currentIndex + 1} / ${completedMatches.length}</div>
                <div class="timeline-match-display">
                  <div class="timeline-team">
-                   <span class="timeline-flag">${homeFlag}</span>
-                   <span class="timeline-team-name">${match.home.team}</span>
+                    <span class="timeline-flag" id="leaderboardTimelineHomeFlag">${homeFlag}</span>
+                    <span class="timeline-team-name" id="leaderboardTimelineHomeTeam">${match.home.team}</span>
                  </div>
-                 <div class="timeline-score">${scoreText}</div>
+                  <div class="timeline-score" id="leaderboardTimelineScore">${scoreText}</div>
                  <div class="timeline-team">
-                   <span class="timeline-flag">${awayFlag}</span>
-                   <span class="timeline-team-name">${match.away.team}</span>
+                    <span class="timeline-flag" id="leaderboardTimelineAwayFlag">${awayFlag}</span>
+                    <span class="timeline-team-name" id="leaderboardTimelineAwayTeam">${match.away.team}</span>
                  </div>
                </div>
-               <div class="timeline-match-date">${matchDateStr}</div>
+                <div class="timeline-match-date" id="leaderboardTimelineDate">${matchDateStr}</div>
              </div>
              <div class="timeline-controls">
-               <button class="timeline-btn" onclick="app.jumpToLeaderboardMatch(0)" title="Jump to first match">⏮ First</button>
-               <button class="timeline-btn" onclick="app.prevLeaderboardMatch()" title="Previous match">◀ Back</button>
+                <button id="leaderboardTimelineFirstBtn" class="timeline-btn" onclick="app.jumpToLeaderboardMatch(0)" title="Jump to first match" aria-label="Jump to first match"><span class="timeline-btn-icon">⏮</span><span class="timeline-btn-label">First</span></button>
+                <button id="leaderboardTimelinePrevBtn" class="timeline-btn" onclick="app.prevLeaderboardMatch()" title="Previous match" aria-label="Previous match"><span class="timeline-btn-icon">◀</span><span class="timeline-btn-label">Back</span></button>
                <input type="range" id="leaderboardMatchSlider" class="timeline-slider" min="0" max="${completedMatches.length - 1}" value="${currentIndex}" onchange="app.jumpToLeaderboardMatch(parseInt(this.value))">
-               <button class="timeline-btn" onclick="app.nextLeaderboardMatch()" title="Next match">Forward ▶</button>
-               <button class="timeline-btn" onclick="app.jumpToLeaderboardMatch(${completedMatches.length - 1})" title="Jump to latest match">Latest ⏭</button>
+                <button id="leaderboardTimelineNextBtn" class="timeline-btn" onclick="app.nextLeaderboardMatch()" title="Next match" aria-label="Next match"><span class="timeline-btn-icon">▶</span><span class="timeline-btn-label">Forward</span></button>
+                <button id="leaderboardTimelineLatestBtn" class="timeline-btn" onclick="app.jumpToLeaderboardMatch(${completedMatches.length - 1})" title="Jump to latest match" aria-label="Jump to latest match"><span class="timeline-btn-icon">⏭</span><span class="timeline-btn-label">Latest</span></button>
              </div>
            </div>
          </div>
@@ -957,18 +1021,20 @@ class WorldCupApp {
      const leaderboardHtml = this.renderLeaderboardTable(rankedAtIndex, movements, showTeamsRemaining);
 
      document.getElementById('leaderboardDisplay').innerHTML = timelineControlHtml + '<div id="leaderboardTableContainer" class="leaderboard-table">' + leaderboardHtml + '</div>';
+      this.updateLeaderboardTimelineContent();
      page.classList.remove('hidden');
      this.currentPage = 'leaderboard';
    }
 
    toggleLeaderboardTimeline() {
+     this.leaderboardTimelineExpanded = !this.leaderboardTimelineExpanded;
      const panel = document.getElementById('leaderboardTimelinePanel');
+     const button = document.querySelector('.timeline-toggle-btn');
      if (panel) {
-       panel.classList.toggle('hidden');
-       const button = document.querySelector('.timeline-toggle-btn');
-       if (button) {
-         button.classList.toggle('expanded');
-       }
+       panel.classList.toggle('hidden', !this.leaderboardTimelineExpanded);
+     }
+     if (button) {
+       button.classList.toggle('expanded', this.leaderboardTimelineExpanded);
      }
    }
 
@@ -976,14 +1042,14 @@ class WorldCupApp {
      const completedMatches = this.getCompletedGroupMatches();
      if (this.leaderboardTimelineIndex < completedMatches.length - 1) {
        this.leaderboardTimelineIndex++;
-       this.showLeaderboard(false);
+       this.updateLeaderboardTimelineContent();
      }
    }
 
    prevLeaderboardMatch() {
      if (this.leaderboardTimelineIndex > 0) {
        this.leaderboardTimelineIndex--;
-       this.showLeaderboard(false);
+       this.updateLeaderboardTimelineContent();
      }
    }
 
@@ -991,7 +1057,7 @@ class WorldCupApp {
      const completedMatches = this.getCompletedGroupMatches();
      if (index >= 0 && index < completedMatches.length) {
        this.leaderboardTimelineIndex = index;
-       this.showLeaderboard(false);
+       this.updateLeaderboardTimelineContent();
      }
    }
 
