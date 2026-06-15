@@ -406,9 +406,8 @@ class WorldCupApp {
     return points;
   }
 
-  calculatePlayerScores() {
+  calculatePlayerScoresFromMatches(completedGroupMatches) {
     const scores = {};
-
     for (let player of this.data.players) {
       scores[player.id] = {
         name: player.name,
@@ -420,56 +419,87 @@ class WorldCupApp {
         losses: 0
       };
     }
-
-    for (let match of this.data.matches) {
-      if (match.stage !== 'group' || match.status !== 'completed') continue;
-
+    for (let match of completedGroupMatches) {
       const homePlayerIds = this.getTeamPlayerIds(match.home.team);
       const awayPlayerIds = this.getTeamPlayerIds(match.away.team);
-
       if (match.winner === 'home') {
-        for (let pid of homePlayerIds) {
-          scores[pid].groupStagePoints += 3;
-          scores[pid].wins += 1;
-        }
-        for (let pid of awayPlayerIds) {
-          scores[pid].losses += 1;
-        }
+        for (let pid of homePlayerIds) { scores[pid].groupStagePoints += 3; scores[pid].wins += 1; }
+        for (let pid of awayPlayerIds) { scores[pid].losses += 1; }
       } else if (match.winner === 'away') {
-        for (let pid of awayPlayerIds) {
-          scores[pid].groupStagePoints += 3;
-          scores[pid].wins += 1;
-        }
-        for (let pid of homePlayerIds) {
-          scores[pid].losses += 1;
-        }
+        for (let pid of awayPlayerIds) { scores[pid].groupStagePoints += 3; scores[pid].wins += 1; }
+        for (let pid of homePlayerIds) { scores[pid].losses += 1; }
       } else if (match.winner === 'draw') {
-        for (let pid of [...homePlayerIds, ...awayPlayerIds]) {
-          scores[pid].groupStagePoints += 1;
-          scores[pid].draws += 1;
-        }
+        for (let pid of [...homePlayerIds, ...awayPlayerIds]) { scores[pid].groupStagePoints += 1; scores[pid].draws += 1; }
       }
-
-      for (let pid of [...homePlayerIds, ...awayPlayerIds]) {
-        scores[pid].totalMatches += 1;
-      }
+      for (let pid of [...homePlayerIds, ...awayPlayerIds]) { scores[pid].totalMatches += 1; }
     }
-
     return scores;
   }
 
-  getRankedPlayers() {
-    const scores = this.calculatePlayerScores();
-    const currentStage = this.getCurrentStage();
+  calculatePlayerScores() {
+    const completedGroupMatches = this.data.matches.filter(
+      m => m.stage === 'group' && m.status === 'completed'
+    );
+    return this.calculatePlayerScoresFromMatches(completedGroupMatches);
+  }
 
-    const ranked = Object.values(scores).sort((a, b) => {
+  getRankedPlayersFromScores(scores, currentStage) {
+    return Object.values(scores).sort((a, b) => {
       if (currentStage === 'group' || currentStage === 'final') {
         return b.groupStagePoints - a.groupStagePoints;
       }
       return b.teamsRemaining - a.teamsRemaining;
     });
+  }
 
-    return ranked;
+  getLeaderboardMovements() {
+    const currentStage = this.getCurrentStage();
+
+    // All completed group matches sorted by date ascending
+    const completedGroupMatches = this.data.matches
+      .filter(m => m.stage === 'group' && m.status === 'completed')
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (completedGroupMatches.length === 0) {
+      return {};
+    }
+
+    // Find the latest UTC calendar date that has completed matches
+    const latestDate = completedGroupMatches[completedGroupMatches.length - 1].date.slice(0, 10);
+
+    // Matches before the latest batch
+    const prevMatches = completedGroupMatches.filter(m => m.date.slice(0, 10) < latestDate);
+
+    // If nothing came before, everyone is "new" — no movement to show
+    if (prevMatches.length === 0) {
+      return {};
+    }
+
+    const currentRanked = this.getRankedPlayersFromScores(
+      this.calculatePlayerScoresFromMatches(completedGroupMatches), currentStage
+    );
+    const prevRanked = this.getRankedPlayersFromScores(
+      this.calculatePlayerScoresFromMatches(prevMatches), currentStage
+    );
+
+    const currentPositions = {};
+    const prevPositions = {};
+    currentRanked.forEach((p, i) => { currentPositions[p.name] = i + 1; });
+    prevRanked.forEach((p, i) => { prevPositions[p.name] = i + 1; });
+
+    const movements = {};
+    for (let player of this.data.players) {
+      const cur = currentPositions[player.name];
+      const prev = prevPositions[player.name];
+      movements[player.name] = (cur != null && prev != null) ? prev - cur : 0;
+    }
+    return movements;
+  }
+
+  getRankedPlayers() {
+    const scores = this.calculatePlayerScores();
+    const currentStage = this.getCurrentStage();
+    return this.getRankedPlayersFromScores(scores, currentStage);
   }
 
   awardGroupMatchPoints(match, pointsMap) {
@@ -757,6 +787,7 @@ class WorldCupApp {
     }
 
     const ranked = this.getRankedPlayers();
+    const movements = this.getLeaderboardMovements();
 
     const currentStage = this.getCurrentStage();
     const stageNames = {
@@ -771,6 +802,8 @@ class WorldCupApp {
 
     document.getElementById('leaderboardStage').textContent = `Current Stage: ${stageNames[currentStage]}`;
 
+    const showTeamsRemaining = currentStage !== 'group';
+
     let leaderboardHtml = '';
     for (let i = 0; i < ranked.length; i++) {
       const player = ranked[i];
@@ -783,6 +816,16 @@ class WorldCupApp {
       const topClass = i < 3 ? `top-${i + 1}` : '';
       const rankClass = i < 3 ? `top-${i + 1}` : '';
 
+      const movement = movements[player.name] ?? 0;
+      let movementBadge;
+      if (movement > 0) {
+        movementBadge = `<span class="lb-movement up">▲ ${movement}</span>`;
+      } else if (movement < 0) {
+        movementBadge = `<span class="lb-movement down">▼ ${Math.abs(movement)}</span>`;
+      } else {
+        movementBadge = `<span class="lb-movement neutral">—</span>`;
+      }
+
       leaderboardHtml += `
         <div class="leaderboard-row ${topClass}">
           <div class="rank ${rankClass}"></div>
@@ -790,17 +833,20 @@ class WorldCupApp {
             <div class="leaderboard-avatar">${avatarHtml}</div>
             <div class="leaderboard-name">
               <div class="leaderboard-name-text">${player.name}</div>
-              <div class="leaderboard-teams-remaining">${player.teamsRemaining} teams remaining</div>
+              ${showTeamsRemaining ? `<div class="leaderboard-teams-remaining">${player.teamsRemaining} teams remaining</div>` : ''}
             </div>
           </div>
-          <div class="leaderboard-score">
-            <span class="leaderboard-score-value">${player.groupStagePoints}</span>
-            <span class="leaderboard-score-label">GROUP<br>PTS</span>
+          <div class="lb-stats">
+            <div class="lb-stat-cell lb-stat-header">W</div>
+            <div class="lb-stat-cell lb-stat-header">D</div>
+            <div class="lb-stat-cell lb-stat-header">L</div>
+            <div class="lb-stat-cell lb-stat-header">PTS</div>
+            <div class="lb-stat-cell">${player.wins}</div>
+            <div class="lb-stat-cell">${player.draws}</div>
+            <div class="lb-stat-cell">${player.losses}</div>
+            <div class="lb-stat-cell lb-stat-pts">${player.groupStagePoints}</div>
           </div>
-          <div style="text-align: center; padding: 0.5rem;">
-            <div style="font-weight: 600; color: #003f7f;">${player.wins}-${player.draws}-${player.losses}</div>
-            <div style="font-size: 0.75rem; color: #666;">W-D-L</div>
-          </div>
+          ${movementBadge}
         </div>
       `;
     }
