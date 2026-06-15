@@ -63,13 +63,14 @@ const playerInitials = {
 };
 
 class WorldCupApp {
-  constructor() {
-    this.data = null;
-    this.resultsByMatchId = new Map();
-    this.currentPage = 'landing';
-    this.nextMatchCountdownInterval = null;
-    this.init();
-  }
+   constructor() {
+     this.data = null;
+     this.resultsByMatchId = new Map();
+     this.currentPage = 'landing';
+     this.nextMatchCountdownInterval = null;
+     this.leaderboardTimelineIndex = null; // null = current; 0+ = after match N
+     this.init();
+   }
 
   async init() {
     try {
@@ -452,55 +453,89 @@ class WorldCupApp {
     });
   }
 
-  getLeaderboardMovements() {
-    const currentStage = this.getCurrentStage();
+   getLeaderboardMovementsFromMatches(beforeMatches, afterMatches, currentStage) {
+     const beforeRanked = this.getRankedPlayersFromScores(
+       this.calculatePlayerScoresFromMatches(beforeMatches), currentStage
+     );
+     const afterRanked = this.getRankedPlayersFromScores(
+       this.calculatePlayerScoresFromMatches(afterMatches), currentStage
+     );
 
-    // All completed group matches sorted by date ascending
-    const completedGroupMatches = this.data.matches
-      .filter(m => m.stage === 'group' && m.status === 'completed')
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+     const beforePositions = {};
+     const afterPositions = {};
+     beforeRanked.forEach((p, i) => { beforePositions[p.name] = i + 1; });
+     afterRanked.forEach((p, i) => { afterPositions[p.name] = i + 1; });
 
-    if (completedGroupMatches.length === 0) {
-      return {};
-    }
+     const movements = {};
+     for (let player of this.data.players) {
+       const after = afterPositions[player.name];
+       const before = beforePositions[player.name];
+       movements[player.name] = (after != null && before != null) ? before - after : 0;
+     }
+     return movements;
+   }
 
-    // Find the latest UTC calendar date that has completed matches
-    const latestDate = completedGroupMatches[completedGroupMatches.length - 1].date.slice(0, 10);
+   getLeaderboardMovements() {
+     const currentStage = this.getCurrentStage();
 
-    // Matches before the latest batch
-    const prevMatches = completedGroupMatches.filter(m => m.date.slice(0, 10) < latestDate);
+     // All completed group matches sorted by date ascending
+     const completedGroupMatches = this.data.matches
+       .filter(m => m.stage === 'group' && m.status === 'completed')
+       .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    // If nothing came before, everyone is "new" — no movement to show
-    if (prevMatches.length === 0) {
-      return {};
-    }
+     if (completedGroupMatches.length === 0) {
+       return {};
+     }
 
-    const currentRanked = this.getRankedPlayersFromScores(
-      this.calculatePlayerScoresFromMatches(completedGroupMatches), currentStage
-    );
-    const prevRanked = this.getRankedPlayersFromScores(
-      this.calculatePlayerScoresFromMatches(prevMatches), currentStage
-    );
+     // Find the latest UTC calendar date that has completed matches
+     const latestDate = completedGroupMatches[completedGroupMatches.length - 1].date.slice(0, 10);
 
-    const currentPositions = {};
-    const prevPositions = {};
-    currentRanked.forEach((p, i) => { currentPositions[p.name] = i + 1; });
-    prevRanked.forEach((p, i) => { prevPositions[p.name] = i + 1; });
+     // Matches before the latest batch
+     const prevMatches = completedGroupMatches.filter(m => m.date.slice(0, 10) < latestDate);
 
-    const movements = {};
-    for (let player of this.data.players) {
-      const cur = currentPositions[player.name];
-      const prev = prevPositions[player.name];
-      movements[player.name] = (cur != null && prev != null) ? prev - cur : 0;
-    }
-    return movements;
-  }
+     // If nothing came before, everyone is "new" — no movement to show
+     if (prevMatches.length === 0) {
+       return {};
+     }
 
-  getRankedPlayers() {
-    const scores = this.calculatePlayerScores();
-    const currentStage = this.getCurrentStage();
-    return this.getRankedPlayersFromScores(scores, currentStage);
-  }
+     return this.getLeaderboardMovementsFromMatches(prevMatches, completedGroupMatches, currentStage);
+   }
+
+   getRankedPlayers() {
+     const scores = this.calculatePlayerScores();
+     const currentStage = this.getCurrentStage();
+     return this.getRankedPlayersFromScores(scores, currentStage);
+   }
+
+   getCompletedGroupMatches() {
+     return this.data.matches
+       .filter(m => m.stage === 'group' && m.status === 'completed')
+       .sort((a, b) => new Date(a.date) - new Date(b.date));
+   }
+
+   getLeaderboardAtMatchIndex(matchIndex) {
+     const completedMatches = this.getCompletedGroupMatches();
+     if (matchIndex < 0 || matchIndex >= completedMatches.length) {
+       return null;
+     }
+     const matchesUpToIndex = completedMatches.slice(0, matchIndex + 1);
+     const scores = this.calculatePlayerScoresFromMatches(matchesUpToIndex);
+     const currentStage = this.getCurrentStage();
+     return this.getRankedPlayersFromScores(scores, currentStage);
+   }
+
+   getMovementsBetweenMatches(beforeIndex, afterIndex) {
+     const completedMatches = this.getCompletedGroupMatches();
+     if (beforeIndex < -1 || afterIndex >= completedMatches.length) {
+       return {};
+     }
+
+     const currentStage = this.getCurrentStage();
+     const beforeMatches = beforeIndex < 0 ? [] : completedMatches.slice(0, beforeIndex + 1);
+     const afterMatches = completedMatches.slice(0, afterIndex + 1);
+
+     return this.getLeaderboardMovementsFromMatches(beforeMatches, afterMatches, currentStage);
+   }
 
   awardGroupMatchPoints(match, pointsMap) {
     if (match.stage !== 'group' || match.status !== 'completed') return;
@@ -778,82 +813,187 @@ class WorldCupApp {
     `;
   }
 
-  showLeaderboard(updateHash = true) {
-    this.closePage();
-    const page = document.getElementById('leaderboardPage');
+   renderLeaderboardTable(ranked, movements, showTeamsRemaining) {
+     let leaderboardHtml = '';
+     for (let i = 0; i < ranked.length; i++) {
+       const player = ranked[i];
+       const initials = playerInitials[player.name] || player.name.charAt(0);
+       const playerData = this.data.players.find(p => p.name === player.name);
+       const avatarUrl = playerData ? playerData.avatarUrl : null;
+       const avatarHtml = avatarUrl
+         ? `<img src="${avatarUrl}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+         : `<span>${initials}</span>`;
+       const topClass = i < 3 ? `top-${i + 1}` : '';
+       const rankClass = i < 3 ? `top-${i + 1}` : '';
 
-    if (updateHash) {
-      this.setHash('leaderboard');
-    }
+       const movement = movements[player.name] ?? 0;
+       let movementBadge;
+       if (movement > 0) {
+         movementBadge = `<span class="lb-movement up">▲ ${movement}</span>`;
+       } else if (movement < 0) {
+         movementBadge = `<span class="lb-movement down">▼ ${Math.abs(movement)}</span>`;
+       } else {
+         movementBadge = `<span class="lb-movement neutral">—</span>`;
+       }
 
-    const ranked = this.getRankedPlayers();
-    const movements = this.getLeaderboardMovements();
+       leaderboardHtml += `
+         <div class="leaderboard-row ${topClass}">
+           <div class="rank ${rankClass}"></div>
+           <div class="leaderboard-player" onclick="app.showPlayerDetail('${player.name}'); event.stopPropagation();">
+             <div class="leaderboard-avatar">${avatarHtml}</div>
+             <div class="leaderboard-name">
+               <div class="leaderboard-name-text">${player.name}</div>
+               ${showTeamsRemaining ? `<div class="leaderboard-teams-remaining">${player.teamsRemaining} teams remaining</div>` : ''}
+             </div>
+           </div>
+           <div class="lb-stats">
+             <div class="lb-stat-cell lb-stat-header">W</div>
+             <div class="lb-stat-cell lb-stat-header">D</div>
+             <div class="lb-stat-cell lb-stat-header">L</div>
+             <div class="lb-stat-cell lb-stat-header">PTS</div>
+             <div class="lb-stat-cell">${player.wins}</div>
+             <div class="lb-stat-cell">${player.draws}</div>
+             <div class="lb-stat-cell">${player.losses}</div>
+             <div class="lb-stat-cell lb-stat-pts">${player.groupStagePoints}</div>
+           </div>
+           ${movementBadge}
+         </div>
+       `;
+     }
+     return leaderboardHtml;
+   }
 
-    const currentStage = this.getCurrentStage();
-    const stageNames = {
-      'group': 'Group Stage',
-      'round_of_32': 'Round of 32',
-      'round_of_16': 'Round of 16',
-      'quarter_final': 'Quarterfinals',
-      'semi_final': 'Semifinals',
-      'third_place': '3rd Place Match',
-      'final': 'Final'
-    };
+   showLeaderboard(updateHash = true) {
+     this.closePage();
+     const page = document.getElementById('leaderboardPage');
 
-    document.getElementById('leaderboardStage').textContent = `Current Stage: ${stageNames[currentStage]}`;
+     if (updateHash) {
+       this.setHash('leaderboard');
+     }
 
-    const showTeamsRemaining = currentStage !== 'group';
+     const currentStage = this.getCurrentStage();
+     const stageNames = {
+       'group': 'Group Stage',
+       'round_of_32': 'Round of 32',
+       'round_of_16': 'Round of 16',
+       'quarter_final': 'Quarterfinals',
+       'semi_final': 'Semifinals',
+       'third_place': '3rd Place Match',
+       'final': 'Final'
+     };
 
-    let leaderboardHtml = '';
-    for (let i = 0; i < ranked.length; i++) {
-      const player = ranked[i];
-      const initials = playerInitials[player.name] || player.name.charAt(0);
-      const playerData = this.data.players.find(p => p.name === player.name);
-      const avatarUrl = playerData ? playerData.avatarUrl : null;
-      const avatarHtml = avatarUrl
-        ? `<img src="${avatarUrl}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
-        : `<span>${initials}</span>`;
-      const topClass = i < 3 ? `top-${i + 1}` : '';
-      const rankClass = i < 3 ? `top-${i + 1}` : '';
+     document.getElementById('leaderboardStage').textContent = `Current Stage: ${stageNames[currentStage]}`;
 
-      const movement = movements[player.name] ?? 0;
-      let movementBadge;
-      if (movement > 0) {
-        movementBadge = `<span class="lb-movement up">▲ ${movement}</span>`;
-      } else if (movement < 0) {
-        movementBadge = `<span class="lb-movement down">▼ ${Math.abs(movement)}</span>`;
-      } else {
-        movementBadge = `<span class="lb-movement neutral">—</span>`;
-      }
+     const showTeamsRemaining = currentStage !== 'group';
+     const completedMatches = this.getCompletedGroupMatches();
 
-      leaderboardHtml += `
-        <div class="leaderboard-row ${topClass}">
-          <div class="rank ${rankClass}"></div>
-          <div class="leaderboard-player" onclick="app.showPlayerDetail('${player.name}'); event.stopPropagation();">
-            <div class="leaderboard-avatar">${avatarHtml}</div>
-            <div class="leaderboard-name">
-              <div class="leaderboard-name-text">${player.name}</div>
-              ${showTeamsRemaining ? `<div class="leaderboard-teams-remaining">${player.teamsRemaining} teams remaining</div>` : ''}
-            </div>
-          </div>
-          <div class="lb-stats">
-            <div class="lb-stat-cell lb-stat-header">W</div>
-            <div class="lb-stat-cell lb-stat-header">D</div>
-            <div class="lb-stat-cell lb-stat-header">L</div>
-            <div class="lb-stat-cell lb-stat-header">PTS</div>
-            <div class="lb-stat-cell">${player.wins}</div>
-            <div class="lb-stat-cell">${player.draws}</div>
-            <div class="lb-stat-cell">${player.losses}</div>
-            <div class="lb-stat-cell lb-stat-pts">${player.groupStagePoints}</div>
-          </div>
-          ${movementBadge}
-        </div>
-      `;
-    }
-    document.getElementById('leaderboardDisplay').innerHTML = leaderboardHtml;
-    page.classList.remove('hidden');
-    this.currentPage = 'leaderboard';
-  }
+     // Initialize timeline index if not set
+     if (this.leaderboardTimelineIndex === null) {
+       this.leaderboardTimelineIndex = completedMatches.length - 1;
+     }
+
+     // Ensure index is valid
+     if (completedMatches.length === 0) {
+       document.getElementById('leaderboardDisplay').innerHTML = '<p>No completed matches yet</p>';
+       page.classList.remove('hidden');
+       this.currentPage = 'leaderboard';
+       return;
+     }
+
+     // Render timeline control
+     let timelineControlHtml = '';
+     if (completedMatches.length > 0) {
+       const currentIndex = Math.min(this.leaderboardTimelineIndex, completedMatches.length - 1);
+       const match = completedMatches[currentIndex];
+       const homeFlag = countryFlags[match.home.team] || '🏴';
+       const awayFlag = countryFlags[match.away.team] || '🏴';
+       const hasScore = this.hasVisibleScore(match);
+       const scoreText = hasScore ? `${match.score.home} - ${match.score.away}` : 'TBD';
+       const matchDateObj = new Date(match.date);
+       const matchDateStr = matchDateObj.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric', year: '2-digit' });
+
+       timelineControlHtml = `
+         <div class="leaderboard-timeline-control">
+           <button class="timeline-toggle-btn" onclick="app.toggleLeaderboardTimeline()">
+             <span class="timeline-toggle-icon">⏱️</span>
+             <span class="timeline-toggle-text">View Match Progress</span>
+             <span class="timeline-toggle-arrow">▼</span>
+           </button>
+           <div class="leaderboard-timeline-panel hidden" id="leaderboardTimelinePanel">
+             <div class="timeline-match-info">
+               <div class="timeline-match-header">Match ${currentIndex + 1} / ${completedMatches.length}</div>
+               <div class="timeline-match-display">
+                 <div class="timeline-team">
+                   <span class="timeline-flag">${homeFlag}</span>
+                   <span class="timeline-team-name">${match.home.team}</span>
+                 </div>
+                 <div class="timeline-score">${scoreText}</div>
+                 <div class="timeline-team">
+                   <span class="timeline-flag">${awayFlag}</span>
+                   <span class="timeline-team-name">${match.away.team}</span>
+                 </div>
+               </div>
+               <div class="timeline-match-date">${matchDateStr}</div>
+             </div>
+             <div class="timeline-controls">
+               <button class="timeline-btn" onclick="app.jumpToLeaderboardMatch(0)" title="Jump to first match">⏮ First</button>
+               <button class="timeline-btn" onclick="app.prevLeaderboardMatch()" title="Previous match">◀ Back</button>
+               <input type="range" id="leaderboardMatchSlider" class="timeline-slider" min="0" max="${completedMatches.length - 1}" value="${currentIndex}" onchange="app.jumpToLeaderboardMatch(parseInt(this.value))">
+               <button class="timeline-btn" onclick="app.nextLeaderboardMatch()" title="Next match">Forward ▶</button>
+               <button class="timeline-btn" onclick="app.jumpToLeaderboardMatch(${completedMatches.length - 1})" title="Jump to latest match">Latest ⏭</button>
+             </div>
+           </div>
+         </div>
+       `;
+     }
+
+     // Get leaderboard at current timeline point
+     const rankedAtIndex = this.getLeaderboardAtMatchIndex(this.leaderboardTimelineIndex);
+     let movements = {};
+     if (this.leaderboardTimelineIndex > 0) {
+       movements = this.getMovementsBetweenMatches(this.leaderboardTimelineIndex - 1, this.leaderboardTimelineIndex);
+     }
+
+     const leaderboardHtml = this.renderLeaderboardTable(rankedAtIndex, movements, showTeamsRemaining);
+
+     document.getElementById('leaderboardDisplay').innerHTML = timelineControlHtml + '<div id="leaderboardTableContainer" class="leaderboard-table">' + leaderboardHtml + '</div>';
+     page.classList.remove('hidden');
+     this.currentPage = 'leaderboard';
+   }
+
+   toggleLeaderboardTimeline() {
+     const panel = document.getElementById('leaderboardTimelinePanel');
+     if (panel) {
+       panel.classList.toggle('hidden');
+       const button = document.querySelector('.timeline-toggle-btn');
+       if (button) {
+         button.classList.toggle('expanded');
+       }
+     }
+   }
+
+   nextLeaderboardMatch() {
+     const completedMatches = this.getCompletedGroupMatches();
+     if (this.leaderboardTimelineIndex < completedMatches.length - 1) {
+       this.leaderboardTimelineIndex++;
+       this.showLeaderboard(false);
+     }
+   }
+
+   prevLeaderboardMatch() {
+     if (this.leaderboardTimelineIndex > 0) {
+       this.leaderboardTimelineIndex--;
+       this.showLeaderboard(false);
+     }
+   }
+
+   jumpToLeaderboardMatch(index) {
+     const completedMatches = this.getCompletedGroupMatches();
+     if (index >= 0 && index < completedMatches.length) {
+       this.leaderboardTimelineIndex = index;
+       this.showLeaderboard(false);
+     }
+   }
 
    showMatches(preselectedTeam = null, updateHash = true) {
      this.closePage();
