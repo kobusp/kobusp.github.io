@@ -119,10 +119,10 @@
     },
     {
       "id": "M14",
-      "status": "scheduled",
+      "status": "in_progress",
       "score": {
-        "home": null,
-        "away": null
+        "home": 0,
+        "away": 1
       },
       "winner": null
     },
