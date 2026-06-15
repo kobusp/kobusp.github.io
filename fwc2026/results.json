@@ -101,12 +101,12 @@
     },
     {
       "id": "M12",
-      "status": "in_progress",
+      "status": "completed",
       "score": {
-        "home": 1,
-        "away": 0
+        "home": 5,
+        "away": 1
       },
-      "winner": null
+      "winner": "home"
     },
     {
       "id": "M13",
