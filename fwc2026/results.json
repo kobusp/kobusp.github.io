@@ -173,12 +173,12 @@
     },
     {
       "id": "M20",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 3,
+        "away": 1
       },
-      "winner": null
+      "winner": "home"
     },
     {
       "id": "M21",
