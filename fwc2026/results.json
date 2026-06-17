@@ -191,10 +191,10 @@
     },
     {
       "id": "M22",
-      "status": "scheduled",
+      "status": "in_progress",
       "score": {
-        "home": null,
-        "away": null
+        "home": 1,
+        "away": 0
       },
       "winner": null
     },
