@@ -218,12 +218,12 @@
     },
     {
       "id": "M25",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 1,
+        "away": 1
       },
-      "winner": null
+      "winner": "draw"
     },
     {
       "id": "M26",
