@@ -236,21 +236,21 @@
     },
     {
       "id": "M27",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 6,
+        "away": 0
       },
-      "winner": null
+      "winner": "home"
     },
     {
       "id": "M28",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 1,
+        "away": 0
       },
-      "winner": null
+      "winner": "home"
     },
     {
       "id": "M29",
