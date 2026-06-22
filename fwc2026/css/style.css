@@ -622,8 +622,9 @@ section h3 {
 
 .timeline-team {
    display: flex;
+   flex-direction: column;
    align-items: center;
-   gap: 0.5rem;
+   gap: 0.3rem;
    flex: 1;
    justify-content: center;
 }
@@ -637,6 +638,32 @@ section h3 {
    color: var(--primary);
    font-size: 0.95rem;
    text-align: center;
+}
+
+.timeline-player-info {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.3rem;
+   font-size: 0.78rem;
+   color: var(--text-light);
+}
+
+.timeline-player-avatar {
+   width: 22px;
+   height: 22px;
+   border-radius: 50%;
+   border: 1.5px solid var(--accent-yellow);
+   background: var(--light-bg);
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 0.65rem;
+   font-weight: 700;
+   overflow: hidden;
+}
+
+.timeline-player-name {
+   font-weight: 500;
 }
 
 .timeline-score {
@@ -1335,10 +1362,27 @@ section h3 {
 .team-box {
   background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
   border: 2px solid var(--border-color);
+  border-left: 5px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem;
   text-align: center;
   transition: all 0.3s ease;
+}
+
+.team-box.team-chip-status-locked-advance {
+  border-left-color: #2e7d32;
+}
+
+.team-box.team-chip-status-could-advance {
+  border-left-color: #87c99a;
+}
+
+.team-box.team-chip-status-could-eliminated {
+  border-left-color: #e2a2a2;
+}
+
+.team-box.team-chip-status-locked-eliminated {
+  border-left-color: #c62828;
 }
 
 .team-box:hover {
@@ -1354,24 +1398,6 @@ section h3 {
 .team-box-name {
   font-weight: 600;
   color: var(--primary);
-  margin-bottom: 0.5rem;
-}
-
-.team-box-status {
-  font-size: 0.8rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.team-box-status.active {
-  background: var(--accent-green);
-  color: white;
-}
-
-.team-box-status.eliminated {
-  background: var(--accent-red);
-  color: white;
 }
 
 .player-matches {
