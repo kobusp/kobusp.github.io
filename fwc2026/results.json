@@ -362,12 +362,12 @@
     },
     {
       "id": "M41",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 2,
+        "away": 0
       },
-      "winner": null
+      "winner": "home"
     },
     {
       "id": "M42",

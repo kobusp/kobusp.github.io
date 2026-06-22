@@ -408,6 +408,514 @@ class WorldCupApp {
     return points;
   }
 
+  getTeamConductScore() {
+    // Placeholder until conduct/card tracking is added to the data model.
+    return 0;
+  }
+
+  getTeamFifaRank(teamName) {
+    const teamData = this.data.teams.find(team => team.name === teamName);
+    if (Number.isFinite(teamData?.fifaRanking)) {
+      return teamData.fifaRanking;
+    }
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  getGroupTeamsMap() {
+    const groupedTeams = {};
+    for (let team of this.data.teams) {
+      if (!groupedTeams[team.group]) groupedTeams[team.group] = [];
+      groupedTeams[team.group].push(team.name);
+    }
+    return groupedTeams;
+  }
+
+  getGroupMatchesByGroup() {
+    const groupedMatches = {};
+    for (let match of this.data.matches) {
+      if (match.stage !== 'group') continue;
+      if (!groupedMatches[match.group]) groupedMatches[match.group] = [];
+      groupedMatches[match.group].push(match);
+    }
+    return groupedMatches;
+  }
+
+  createGroupStats(groupTeams) {
+    const statsByTeam = {};
+    for (let teamName of groupTeams) {
+      statsByTeam[teamName] = {
+        points: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifference: 0,
+        conductScore: this.getTeamConductScore(teamName),
+        fifaRank: this.getTeamFifaRank(teamName)
+      };
+    }
+    return statsByTeam;
+  }
+
+  applyCompletedMatchToStats(match, statsByTeam) {
+    const homeTeam = match.home.team;
+    const awayTeam = match.away.team;
+    if (!statsByTeam[homeTeam] || !statsByTeam[awayTeam]) return;
+
+    const homeGoals = Number.isFinite(match?.score?.home) ? match.score.home : 0;
+    const awayGoals = Number.isFinite(match?.score?.away) ? match.score.away : 0;
+
+    statsByTeam[homeTeam].goalsFor += homeGoals;
+    statsByTeam[homeTeam].goalsAgainst += awayGoals;
+    statsByTeam[awayTeam].goalsFor += awayGoals;
+    statsByTeam[awayTeam].goalsAgainst += homeGoals;
+    statsByTeam[homeTeam].goalDifference = statsByTeam[homeTeam].goalsFor - statsByTeam[homeTeam].goalsAgainst;
+    statsByTeam[awayTeam].goalDifference = statsByTeam[awayTeam].goalsFor - statsByTeam[awayTeam].goalsAgainst;
+
+    if (match.winner === 'home') {
+      statsByTeam[homeTeam].points += 3;
+    } else if (match.winner === 'away') {
+      statsByTeam[awayTeam].points += 3;
+    } else if (match.winner === 'draw') {
+      statsByTeam[homeTeam].points += 1;
+      statsByTeam[awayTeam].points += 1;
+    }
+  }
+
+  getHeadToHeadStats(tiedTeams, completedMatches) {
+    const tiedSet = new Set(tiedTeams);
+    const headToHead = this.createGroupStats(tiedTeams);
+    for (let match of completedMatches) {
+      if (!tiedSet.has(match.home.team) || !tiedSet.has(match.away.team)) continue;
+      this.applyCompletedMatchToStats(match, headToHead);
+    }
+    return headToHead;
+  }
+
+  rankTeamsInGroup(groupTeams, matches) {
+    const completedMatches = matches.filter(match => match.status === 'completed');
+    const statsByTeam = this.createGroupStats(groupTeams);
+    for (let match of completedMatches) {
+      this.applyCompletedMatchToStats(match, statsByTeam);
+    }
+
+    const teamsByPoints = {};
+    for (let teamName of groupTeams) {
+      const points = statsByTeam[teamName].points;
+      if (!teamsByPoints[points]) teamsByPoints[points] = [];
+      teamsByPoints[points].push(teamName);
+    }
+
+    const sortedTeams = [];
+    const pointValues = Object.keys(teamsByPoints)
+      .map(Number)
+      .sort((a, b) => b - a);
+
+    for (let points of pointValues) {
+      const bucket = teamsByPoints[points];
+      if (bucket.length === 1) {
+        sortedTeams.push(bucket[0]);
+        continue;
+      }
+
+      const headToHeadStats = this.getHeadToHeadStats(bucket, completedMatches);
+      bucket.sort((a, b) => {
+        const h2hPointsDiff = headToHeadStats[b].points - headToHeadStats[a].points;
+        if (h2hPointsDiff !== 0) return h2hPointsDiff;
+
+        const h2hGoalDiff = headToHeadStats[b].goalDifference - headToHeadStats[a].goalDifference;
+        if (h2hGoalDiff !== 0) return h2hGoalDiff;
+
+        const h2hGoalsForDiff = headToHeadStats[b].goalsFor - headToHeadStats[a].goalsFor;
+        if (h2hGoalsForDiff !== 0) return h2hGoalsForDiff;
+
+        const overallGoalDiff = statsByTeam[b].goalDifference - statsByTeam[a].goalDifference;
+        if (overallGoalDiff !== 0) return overallGoalDiff;
+
+        const overallGoalsFor = statsByTeam[b].goalsFor - statsByTeam[a].goalsFor;
+        if (overallGoalsFor !== 0) return overallGoalsFor;
+
+        const conductDiff = statsByTeam[b].conductScore - statsByTeam[a].conductScore;
+        if (conductDiff !== 0) return conductDiff;
+
+        const fifaDiff = statsByTeam[a].fifaRank - statsByTeam[b].fifaRank;
+        if (fifaDiff !== 0) return fifaDiff;
+
+        return a.localeCompare(b);
+      });
+      sortedTeams.push(...bucket);
+    }
+
+    return { sortedTeams, statsByTeam };
+  }
+
+  createThirdPlaceEntry(group, teamName, statsByTeam) {
+    const stats = statsByTeam[teamName];
+    return {
+      group,
+      team: teamName,
+      points: stats.points,
+      goalDifference: stats.goalDifference,
+      goalsFor: stats.goalsFor,
+      conductScore: stats.conductScore,
+      fifaRank: stats.fifaRank
+    };
+  }
+
+  getThirdPlaceHeadToHeadStats(thirdEntries) {
+    const teamNames = thirdEntries.map(entry => entry.team);
+    const statsByTeam = this.createGroupStats(teamNames);
+    const teamSet = new Set(teamNames);
+
+    for (let match of this.getCompletedGroupMatches()) {
+      if (!teamSet.has(match.home.team) || !teamSet.has(match.away.team)) continue;
+      this.applyCompletedMatchToStats(match, statsByTeam);
+    }
+
+    return statsByTeam;
+  }
+
+  compareThirdPlaceEntries(a, b, headToHeadStats) {
+    const h2hPointsDiff = (headToHeadStats[b.team]?.points || 0) - (headToHeadStats[a.team]?.points || 0);
+    if (h2hPointsDiff !== 0) return h2hPointsDiff;
+
+    const h2hGoalDiff = (headToHeadStats[b.team]?.goalDifference || 0) - (headToHeadStats[a.team]?.goalDifference || 0);
+    if (h2hGoalDiff !== 0) return h2hGoalDiff;
+
+    const h2hGoalsForDiff = (headToHeadStats[b.team]?.goalsFor || 0) - (headToHeadStats[a.team]?.goalsFor || 0);
+    if (h2hGoalsForDiff !== 0) return h2hGoalsForDiff;
+
+    const overallGoalDiff = b.goalDifference - a.goalDifference;
+    if (overallGoalDiff !== 0) return overallGoalDiff;
+
+    const overallGoalsFor = b.goalsFor - a.goalsFor;
+    if (overallGoalsFor !== 0) return overallGoalsFor;
+
+    // Placeholder: conduct score is currently always 0 until card data is available.
+    const conductDiff = b.conductScore - a.conductScore;
+    if (conductDiff !== 0) return conductDiff;
+
+    const fifaDiff = a.fifaRank - b.fifaRank;
+    if (fifaDiff !== 0) return fifaDiff;
+
+    return a.team.localeCompare(b.team);
+  }
+
+  rankThirdPlaceEntries(thirdEntries) {
+    const entriesByPoints = {};
+    for (let entry of thirdEntries) {
+      if (!entriesByPoints[entry.points]) entriesByPoints[entry.points] = [];
+      entriesByPoints[entry.points].push(entry);
+    }
+
+    const sorted = [];
+    const pointsValues = Object.keys(entriesByPoints)
+      .map(Number)
+      .sort((a, b) => b - a);
+
+    for (let points of pointsValues) {
+      const bucket = entriesByPoints[points];
+      if (bucket.length === 1) {
+        sorted.push(bucket[0]);
+        continue;
+      }
+      const headToHeadStats = this.getThirdPlaceHeadToHeadStats(bucket);
+      bucket.sort((a, b) => this.compareThirdPlaceEntries(a, b, headToHeadStats));
+      sorted.push(...bucket);
+    }
+
+    return sorted;
+  }
+
+  getCurrentQualifyingTeamsFromStandings() {
+    const groupedTeams = this.getGroupTeamsMap();
+    const groupedMatches = this.getGroupMatchesByGroup();
+    const qualifyingTeams = new Set();
+    const thirdEntries = [];
+
+    for (let group of Object.keys(groupedTeams).sort((a, b) => a.localeCompare(b))) {
+      const completedMatches = (groupedMatches[group] || []).filter(match => match.status === 'completed');
+      const ranking = this.rankTeamsInGroup(groupedTeams[group], completedMatches);
+      const groupRankedTeams = ranking.sortedTeams;
+
+      if (groupRankedTeams[0]) qualifyingTeams.add(groupRankedTeams[0]);
+      if (groupRankedTeams[1]) qualifyingTeams.add(groupRankedTeams[1]);
+      if (groupRankedTeams[2]) {
+        thirdEntries.push(this.createThirdPlaceEntry(group, groupRankedTeams[2], ranking.statsByTeam));
+      }
+    }
+
+    const rankedThirdPlace = this.rankThirdPlaceEntries(thirdEntries);
+    for (let thirdEntry of rankedThirdPlace.slice(0, 8)) {
+      qualifyingTeams.add(thirdEntry.team);
+    }
+
+    return qualifyingTeams;
+  }
+
+  rankTeamsInGroupForQualification(groupTeams, matches) {
+    const completedMatches = matches.filter(match => match.status === 'completed');
+    const statsByTeam = this.createGroupStats(groupTeams);
+    for (let match of completedMatches) {
+      this.applyCompletedMatchToStats(match, statsByTeam);
+    }
+
+    const teamsByPoints = {};
+    for (let teamName of groupTeams) {
+      const points = statsByTeam[teamName].points;
+      if (!teamsByPoints[points]) teamsByPoints[points] = [];
+      teamsByPoints[points].push(teamName);
+    }
+
+    const rankedBuckets = [];
+    const pointValues = Object.keys(teamsByPoints)
+      .map(Number)
+      .sort((a, b) => b - a);
+
+    for (let points of pointValues) {
+      const bucket = teamsByPoints[points];
+      if (bucket.length === 1) {
+        rankedBuckets.push([bucket[0]]);
+        continue;
+      }
+
+      const headToHeadStats = this.getHeadToHeadStats(bucket, completedMatches);
+      const subBuckets = [];
+      const visited = new Set();
+
+      const sorted = [...bucket].sort((a, b) => {
+        const h2hPointsDiff = headToHeadStats[b].points - headToHeadStats[a].points;
+        if (h2hPointsDiff !== 0) return h2hPointsDiff;
+        const h2hGoalDiff = headToHeadStats[b].goalDifference - headToHeadStats[a].goalDifference;
+        if (h2hGoalDiff !== 0) return h2hGoalDiff;
+        const h2hGoalsForDiff = headToHeadStats[b].goalsFor - headToHeadStats[a].goalsFor;
+        if (h2hGoalsForDiff !== 0) return h2hGoalsForDiff;
+        return 0;
+      });
+
+      for (let i = 0; i < sorted.length; i++) {
+        if (visited.has(sorted[i])) continue;
+        const tiedGroup = [sorted[i]];
+        visited.add(sorted[i]);
+        for (let j = i + 1; j < sorted.length; j++) {
+          if (visited.has(sorted[j])) continue;
+          const a = sorted[i];
+          const b = sorted[j];
+          const sameH2hPoints = headToHeadStats[a].points === headToHeadStats[b].points;
+          const sameH2hGD = headToHeadStats[a].goalDifference === headToHeadStats[b].goalDifference;
+          const sameH2hGF = headToHeadStats[a].goalsFor === headToHeadStats[b].goalsFor;
+          if (sameH2hPoints && sameH2hGD && sameH2hGF) {
+            tiedGroup.push(sorted[j]);
+            visited.add(sorted[j]);
+          } else {
+            break;
+          }
+        }
+        subBuckets.push(tiedGroup);
+      }
+
+      rankedBuckets.push(...subBuckets);
+    }
+
+    return { rankedBuckets, statsByTeam };
+  }
+
+  generatePermutations(arr) {
+    if (arr.length <= 1) return [arr];
+    const result = [];
+    for (let i = 0; i < arr.length; i++) {
+      const rest = [...arr.slice(0, i), ...arr.slice(i + 1)];
+      for (let perm of this.generatePermutations(rest)) {
+        result.push([arr[i], ...perm]);
+      }
+    }
+    return result;
+  }
+
+  buildGroupScenarioOutcomes(group, groupTeams, groupMatches) {
+    const completedMatches = groupMatches.filter(match => match.status === 'completed');
+    const pendingMatches = groupMatches.filter(match => match.status !== 'completed');
+    const outcomes = [];
+
+    const outcomeVariants = [
+      { winner: 'home', score: { home: 1, away: 0 } },
+      { winner: 'away', score: { home: 0, away: 1 } },
+      { winner: 'draw', score: { home: 0, away: 0 } }
+    ];
+
+    const buildOutcomes = (index, simulatedMatches) => {
+      if (index >= pendingMatches.length) {
+        const allMatches = [...completedMatches, ...simulatedMatches];
+        const qualRanking = this.rankTeamsInGroupForQualification(groupTeams, allMatches);
+        const { rankedBuckets, statsByTeam } = qualRanking;
+
+        const tiedBucketPermutations = rankedBuckets.map(bucket =>
+          bucket.length > 1 ? this.generatePermutations(bucket) : [bucket]
+        );
+
+        const expandPermutations = (bucketIdx, currentOrder) => {
+          if (bucketIdx >= tiedBucketPermutations.length) {
+            const positionsByTeam = {};
+            currentOrder.forEach((teamName, idx) => {
+              positionsByTeam[teamName] = idx + 1;
+            });
+            outcomes.push({
+              group,
+              positionsByTeam,
+              topTwo: currentOrder.slice(0, 2),
+              thirdEntry: this.createThirdPlaceEntry(group, currentOrder[2], statsByTeam)
+            });
+            return;
+          }
+          for (let perm of tiedBucketPermutations[bucketIdx]) {
+            expandPermutations(bucketIdx + 1, [...currentOrder, ...perm]);
+          }
+        };
+
+        expandPermutations(0, []);
+        return;
+      }
+
+      const match = pendingMatches[index];
+      for (let variant of outcomeVariants) {
+        const simulatedMatch = {
+          ...match,
+          status: 'completed',
+          winner: variant.winner,
+          score: { home: variant.score.home, away: variant.score.away }
+        };
+        buildOutcomes(index + 1, [...simulatedMatches, simulatedMatch]);
+      }
+    };
+
+    buildOutcomes(0, []);
+    return outcomes;
+  }
+
+  isThirdEntryAhead(candidate, target) {
+    const headToHeadStats = this.getThirdPlaceHeadToHeadStats([candidate, target]);
+    return this.compareThirdPlaceEntries(candidate, target, headToHeadStats) < 0;
+  }
+
+  getThirdPlaceOutrankBounds(targetThirdEntry, scenarioOutcomesByGroup, excludedGroup) {
+    let bestCaseOutrank = 0;
+    let worstCaseOutrank = 0;
+
+    for (let [group, outcomes] of Object.entries(scenarioOutcomesByGroup)) {
+      if (group === excludedGroup) continue;
+
+      const thirdEntries = outcomes.map(outcome => outcome.thirdEntry);
+      const groupCanOutrank = thirdEntries.some(entry => this.isThirdEntryAhead(entry, targetThirdEntry));
+      const groupCanAvoidOutranking = thirdEntries.some(entry => !this.isThirdEntryAhead(entry, targetThirdEntry));
+
+      if (groupCanOutrank) worstCaseOutrank += 1;
+      if (!groupCanAvoidOutranking) bestCaseOutrank += 1;
+    }
+
+    return { bestCaseOutrank, worstCaseOutrank };
+  }
+
+  getQualificationSummaryForOutcome(position, thirdEntry, scenarioOutcomesByGroup, group) {
+    if (position <= 2) {
+      return {
+        canQualifyInSomeWorld: true,
+        qualifiesInAllWorlds: true,
+        canBeEliminatedInSomeWorld: false,
+        eliminatedInAllWorlds: false
+      };
+    }
+
+    if (position === 3) {
+      const bounds = this.getThirdPlaceOutrankBounds(thirdEntry, scenarioOutcomesByGroup, group);
+      return {
+        canQualifyInSomeWorld: bounds.bestCaseOutrank <= 7,
+        qualifiesInAllWorlds: bounds.worstCaseOutrank <= 7,
+        canBeEliminatedInSomeWorld: bounds.worstCaseOutrank >= 8,
+        eliminatedInAllWorlds: bounds.bestCaseOutrank >= 8
+      };
+    }
+
+    return {
+      canQualifyInSomeWorld: false,
+      qualifiesInAllWorlds: false,
+      canBeEliminatedInSomeWorld: true,
+      eliminatedInAllWorlds: true
+    };
+  }
+
+  getTeamQualificationOutcomes() {
+    const groupedTeams = this.getGroupTeamsMap();
+    const groupedMatches = this.getGroupMatchesByGroup();
+    const scenarioOutcomesByGroup = {};
+
+    for (let group of Object.keys(groupedTeams).sort((a, b) => a.localeCompare(b))) {
+      scenarioOutcomesByGroup[group] = this.buildGroupScenarioOutcomes(
+        group,
+        groupedTeams[group],
+        groupedMatches[group] || []
+      );
+    }
+
+    const qualificationByTeam = {};
+    for (let team of this.data.teams) {
+      qualificationByTeam[team.name] = {
+        couldAdvance: false,
+        couldBeEliminated: false,
+        definitelyAdvance: true,
+        definitelyEliminated: true
+      };
+    }
+
+    for (let [group, outcomes] of Object.entries(scenarioOutcomesByGroup)) {
+      for (let teamName of groupedTeams[group]) {
+        for (let outcome of outcomes) {
+          const position = outcome.positionsByTeam[teamName];
+          const outcomeSummary = this.getQualificationSummaryForOutcome(
+            position,
+            outcome.thirdEntry,
+            scenarioOutcomesByGroup,
+            group
+          );
+
+          const summary = qualificationByTeam[teamName];
+          summary.couldAdvance = summary.couldAdvance || outcomeSummary.canQualifyInSomeWorld;
+          summary.couldBeEliminated = summary.couldBeEliminated || outcomeSummary.canBeEliminatedInSomeWorld;
+          summary.definitelyAdvance = summary.definitelyAdvance && outcomeSummary.qualifiesInAllWorlds;
+          summary.definitelyEliminated = summary.definitelyEliminated && outcomeSummary.eliminatedInAllWorlds;
+        }
+      }
+    }
+
+    return qualificationByTeam;
+  }
+
+  getTeamStatusTag(teamName, qualificationByTeam, currentQualifyingTeams) {
+    const status = qualificationByTeam[teamName] || {};
+    if (status.definitelyAdvance) {
+      return {
+        className: 'team-chip-status-locked-advance',
+        title: 'Guaranteed to qualify for the round of 32'
+      };
+    }
+
+    if (status.definitelyEliminated) {
+      return {
+        className: 'team-chip-status-locked-eliminated',
+        title: 'Guaranteed to be eliminated from round-of-32 qualification'
+      };
+    }
+
+    if (currentQualifyingTeams.has(teamName)) {
+      return {
+        className: 'team-chip-status-could-advance',
+        title: 'Currently in a qualifying position'
+      };
+    }
+
+    return {
+      className: 'team-chip-status-could-eliminated',
+      title: 'Currently outside qualifying positions'
+    };
+  }
+
   calculatePlayerScoresFromMatches(completedGroupMatches) {
     const scores = {};
     for (let player of this.data.players) {
@@ -1212,27 +1720,45 @@ class WorldCupApp {
      }
 
       const teamPoints = this.calculateTeamGroupPoints();
+      const groupedTeams = this.getGroupTeamsMap();
+      const groupedMatches = this.getGroupMatchesByGroup();
+      const qualificationByTeam = this.getTeamQualificationOutcomes();
+      const currentQualifyingTeams = this.getCurrentQualifyingTeamsFromStandings();
 
-      const groupedTeams = {};
-      for (let team of this.data.teams) {
-        if (!groupedTeams[team.group]) groupedTeams[team.group] = [];
-        groupedTeams[team.group].push(team.name);
-      }
+      const sortedGroups = Object.keys(groupedTeams).sort((a, b) => a.localeCompare(b));
 
-      const sortedGroups = Object.keys(groupedTeams).sort();
+      document.getElementById('teamsLegend').innerHTML = `
+        <div class="teams-status-legend" aria-label="Qualification color legend">
+          <div class="teams-status-legend-item">
+            <span class="teams-status-legend-swatch swatch-locked-advance"></span>
+            <span>Definitely through</span>
+          </div>
+          <div class="teams-status-legend-item">
+            <span class="teams-status-legend-swatch swatch-could-advance"></span>
+            <span>Can advance</span>
+          </div>
+          <div class="teams-status-legend-item">
+            <span class="teams-status-legend-swatch swatch-could-eliminated"></span>
+            <span>Can be eliminated</span>
+          </div>
+          <div class="teams-status-legend-item">
+            <span class="teams-status-legend-swatch swatch-locked-eliminated"></span>
+            <span>Definitely out</span>
+          </div>
+        </div>
+      `;
+
       let html = '';
-
       for (let group of sortedGroups) {
-        const teams = groupedTeams[group].slice().sort((a, b) => {
-          const ptsDiff = (teamPoints[b] || 0) - (teamPoints[a] || 0);
-          return ptsDiff !== 0 ? ptsDiff : a.localeCompare(b);
-        });
+        const completedGroupMatches = (groupedMatches[group] || []).filter(match => match.status === 'completed');
+        const teams = this.rankTeamsInGroup(groupedTeams[group], completedGroupMatches).sortedTeams;
        html += `
          <section class="group-card">
            <h3>Group ${group}</h3>
            <div class="group-teams-list">
              ${teams.map(teamName => {
                const teamFlag = countryFlags[teamName] || '🏴';
+                const statusTag = this.getTeamStatusTag(teamName, qualificationByTeam, currentQualifyingTeams);
                const teamPlayers = this.getTeamPlayerObjects(teamName);
                const owner = teamPlayers.length ? teamPlayers[0] : null;
                const ownerInitial = owner ? (playerInitials[owner.name] || owner.name.charAt(0)) : '?';
@@ -1243,8 +1769,8 @@ class WorldCupApp {
                  : '<span>?</span>';
                const ownerName = owner ? owner.name : 'Unassigned';
                 return `
-                  <button class="team-chip" onclick="app.showMatchesByTeam('${encodeURIComponent(teamName)}')" aria-label="View matches for ${teamName}">
-                    <span class="team-chip-main">${teamFlag} ${teamName} (${teamPoints[teamName] || 0})</span>
+                  <button class="team-chip ${statusTag.className}" onclick="app.showMatchesByTeam('${encodeURIComponent(teamName)}')" aria-label="View matches for ${teamName}" title="${statusTag.title}">
+                     <span class="team-chip-main">${teamFlag} ${teamName} (${teamPoints[teamName] || 0})</span>
                    <span class="team-chip-owner">
                      <span class="team-chip-owner-name">${ownerName}</span>
                      <span class="team-chip-owner-avatar">${ownerAvatar}</span>
