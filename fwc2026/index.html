@@ -119,6 +119,13 @@
             </div>
 
             <div class="filter-group">
+              <label for="groupFilter">Group:</label>
+              <select id="groupFilter" onchange="app.applyMatchFilters()">
+                <option value="">All Groups</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
               <label for="statusFilter">Status:</label>
               <select id="statusFilter" onchange="app.applyMatchFilters()">
                 <option value="">All Statuses</option>

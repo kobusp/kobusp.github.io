@@ -1897,6 +1897,23 @@ class WorldCupApp {
    }
 
    initializeMatchFilters() {
+      // Populate group filter from group-stage matches
+      const groupFilter = document.getElementById('groupFilter');
+      while (groupFilter.options.length > 1) {
+        groupFilter.remove(1);
+      }
+      const groups = [...new Set(
+        this.data.matches
+          .filter(m => m.stage === 'group' && m.group)
+          .map(m => m.group)
+      )].sort((a, b) => a.localeCompare(b));
+      for (let group of groups) {
+        const option = document.createElement('option');
+        option.value = group;
+        option.textContent = `Group ${group}`;
+        groupFilter.appendChild(option);
+      }
+
      // Populate team filter
      const teamFilter = document.getElementById('teamFilter');
      // Clear existing options except the first one
@@ -1929,6 +1946,7 @@ class WorldCupApp {
 
      // Reset all filters
      document.getElementById('stageFilter').value = '';
+      document.getElementById('groupFilter').value = '';
      document.getElementById('statusFilter').value = '';
      document.getElementById('teamFilter').value = '';
      document.getElementById('playerFilter').value = '';
@@ -1936,6 +1954,7 @@ class WorldCupApp {
 
    applyMatchFilters() {
      const stageFilter = document.getElementById('stageFilter').value;
+      const groupFilter = document.getElementById('groupFilter').value;
      const statusFilter = document.getElementById('statusFilter').value;
      const teamFilter = document.getElementById('teamFilter').value;
      const playerFilter = document.getElementById('playerFilter').value;
@@ -1947,6 +1966,11 @@ class WorldCupApp {
      if (stageFilter) {
        filteredMatches = filteredMatches.filter(m => m.stage === stageFilter);
      }
+
+      // Filter by group
+      if (groupFilter) {
+        filteredMatches = filteredMatches.filter(m => m.group === groupFilter);
+      }
 
      // Filter by status
      if (statusFilter) {
