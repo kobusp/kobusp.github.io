@@ -389,12 +389,12 @@
     },
     {
       "id": "M44",
-      "status": "in_progress",
+      "status": "completed",
       "score": {
         "home": 1,
-        "away": 0
+        "away": 2
       },
-      "winner": null
+      "winner": "away"
     },
     {
       "id": "M45",
