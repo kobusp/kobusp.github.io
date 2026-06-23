@@ -371,28 +371,28 @@
     },
     {
       "id": "M42",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 3,
+        "away": 0
       },
-      "winner": null
+      "winner": "home"
     },
     {
       "id": "M43",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 3,
+        "away": 2
       },
-      "winner": null
+      "winner": "home"
     },
     {
       "id": "M44",
-      "status": "scheduled",
+      "status": "in_progress",
       "score": {
-        "home": null,
-        "away": null
+        "home": 1,
+        "away": 0
       },
       "winner": null
     },
