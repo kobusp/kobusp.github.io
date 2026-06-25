@@ -1276,10 +1276,10 @@
       "stage": "round_of_32",
       "date": "2026-06-28T19:00:00Z",
       "home": {
-        "team": "2A"
+        "team": "South Africa"
       },
       "away": {
-        "team": "2B"
+        "team": "Canada"
       },
       "venue": "Sofi Stadium, Inglewood"
     },
@@ -1288,7 +1288,7 @@
       "stage": "round_of_32",
       "date": "2026-06-29T20:30:00Z",
       "home": {
-        "team": "1E"
+        "team": "Germany"
       },
       "away": {
         "team": "3ABCDF"
@@ -1303,7 +1303,7 @@
         "team": "1F"
       },
       "away": {
-        "team": "2C"
+        "team": "Morocco"
       },
       "venue": "Estadio BBVA, Guadalupe"
     },
@@ -1312,7 +1312,7 @@
       "stage": "round_of_32",
       "date": "2026-06-29T17:00:00Z",
       "home": {
-        "team": "1C"
+        "team": "Brazil"
       },
       "away": {
         "team": "2F"
@@ -1348,7 +1348,7 @@
       "stage": "round_of_32",
       "date": "2026-07-01T01:00:00Z",
       "home": {
-        "team": "1A"
+        "team": "Mexico"
       },
       "away": {
         "team": "3CEFHI"
@@ -1372,7 +1372,7 @@
       "stage": "round_of_32",
       "date": "2026-07-02T00:00:00Z",
       "home": {
-        "team": "1D"
+        "team": "USA"
       },
       "away": {
         "team": "3BEFIJ"
@@ -1420,7 +1420,7 @@
       "stage": "round_of_32",
       "date": "2026-07-03T03:00:00Z",
       "home": {
-        "team": "2B"
+        "team": "Switzerland"
       },
       "away": {
         "team": "3EFGIJ"
@@ -1432,7 +1432,7 @@
       "stage": "round_of_32",
       "date": "2026-07-03T22:00:00Z",
       "home": {
-        "team": "1J"
+        "team": "Argentina"
       },
       "away": {
         "team": "2H"
