@@ -328,6 +328,85 @@ class WorldCupApp {
     return activeTeams;
   }
 
+  getActiveTeamsFromMatches(matches) {
+    const activeTeams = new Set(this.data.teams.map(team => team.name));
+    const orderedMatches = [...(matches || [])].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (orderedMatches.length === 0) {
+      return activeTeams;
+    }
+
+    const latestStageOrder = this.getStageOrder(orderedMatches[orderedMatches.length - 1].stage);
+    const roundOf32Order = this.getStageOrder('round_of_32');
+
+    if (latestStageOrder < roundOf32Order) {
+      return activeTeams;
+    }
+
+    const roundOf32Teams = new Set();
+    for (let match of this.data.matches) {
+      if (match.stage !== 'round_of_32') continue;
+      roundOf32Teams.add(match.home.team);
+      roundOf32Teams.add(match.away.team);
+    }
+
+    if (roundOf32Teams.size > 0) {
+      for (let teamName of [...activeTeams]) {
+        if (!roundOf32Teams.has(teamName)) {
+          activeTeams.delete(teamName);
+        }
+      }
+    }
+
+    const knockoutStages = ['round_of_32', 'round_of_16', 'quarter_final', 'semi_final', 'final'];
+    for (let stage of knockoutStages) {
+      if (this.getStageOrder(stage) > latestStageOrder) {
+        break;
+      }
+
+      for (let match of orderedMatches) {
+        if (match.stage !== stage || match.status !== 'completed') continue;
+
+        const losingTeam = match.winner === 'home'
+          ? match.away.team
+          : match.winner === 'away'
+            ? match.home.team
+            : null;
+
+        if (losingTeam) {
+          activeTeams.delete(losingTeam);
+        }
+      }
+    }
+
+    return activeTeams;
+  }
+
+  getLeaderboardSnapshot(matches) {
+    const completedMatches = [...(matches || [])].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const metricStage = this.getLeaderboardMetricStage(completedMatches);
+    const activeTeams = this.getActiveTeamsFromMatches(completedMatches);
+    const scores = this.calculatePlayerScoresFromMatches(completedMatches, activeTeams);
+    const ranked = this.getRankedPlayersFromScores(scores, metricStage === 'group' ? 'group' : 'round_of_32');
+
+    return {
+      completedMatches,
+      metricStage,
+      activeTeams,
+      scores,
+      ranked
+    };
+  }
+
+  getLeaderboardMetricStage(matches) {
+    const orderedMatches = [...(matches || [])].sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (orderedMatches.length === 0) {
+      return this.getCurrentStage() === 'group' ? 'group' : 'knockout';
+    }
+
+    return orderedMatches[orderedMatches.length - 1].stage === 'group' ? 'group' : 'knockout';
+  }
+
   getNextMatch() {
     const now = this.getCurrentDateAndTime();
 
@@ -1041,13 +1120,11 @@ class WorldCupApp {
     });
   }
 
-   getLeaderboardMovementsFromMatches(beforeMatches, afterMatches, currentStage) {
-     const beforeRanked = this.getRankedPlayersFromScores(
-       this.calculatePlayerScoresFromMatches(beforeMatches), currentStage
-     );
-     const afterRanked = this.getRankedPlayersFromScores(
-       this.calculatePlayerScoresFromMatches(afterMatches), currentStage
-     );
+  getLeaderboardMovementsFromMatches(beforeMatches, afterMatches, metricStage = this.getLeaderboardMetricStage(afterMatches)) {
+    const beforeSnapshot = this.getLeaderboardSnapshot(beforeMatches);
+    const afterSnapshot = this.getLeaderboardSnapshot(afterMatches);
+    const beforeRanked = beforeSnapshot.ranked;
+    const afterRanked = afterSnapshot.ranked;
 
      const beforePositions = {};
      const afterPositions = {};
@@ -1063,53 +1140,45 @@ class WorldCupApp {
      return movements;
    }
 
-   getLeaderboardMovements() {
-      const currentStage = this.getCurrentStage();
+  getLeaderboardMovements() {
+       const completedMatches = this.getCompletedMatches();
 
-      // All completed group matches sorted by date ascending
-      const completedGroupMatches = this.data.matches
-        .filter(m => m.stage === 'group' && m.status === 'completed')
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+       if (completedMatches.length === 0) {
+         return {};
+       }
 
-      if (completedGroupMatches.length === 0) {
-        return {};
-      }
+       // Find the latest UTC calendar date that has completed matches
+       const latestDate = completedMatches[completedMatches.length - 1].date.slice(0, 10);
 
-      // Find the latest UTC calendar date that has completed matches
-      const latestDate = completedGroupMatches[completedGroupMatches.length - 1].date.slice(0, 10);
-
-      // Matches before the latest batch
-      const prevMatches = completedGroupMatches.filter(m => m.date.slice(0, 10) < latestDate);
+       // Matches before the latest batch
+       const prevMatches = completedMatches.filter(m => m.date.slice(0, 10) < latestDate);
 
       // If nothing came before, everyone is "new" — no movement to show
       if (prevMatches.length === 0) {
         return {};
       }
 
-      return this.getLeaderboardMovementsFromMatches(prevMatches, completedGroupMatches, currentStage);
-   }
+       return this.getLeaderboardMovementsFromMatches(prevMatches, completedMatches, this.getLeaderboardMetricStage(completedMatches));
+    }
 
-   getLeaderboardMovementsSince24Hours() {
-     const currentStage = this.getCurrentStage();
-     const now = this.getCurrentDateAndTime();
-     const cutoff = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+    getLeaderboardMovementsSince24Hours() {
+      const now = this.getCurrentDateAndTime();
+      const cutoff = new Date(now.getTime() - (24 * 60 * 60 * 1000));
 
-     const completedGroupMatches = this.data.matches
-       .filter(m => m.stage === 'group' && m.status === 'completed')
-       .sort((a, b) => new Date(a.date) - new Date(b.date));
+      const completedMatches = this.getCompletedMatches();
 
-     if (completedGroupMatches.length === 0) {
-       return {};
-     }
+      if (completedMatches.length === 0) {
+        return {};
+      }
 
-     const matchesBefore24h = completedGroupMatches.filter(m => new Date(m.date) < cutoff);
+      const matchesBefore24h = completedMatches.filter(m => new Date(m.date) < cutoff);
 
      if (matchesBefore24h.length === 0) {
        return {};
      }
 
-     return this.getLeaderboardMovementsFromMatches(matchesBefore24h, completedGroupMatches, currentStage);
-   }
+      return this.getLeaderboardMovementsFromMatches(matchesBefore24h, completedMatches, this.getLeaderboardMetricStage(completedMatches));
+    }
 
    getRankedPlayers() {
      const scores = this.calculatePlayerScores();
@@ -1117,35 +1186,35 @@ class WorldCupApp {
      return this.getRankedPlayersFromScores(scores, currentStage);
    }
 
-   getCompletedGroupMatches() {
-     return this.data.matches
-       .filter(m => m.stage === 'group' && m.status === 'completed')
-       .sort((a, b) => new Date(a.date) - new Date(b.date));
-   }
+    getCompletedMatches() {
+      return this.data.matches
+        .filter(m => m.status === 'completed')
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
 
-   getLeaderboardAtMatchIndex(matchIndex) {
-     const completedMatches = this.getCompletedGroupMatches();
-     if (matchIndex < 0 || matchIndex >= completedMatches.length) {
-       return null;
-     }
-     const matchesUpToIndex = completedMatches.slice(0, matchIndex + 1);
-     const scores = this.calculatePlayerScoresFromMatches(matchesUpToIndex);
-     const currentStage = this.getCurrentStage();
-     return this.getRankedPlayersFromScores(scores, currentStage);
-   }
+    getCompletedGroupMatches() {
+      return this.getCompletedMatches();
+    }
 
-   getMovementsBetweenMatches(beforeIndex, afterIndex) {
-     const completedMatches = this.getCompletedGroupMatches();
-     if (beforeIndex < -1 || afterIndex >= completedMatches.length) {
-       return {};
-     }
+    getLeaderboardAtMatchIndex(matchIndex) {
+      const completedMatches = this.getCompletedMatches();
+      if (matchIndex < 0 || matchIndex >= completedMatches.length) {
+        return null;
+      }
+      const matchesUpToIndex = completedMatches.slice(0, matchIndex + 1);
+      return this.getLeaderboardSnapshot(matchesUpToIndex).ranked;
+    }
 
-     const currentStage = this.getCurrentStage();
-     const beforeMatches = beforeIndex < 0 ? [] : completedMatches.slice(0, beforeIndex + 1);
-     const afterMatches = completedMatches.slice(0, afterIndex + 1);
+    getMovementsBetweenMatches(beforeIndex, afterIndex) {
+      const completedMatches = this.getCompletedMatches();
+      if (beforeIndex < -1 || afterIndex >= completedMatches.length) {
+        return {};
+      }
 
-     return this.getLeaderboardMovementsFromMatches(beforeMatches, afterMatches, currentStage);
-   }
+      const beforeMatches = beforeIndex < 0 ? [] : completedMatches.slice(0, beforeIndex + 1);
+      const afterMatches = completedMatches.slice(0, afterIndex + 1);
+      return this.getLeaderboardMovementsFromMatches(beforeMatches, afterMatches, this.getLeaderboardMetricStage(afterMatches));
+    }
 
    renderTimelinePlayerInfo(teamName) {
      const players = this.getTeamPlayerObjects(teamName);
@@ -1159,7 +1228,7 @@ class WorldCupApp {
    }
 
    updateLeaderboardTimelineContent() {
-      const completedMatches = this.getCompletedGroupMatches();
+      const completedMatches = this.getCompletedMatches();
       if (completedMatches.length === 0) return;
 
       const clampedIndex = Math.max(0, Math.min(this.leaderboardTimelineIndex, completedMatches.length - 1));
@@ -1448,7 +1517,7 @@ class WorldCupApp {
 
     ranked.forEach((player, index) => {
       const movement = movements[player.name] ?? 0;
-      matchLines.push(`${index + 1}. ${player.name} (${player.wins}W ${player.draws}D ${player.losses}L) ${player.groupStagePoints} PTS ${this.formatLeaderboardMovement(movement)}`);
+      matchLines.push(`${index + 1}. ${player.name} ${player.teamsRemaining} Teams Remaining ${this.formatLeaderboardMovement(movement)}`);
     });
 
     const nextMatch = this.getNextMatch();
@@ -1702,21 +1771,17 @@ class WorldCupApp {
        'final': 'Final'
      };
 
-     document.getElementById('leaderboardStage').textContent = `Current Stage: ${stageNames[currentStage]}`;
+      document.getElementById('leaderboardStage').textContent = `Current Stage: ${stageNames[currentStage]}`;
 
-     const showTeamsRemaining = currentStage !== 'group';
-     const completedMatches = this.getCompletedGroupMatches();
+      const showTeamsRemaining = currentStage !== 'group';
+      const completedMatches = this.getCompletedMatches();
+      this.leaderboardTimelineIndex = completedMatches.length - 1;
 
-     // Initialize timeline index if not set
-     if (this.leaderboardTimelineIndex === null) {
-       this.leaderboardTimelineIndex = completedMatches.length - 1;
-     }
-
-     // Ensure index is valid
-     if (completedMatches.length === 0) {
-       document.getElementById('leaderboardDisplay').innerHTML = '<p>No completed matches yet</p>';
-       page.classList.remove('hidden');
-       this.currentPage = 'leaderboard';
+      // Initialize timeline index if not set
+      if (completedMatches.length === 0) {
+        document.getElementById('leaderboardDisplay').innerHTML = '<p>No completed matches yet</p>';
+        page.classList.remove('hidden');
+        this.currentPage = 'leaderboard';
        return;
      }
 
@@ -1797,7 +1862,7 @@ class WorldCupApp {
    }
 
    nextLeaderboardMatch() {
-     const completedMatches = this.getCompletedGroupMatches();
+      const completedMatches = this.getCompletedMatches();
      if (this.leaderboardTimelineIndex < completedMatches.length - 1) {
        this.leaderboardTimelineIndex++;
        this.updateLeaderboardTimelineContent();
@@ -1812,11 +1877,11 @@ class WorldCupApp {
    }
 
    jumpToLeaderboardMatch(index) {
-     const completedMatches = this.getCompletedGroupMatches();
-     if (index >= 0 && index < completedMatches.length) {
-       this.leaderboardTimelineIndex = index;
-       this.updateLeaderboardTimelineContent();
-     }
+      const completedMatches = this.getCompletedMatches();
+      if (index >= 0 && index < completedMatches.length) {
+        this.leaderboardTimelineIndex = index;
+        this.updateLeaderboardTimelineContent();
+      }
    }
 
    showMatches(preselectedTeam = null, updateHash = true) {
