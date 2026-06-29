@@ -6,7 +6,7 @@
     "stageDates": {
       "group": {
         "start": "2026-06-10T00:00:00Z",
-        "end": "2026-06-30T23:59:59Z"
+        "end": "2026-06-27T23:59:59Z"
       },
       "round_of_32": {
         "start": "2026-06-28T00:00:00Z",
@@ -1291,7 +1291,7 @@
         "team": "Germany"
       },
       "away": {
-        "team": "3ABCDF"
+        "team": "Paraguay"
       },
       "venue": "Gillette Stadium, Foxborough"
     },
@@ -1300,7 +1300,7 @@
       "stage": "round_of_32",
       "date": "2026-06-30T01:00:00Z",
       "home": {
-        "team": "1F"
+        "team": "Netherlands"
       },
       "away": {
         "team": "Morocco"
@@ -1315,7 +1315,7 @@
         "team": "Brazil"
       },
       "away": {
-        "team": "2F"
+        "team": "Japan"
       },
       "venue": "NRG Stadium, Houston"
     },
@@ -1324,10 +1324,10 @@
       "stage": "round_of_32",
       "date": "2026-06-30T21:00:00Z",
       "home": {
-        "team": "1I"
+        "team": "France"
       },
       "away": {
-        "team": "3CDFGH"
+        "team": "Sweden"
       },
       "venue": "MetLife Stadium, East Rutherford"
     },
@@ -1336,10 +1336,10 @@
       "stage": "round_of_32",
       "date": "2026-06-30T18:00:00Z",
       "home": {
-        "team": "2E"
+        "team": "Ivory Coast"
       },
       "away": {
-        "team": "2I"
+        "team": "Norway"
       },
       "venue": "AT&T Stadium, Arlington"
     },
@@ -1351,7 +1351,7 @@
         "team": "Mexico"
       },
       "away": {
-        "team": "3CEFHI"
+        "team": "Ecuador"
       },
       "venue": "Estadio Azteca, Mexico City"
     },
@@ -1360,10 +1360,10 @@
       "stage": "round_of_32",
       "date": "2026-07-01T16:00:00Z",
       "home": {
-        "team": "1L"
+        "team": "England"
       },
       "away": {
-        "team": "3EHIJK"
+        "team": "DR Congo"
       },
       "venue": "Mercedes-Benz Stadium, Atlanta"
     },
@@ -1375,7 +1375,7 @@
         "team": "USA"
       },
       "away": {
-        "team": "3BEFIJ"
+        "team": "Bosnia and Herzegovina"
       },
       "venue": "Levi's Stadium, Santa Clara"
     },
@@ -1384,10 +1384,10 @@
       "stage": "round_of_32",
       "date": "2026-07-01T20:00:00Z",
       "home": {
-        "team": "1G"
+        "team": "Belgium"
       },
       "away": {
-        "team": "3AEHIJ"
+        "team": "Senegal"
       },
       "venue": "Lumen Field, Seattle"
     },
@@ -1396,10 +1396,10 @@
       "stage": "round_of_32",
       "date": "2026-07-02T23:00:00Z",
       "home": {
-        "team": "2K"
+        "team": "Portugal"
       },
       "away": {
-        "team": "2L"
+        "team": "Croatia"
       },
       "venue": "BMO Field, Toronto"
     },
@@ -1408,10 +1408,10 @@
       "stage": "round_of_32",
       "date": "2026-07-02T19:00:00Z",
       "home": {
-        "team": "1H"
+        "team": "Spain"
       },
       "away": {
-        "team": "2J"
+        "team": "Austria"
       },
       "venue": "Sofi Stadium, Inglewood"
     },
@@ -1423,7 +1423,7 @@
         "team": "Switzerland"
       },
       "away": {
-        "team": "3EFGIJ"
+        "team": "Algeria"
       },
       "venue": "BC Place, Vancouver"
     },
@@ -1435,7 +1435,7 @@
         "team": "Argentina"
       },
       "away": {
-        "team": "2H"
+        "team": "Cape Verde"
       },
       "venue": "Hard Rock Stadium, Miami Gardens"
     },
@@ -1444,10 +1444,10 @@
       "stage": "round_of_32",
       "date": "2026-07-04T01:30:00Z",
       "home": {
-        "team": "1K"
+        "team": "Colombia"
       },
       "away": {
-        "team": "3DEIJL"
+        "team": "Ghana"
       },
       "venue": "Arrowhead Stadium, Kansas City"
     },
@@ -1456,10 +1456,10 @@
       "stage": "round_of_32",
       "date": "2026-07-03T18:00:00Z",
       "home": {
-        "team": "2D"
+        "team": "Australia"
       },
       "away": {
-        "team": "2G"
+        "team": "Egypt"
       },
       "venue": "AT&T Stadium, Arlington"
     },
