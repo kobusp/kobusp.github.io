@@ -265,6 +265,69 @@ class WorldCupApp {
     return 'final';
   }
 
+  getStageOrder(stage) {
+    const stages = [
+      'group',
+      'round_of_32',
+      'round_of_16',
+      'quarter_final',
+      'semi_final',
+      'third_place',
+      'final'
+    ];
+    const index = stages.indexOf(stage);
+    return index === -1 ? stages.length : index;
+  }
+
+  getCurrentActiveTeams() {
+    const activeTeams = new Set(this.data.teams.map(team => team.name));
+    const currentStage = this.getCurrentStage();
+
+    if (currentStage === 'group') {
+      return activeTeams;
+    }
+
+    const roundOf32Teams = new Set();
+    for (let match of this.data.matches) {
+      if (match.stage !== 'round_of_32') continue;
+      roundOf32Teams.add(match.home.team);
+      roundOf32Teams.add(match.away.team);
+    }
+
+    if (roundOf32Teams.size > 0) {
+      for (let teamName of [...activeTeams]) {
+        if (!roundOf32Teams.has(teamName)) {
+          activeTeams.delete(teamName);
+        }
+      }
+    }
+
+    const knockoutStages = ['round_of_32', 'round_of_16', 'quarter_final', 'semi_final', 'final'];
+    const currentStageOrder = this.getStageOrder(currentStage);
+
+    for (let stage of knockoutStages) {
+      if (this.getStageOrder(stage) > currentStageOrder) {
+        break;
+      }
+
+      for (let match of this.data.matches) {
+        if (match.stage !== stage || match.status !== 'completed') continue;
+
+        const losingTeam = match.winner === 'home'
+          ? match.away.team
+          : match.winner === 'away'
+            ? match.home.team
+            : null;
+
+        if (losingTeam) {
+          activeTeams.delete(losingTeam);
+        }
+      }
+    }
+
+    return activeTeams;
+  }
+
   getNextMatch() {
     const now = this.getCurrentDateAndTime();
 
@@ -887,7 +950,23 @@ class WorldCupApp {
     return qualificationByTeam;
   }
 
-  getTeamStatusTag(teamName, qualificationByTeam, currentQualifyingTeams) {
+  getTeamStatusTag(teamName, qualificationByTeam, currentQualifyingTeams, activeTeams = this.getCurrentActiveTeams()) {
+    const currentStage = this.getCurrentStage();
+
+    if (currentStage !== 'group') {
+      if (activeTeams.has(teamName)) {
+        return {
+          className: 'team-chip-status-locked-advance',
+          title: 'Still alive in the World Cup'
+        };
+      }
+
+      return {
+        className: 'team-chip-status-locked-eliminated',
+        title: 'Eliminated from the World Cup'
+      };
+    }
+
     const status = qualificationByTeam[teamName] || {};
     if (status.definitelyAdvance) {
       return {
@@ -916,13 +995,13 @@ class WorldCupApp {
     };
   }
 
-  calculatePlayerScoresFromMatches(completedGroupMatches) {
+  calculatePlayerScoresFromMatches(completedGroupMatches, activeTeams = this.getCurrentActiveTeams()) {
     const scores = {};
     for (let player of this.data.players) {
       scores[player.id] = {
         name: player.name,
         groupStagePoints: 0,
-        teamsRemaining: player.teams.length,
+        teamsRemaining: player.teams.filter(teamName => activeTeams.has(teamName)).length,
         totalMatches: 0,
         wins: 0,
         draws: 0,
@@ -950,7 +1029,7 @@ class WorldCupApp {
     const completedGroupMatches = this.data.matches.filter(
       m => m.stage === 'group' && m.status === 'completed'
     );
-    return this.calculatePlayerScoresFromMatches(completedGroupMatches);
+    return this.calculatePlayerScoresFromMatches(completedGroupMatches, this.getCurrentActiveTeams());
   }
 
   getRankedPlayersFromScores(scores, currentStage) {
@@ -1773,42 +1852,57 @@ class WorldCupApp {
      this.currentPage = 'matches';
    }
 
-   showTeams(updateHash = true) {
-     this.closePage();
-     const page = document.getElementById('teamsPage');
+  showTeams(updateHash = true) {
+    this.closePage();
+    const page = document.getElementById('teamsPage');
 
      if (updateHash) {
        this.setHash('teams');
-     }
+      }
 
-      const teamPoints = this.calculateTeamGroupPoints();
-      const groupedTeams = this.getGroupTeamsMap();
-      const groupedMatches = this.getGroupMatchesByGroup();
-      const qualificationByTeam = this.getTeamQualificationOutcomes();
-      const currentQualifyingTeams = this.getCurrentQualifyingTeamsFromStandings();
+       const teamPoints = this.calculateTeamGroupPoints();
+       const groupedTeams = this.getGroupTeamsMap();
+       const groupedMatches = this.getGroupMatchesByGroup();
+       const qualificationByTeam = this.getTeamQualificationOutcomes();
+       const currentQualifyingTeams = this.getCurrentQualifyingTeamsFromStandings();
+       const currentStage = this.getCurrentStage();
+       const activeTeams = this.getCurrentActiveTeams();
 
       const sortedGroups = Object.keys(groupedTeams).sort((a, b) => a.localeCompare(b));
 
-      document.getElementById('teamsLegend').innerHTML = `
-        <div class="teams-status-legend" aria-label="Qualification color legend">
-          <div class="teams-status-legend-item">
-            <span class="teams-status-legend-swatch swatch-locked-advance"></span>
-            <span>Definitely through</span>
+      document.getElementById('teamsLegend').innerHTML = currentStage === 'group'
+        ? `
+          <div class="teams-status-legend" aria-label="Qualification color legend">
+            <div class="teams-status-legend-item">
+              <span class="teams-status-legend-swatch swatch-locked-advance"></span>
+              <span>Definitely through</span>
+            </div>
+            <div class="teams-status-legend-item">
+              <span class="teams-status-legend-swatch swatch-could-advance"></span>
+              <span>Can advance</span>
+            </div>
+            <div class="teams-status-legend-item">
+              <span class="teams-status-legend-swatch swatch-could-eliminated"></span>
+              <span>Can be eliminated</span>
+            </div>
+            <div class="teams-status-legend-item">
+              <span class="teams-status-legend-swatch swatch-locked-eliminated"></span>
+              <span>Definitely out</span>
+            </div>
           </div>
-          <div class="teams-status-legend-item">
-            <span class="teams-status-legend-swatch swatch-could-advance"></span>
-            <span>Can advance</span>
+        `
+        : `
+          <div class="teams-status-legend" aria-label="Elimination status legend">
+            <div class="teams-status-legend-item">
+              <span class="teams-status-legend-swatch swatch-locked-advance"></span>
+              <span>Still alive</span>
+            </div>
+            <div class="teams-status-legend-item">
+              <span class="teams-status-legend-swatch swatch-locked-eliminated"></span>
+              <span>Eliminated</span>
+            </div>
           </div>
-          <div class="teams-status-legend-item">
-            <span class="teams-status-legend-swatch swatch-could-eliminated"></span>
-            <span>Can be eliminated</span>
-          </div>
-          <div class="teams-status-legend-item">
-            <span class="teams-status-legend-swatch swatch-locked-eliminated"></span>
-            <span>Definitely out</span>
-          </div>
-        </div>
-      `;
+        `;
 
       let html = '';
       for (let group of sortedGroups) {
@@ -1820,7 +1914,7 @@ class WorldCupApp {
            <div class="group-teams-list">
              ${teams.map(teamName => {
                const teamFlag = countryFlags[teamName] || '🏴';
-                const statusTag = this.getTeamStatusTag(teamName, qualificationByTeam, currentQualifyingTeams);
+                 const statusTag = this.getTeamStatusTag(teamName, qualificationByTeam, currentQualifyingTeams, activeTeams);
                const teamPlayers = this.getTeamPlayerObjects(teamName);
                const owner = teamPlayers.length ? teamPlayers[0] : null;
                const ownerInitial = owner ? (playerInitials[owner.name] || owner.name.charAt(0)) : '?';
@@ -2023,6 +2117,8 @@ class WorldCupApp {
 
     const scores = this.calculatePlayerScores();
     const playerScore = scores[player.id];
+    const currentStage = this.getCurrentStage();
+    const activeTeams = this.getCurrentActiveTeams();
     const initials = playerInitials[playerName] || playerName.charAt(0);
     const avatarUrl = player.avatarUrl;
     const avatarHtml = avatarUrl
@@ -2047,7 +2143,7 @@ class WorldCupApp {
     let teamsHtml = '';
     for (let teamName of player.teams) {
       const flag = countryFlags[teamName] || '🏴';
-      const statusTag = this.getTeamStatusTag(teamName, qualificationByTeam, currentQualifyingTeams);
+      const statusTag = this.getTeamStatusTag(teamName, qualificationByTeam, currentQualifyingTeams, activeTeams);
 
       teamsHtml += `
         <div class="team-box ${statusTag.className}" title="${statusTag.title}" onclick="app.showMatchesByTeam('${encodeURIComponent(teamName)}')" style="cursor:pointer;">
@@ -2133,24 +2229,39 @@ class WorldCupApp {
         </div>
         <div class="player-teams-section">
           <h3>Teams</h3>
-          <div class="teams-status-legend" aria-label="Qualification color legend">
-            <div class="teams-status-legend-item">
-              <span class="teams-status-legend-swatch swatch-locked-advance"></span>
-              <span>Definitely through</span>
-            </div>
-            <div class="teams-status-legend-item">
-              <span class="teams-status-legend-swatch swatch-could-advance"></span>
-              <span>Can advance</span>
-            </div>
-            <div class="teams-status-legend-item">
-              <span class="teams-status-legend-swatch swatch-could-eliminated"></span>
-              <span>Can be eliminated</span>
-            </div>
-            <div class="teams-status-legend-item">
-              <span class="teams-status-legend-swatch swatch-locked-eliminated"></span>
-              <span>Definitely out</span>
-            </div>
-          </div>
+          ${currentStage === 'group'
+            ? `
+              <div class="teams-status-legend" aria-label="Qualification color legend">
+                <div class="teams-status-legend-item">
+                  <span class="teams-status-legend-swatch swatch-locked-advance"></span>
+                  <span>Definitely through</span>
+                </div>
+                <div class="teams-status-legend-item">
+                  <span class="teams-status-legend-swatch swatch-could-advance"></span>
+                  <span>Can advance</span>
+                </div>
+                <div class="teams-status-legend-item">
+                  <span class="teams-status-legend-swatch swatch-could-eliminated"></span>
+                  <span>Can be eliminated</span>
+                </div>
+                <div class="teams-status-legend-item">
+                  <span class="teams-status-legend-swatch swatch-locked-eliminated"></span>
+                  <span>Definitely out</span>
+                </div>
+              </div>
+            `
+            : `
+              <div class="teams-status-legend" aria-label="Elimination status legend">
+                <div class="teams-status-legend-item">
+                  <span class="teams-status-legend-swatch swatch-locked-advance"></span>
+                  <span>Still alive</span>
+                </div>
+                <div class="teams-status-legend-item">
+                  <span class="teams-status-legend-swatch swatch-locked-eliminated"></span>
+                  <span>Eliminated</span>
+                </div>
+              </div>
+            `}
           <div class="teams-list">${teamsHtml}</div>
         </div>
         <div class="player-matches">
