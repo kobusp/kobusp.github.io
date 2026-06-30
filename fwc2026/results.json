@@ -659,21 +659,21 @@
     },
     {
       "id": "M74",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 3,
+        "away": 4
       },
-      "winner": null
+      "winner": "away"
     },
     {
       "id": "M75",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 2,
+        "away": 3
       },
-      "winner": null
+      "winner": "away"
     },
     {
       "id": "M76",
