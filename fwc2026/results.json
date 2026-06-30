@@ -686,10 +686,10 @@
     },
     {
       "id": "M77",
-      "status": "scheduled",
+      "status": "in_progress",
       "score": {
-        "home": null,
-        "away": null
+        "home": 1,
+        "away": 1
       },
       "winner": null
     },
