@@ -1322,18 +1322,6 @@
     {
       "id": "M77",
       "stage": "round_of_32",
-      "date": "2026-06-30T17:00:00Z",
-      "home": {
-        "team": "Ivory Coast"
-      },
-      "away": {
-        "team": "Norway"
-      },
-      "venue": "AT&T Stadium, Arlington"
-    },
-    {
-      "id": "M78",
-      "stage": "round_of_32",
       "date": "2026-06-30T21:00:00Z",
       "home": {
         "team": "France"
@@ -1342,6 +1330,18 @@
         "team": "Sweden"
       },
       "venue": "MetLife Stadium, East Rutherford"
+    },
+    {
+      "id": "M78",
+      "stage": "round_of_32",
+      "date": "2026-06-30T17:00:00Z",
+      "home": {
+        "team": "Ivory Coast"
+      },
+      "away": {
+        "team": "Norway"
+      },
+      "venue": "AT&T Stadium, Arlington"
     },
     {
       "id": "M79",
@@ -1468,7 +1468,7 @@
       "stage": "round_of_16",
       "date": "2026-07-04T21:00:00Z",
       "home": {
-        "team": "W74"
+        "team": "Paraguay"
       },
       "away": {
         "team": "W77"
@@ -1480,10 +1480,10 @@
       "stage": "round_of_16",
       "date": "2026-07-04T17:00:00Z",
       "home": {
-        "team": "W73"
+        "team": "Canada"
       },
       "away": {
-        "team": "W75"
+        "team": "Morocco"
       },
       "venue": "NRG Stadium, Houston"
     },
@@ -1492,10 +1492,10 @@
       "stage": "round_of_16",
       "date": "2026-07-05T20:00:00Z",
       "home": {
-        "team": "W76"
+        "team": "Brazil"
       },
       "away": {
-        "team": "W78"
+        "team": "Norway"
       },
       "venue": "MetLife Stadium, East Rutherford"
     },
