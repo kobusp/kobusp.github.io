@@ -1131,7 +1131,10 @@ class WorldCupApp {
       if (currentStage === 'group' || currentStage === 'final') {
         return b.groupStagePoints - a.groupStagePoints;
       }
-      return b.teamsRemaining - a.teamsRemaining;
+      const teamsRemainingDiff = b.teamsRemaining - a.teamsRemaining;
+      if (teamsRemainingDiff !== 0) return teamsRemainingDiff;
+
+      return b.wins - a.wins;
     });
   }
 
