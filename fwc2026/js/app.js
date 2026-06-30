@@ -1712,20 +1712,28 @@ class WorldCupApp {
     this.currentPage = 'landing';
   }
 
-  renderPlayerCard(player, rank) {
+  renderPlayerCard(player, rank, currentStage = this.getCurrentStage()) {
     const initials = playerInitials[player.name] || player.name.charAt(0);
     const playerData = this.data.players.find(p => p.name === player.name);
     const avatarUrl = playerData ? playerData.avatarUrl : null;
     const avatarHtml = avatarUrl
       ? `<img src="${avatarUrl}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
       : `<span>${initials}</span>`;
+
+    const isKnockoutStage = currentStage !== 'group' && currentStage !== 'final';
+    const statsHtml = isKnockoutStage
+      ? `<div class="player-score">${player.teamsRemaining} ${player.teamsRemaining === 1 ? 'Team' : 'Teams'} Remaining</div>`
+      : `
+        <div class="player-score">${player.groupStagePoints} pts</div>
+        <div class="player-teams">from ${player.teamsRemaining} teams still active</div>
+      `;
+
     return `
       <div class="player-card" onclick="app.showPlayerDetail('${player.name}')">
         <div class="player-rank">${rank}</div>
         <div class="player-avatar">${avatarHtml}</div>
         <div class="player-name">${player.name}</div>
-        <div class="player-score">${player.groupStagePoints} pts</div>
-        <div class="player-teams">from ${player.teamsRemaining} teams still active</div>
+        ${statsHtml}
         <span class="team-count">${player.wins}W ${player.draws}D ${player.losses}L</span>
       </div>
     `;

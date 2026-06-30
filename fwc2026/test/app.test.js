@@ -250,6 +250,31 @@ test('generatePermutations produces every ordering exactly once', () => {
   assert.ok(asStrings.has('CBA'));
 });
 
+test('renderPlayerCard highlights teams remaining and hides points during knockout stages', () => {
+  const data = { players: [player('P1', 'Aiden', ['Home'])] };
+  const app = createApp(data);
+  const playerScore = { name: 'Aiden', groupStagePoints: 9, teamsRemaining: 2, wins: 3, draws: 0, losses: 0 };
+
+  const knockoutHtml = app.renderPlayerCard(playerScore, 1, 'round_of_16');
+  assert.match(knockoutHtml, /2 Teams Remaining/);
+  assert.doesNotMatch(knockoutHtml, /pts/);
+  assert.doesNotMatch(knockoutHtml, /still active/);
+
+  const groupHtml = app.renderPlayerCard(playerScore, 1, 'group');
+  assert.match(groupHtml, /9 pts/);
+  assert.match(groupHtml, /from 2 teams still active/);
+  assert.doesNotMatch(groupHtml, /Teams Remaining/);
+});
+
+test('renderPlayerCard singularizes "Team" when only one team remains', () => {
+  const data = { players: [player('P1', 'Aiden', ['Home'])] };
+  const app = createApp(data);
+  const playerScore = { name: 'Aiden', groupStagePoints: 0, teamsRemaining: 1, wins: 1, draws: 0, losses: 0 };
+
+  const html = app.renderPlayerCard(playerScore, 1, 'quarter_final');
+  assert.match(html, /1 Team Remaining/);
+});
+
 test('getNavRouteFromHash maps hashes to top-level nav routes', () => {
   const app = createApp({ matches: [] });
   const originalWindow = global.window;
