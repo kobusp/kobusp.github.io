@@ -409,15 +409,16 @@ class WorldCupApp {
 
   getNextMatch() {
     const now = this.getCurrentDateAndTime();
+    const sortedMatches = [...this.data.matches].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    for (let match of this.data.matches) {
+    for (let match of sortedMatches) {
       if (match.status === 'in_progress') {
         return match;
       }
     }
 
     // Prefer an ongoing non-completed match (kickoff + 2 hours window)
-    for (let match of this.data.matches) {
+    for (let match of sortedMatches) {
       if (match.status === 'completed') continue;
       const kickoff = new Date(match.date);
       const matchEnd = new Date(kickoff.getTime() + (2 * 60 * 60 * 1000));
@@ -427,12 +428,12 @@ class WorldCupApp {
     }
 
     // Otherwise pick the next upcoming non-completed match
-    for (let match of this.data.matches) {
+    for (let match of sortedMatches) {
       if (new Date(match.date) >= now && match.status !== 'completed') {
         return match;
       }
     }
-    return this.data.matches[this.data.matches.length - 1];
+    return sortedMatches[sortedMatches.length - 1];
   }
 
   stopNextMatchCountdown() {
@@ -1214,6 +1215,11 @@ class WorldCupApp {
       .sort((a, b) => new Date(a.date) - new Date(b.date));
   }
 
+  getLatestCompletedMatch() {
+    const completedMatches = this.getCompletedMatches();
+    return completedMatches.length ? completedMatches[completedMatches.length - 1] : null;
+  }
+
   getCompletedGroupMatches() {
     return this.getCompletedMatches();
   }
@@ -1671,6 +1677,16 @@ class WorldCupApp {
     const nextMatch = this.getNextMatch();
     document.getElementById('nextMatchDisplay').innerHTML = this.renderMatchCard(nextMatch);
     this.startNextMatchCountdown(nextMatch);
+
+    // Latest result
+    const latestResultSection = document.getElementById('latestResultSection');
+    const latestCompletedMatch = this.getLatestCompletedMatch();
+    if (latestCompletedMatch) {
+      document.getElementById('latestResultDisplay').innerHTML = this.renderMatchCard(latestCompletedMatch);
+      latestResultSection.classList.remove('hidden');
+    } else {
+      latestResultSection.classList.add('hidden');
+    }
 
     // Schedule - only remaining (non-completed) matches
     const now = this.getCurrentDateAndTime();

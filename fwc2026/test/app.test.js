@@ -202,6 +202,29 @@ test('getNextMatch falls back to the next upcoming non-completed match', () => {
   assert.equal(app.getNextMatch().id, 'M2');
 });
 
+test('getNextMatch picks the chronologically earliest upcoming match even when data is out of order', () => {
+  const data = {
+    matches: [
+      match('M3', 'group', 'A', 'Home3', 'Away3', { status: 'scheduled', date: '2026-06-25T00:00:00Z' }),
+      match('M1', 'group', 'A', 'Home1', 'Away1', { status: 'completed', date: '2026-06-10T00:00:00Z' }),
+      match('M2', 'group', 'A', 'Home2', 'Away2', { status: 'scheduled', date: '2026-06-20T00:00:00Z' }),
+    ],
+  };
+  const app = createApp(data, { now: new Date('2026-06-16T00:00:00Z') });
+  assert.equal(app.getNextMatch().id, 'M2');
+});
+
+test('getNextMatch falls back to the chronologically last match when none remain upcoming', () => {
+  const data = {
+    matches: [
+      match('M2', 'group', 'A', 'Home2', 'Away2', { status: 'completed', date: '2026-06-20T00:00:00Z' }),
+      match('M1', 'group', 'A', 'Home1', 'Away1', { status: 'completed', date: '2026-06-10T00:00:00Z' }),
+    ],
+  };
+  const app = createApp(data, { now: new Date('2026-06-25T00:00:00Z') });
+  assert.equal(app.getNextMatch().id, 'M2');
+});
+
 test('calculatePlayerScoresFromMatches and getRankedPlayersFromScores rank winners first', () => {
   const data = {
     players: [
@@ -237,6 +260,21 @@ test('getCompletedMatches returns only completed matches sorted by date', () => 
   const app = createApp(data);
   const completed = app.getCompletedMatches();
   assert.deepEqual(completed.map(m => m.id), ['M1', 'M2']);
+});
+
+test('getLatestCompletedMatch returns the most recently completed match, or null if none', () => {
+  const data = {
+    matches: [
+      match('M2', 'group', 'A', 'H2', 'A2', { status: 'completed', date: '2026-06-20T00:00:00Z' }),
+      match('M1', 'group', 'A', 'H1', 'A1', { status: 'completed', date: '2026-06-10T00:00:00Z' }),
+      match('M3', 'group', 'A', 'H3', 'A3', { status: 'scheduled', date: '2026-06-25T00:00:00Z' }),
+    ],
+  };
+  const app = createApp(data);
+  assert.equal(app.getLatestCompletedMatch().id, 'M2');
+
+  const noCompletedApp = createApp({ matches: [match('M4', 'group', 'A', 'H4', 'A4', { status: 'scheduled' })] });
+  assert.equal(noCompletedApp.getLatestCompletedMatch(), null);
 });
 
 test('generatePermutations produces every ordering exactly once', () => {
