@@ -1322,18 +1322,6 @@
     {
       "id": "M77",
       "stage": "round_of_32",
-      "date": "2026-06-30T21:00:00Z",
-      "home": {
-        "team": "France"
-      },
-      "away": {
-        "team": "Sweden"
-      },
-      "venue": "MetLife Stadium, East Rutherford"
-    },
-    {
-      "id": "M78",
-      "stage": "round_of_32",
       "date": "2026-06-30T17:00:00Z",
       "home": {
         "team": "Ivory Coast"
@@ -1342,6 +1330,18 @@
         "team": "Norway"
       },
       "venue": "AT&T Stadium, Arlington"
+    },
+    {
+      "id": "M78",
+      "stage": "round_of_32",
+      "date": "2026-06-30T21:00:00Z",
+      "home": {
+        "team": "France"
+      },
+      "away": {
+        "team": "Sweden"
+      },
+      "venue": "MetLife Stadium, East Rutherford"
     },
     {
       "id": "M79",

@@ -2489,11 +2489,18 @@ class WorldCupApp {
   }
 }
 
+// Export for Node-based unit tests (no-op in the browser bundle).
+if (typeof module === 'object' && module.exports) {
+  module.exports = { WorldCupApp, countryFlags, playerInitials };
+}
+
 // Initialize the app when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      window.app = new WorldCupApp();
+    });
+  } else {
     window.app = new WorldCupApp();
-  });
-} else {
-  window.app = new WorldCupApp();
+  }
 }
