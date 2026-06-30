@@ -63,22 +63,22 @@ const playerInitials = {
 };
 
 class WorldCupApp {
-   constructor() {
-     this.data = null;
-     this.resultsByMatchId = new Map();
-     this.currentPage = 'landing';
-     this.nextMatchCountdownInterval = null;
-     this.leaderboardTimelineIndex = null; // null = current; 0+ = after match N
-     this.leaderboardTimelineExpanded = false;
-     this.init();
-   }
+  constructor() {
+    this.data = null;
+    this.resultsByMatchId = new Map();
+    this.currentPage = 'landing';
+    this.nextMatchCountdownInterval = null;
+    this.leaderboardTimelineIndex = null; // null = current; 0+ = after match N
+    this.leaderboardTimelineExpanded = false;
+    this.init();
+  }
 
   async init() {
     try {
       const cacheBust = window.__CACHE_BUST__ ? `?v=${encodeURIComponent(window.__CACHE_BUST__)}` : '';
       const [tournamentResponse, resultsResponse] = await Promise.all([
-        fetch(`tournament.json${cacheBust}`, { cache: 'no-store' }),
-        fetch(`results.json${cacheBust}`, { cache: 'no-store' })
+        fetch(`tournament.json${cacheBust}`, {cache: 'no-store'}),
+        fetch(`results.json${cacheBust}`, {cache: 'no-store'})
       ]);
 
       if (!tournamentResponse.ok) {
@@ -156,7 +156,7 @@ class WorldCupApp {
   getDefaultMatchResult() {
     return {
       status: 'scheduled',
-      score: { home: null, away: null },
+      score: {home: null, away: null},
       winner: null
     };
   }
@@ -164,7 +164,7 @@ class WorldCupApp {
   mergeMatchesWithResults(matches) {
     return matches.map(match => {
       const result = this.resultsByMatchId.get(match.id) || this.getDefaultMatchResult();
-      const score = result.score || { home: null, away: null };
+      const score = result.score || {home: null, away: null};
       return {
         ...match,
         status: result.status || 'scheduled',
@@ -512,24 +512,24 @@ class WorldCupApp {
   }
 
   getPlayersForMatch(match) {
-     const homePlayers = this.getTeamPlayerNames(match.home.team);
-     const awayPlayers = this.getTeamPlayerNames(match.away.team);
-     const homePlayerIds = this.getTeamPlayerIds(match.home.team);
-     const awayPlayerIds = this.getTeamPlayerIds(match.away.team);
-     const homePlayerObjects = this.getTeamPlayerObjects(match.home.team);
-     const awayPlayerObjects = this.getTeamPlayerObjects(match.away.team);
-     return { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds, homePlayerObjects, awayPlayerObjects };
-   }
+    const homePlayers = this.getTeamPlayerNames(match.home.team);
+    const awayPlayers = this.getTeamPlayerNames(match.away.team);
+    const homePlayerIds = this.getTeamPlayerIds(match.home.team);
+    const awayPlayerIds = this.getTeamPlayerIds(match.away.team);
+    const homePlayerObjects = this.getTeamPlayerObjects(match.home.team);
+    const awayPlayerObjects = this.getTeamPlayerObjects(match.away.team);
+    return {homePlayers, awayPlayers, homePlayerIds, awayPlayerIds, homePlayerObjects, awayPlayerObjects};
+  }
 
-   getTeamPlayerObjects(teamName) {
-     const players = [];
-     for (let player of this.data.players) {
-       if (player.teams.includes(teamName)) {
-         players.push(player);
-       }
-     }
-     return players;
-   }
+  getTeamPlayerObjects(teamName) {
+    const players = [];
+    for (let player of this.data.players) {
+      if (player.teams.includes(teamName)) {
+        players.push(player);
+      }
+    }
+    return players;
+  }
 
   calculateTeamGroupPoints() {
     const points = {};
@@ -686,7 +686,7 @@ class WorldCupApp {
       sortedTeams.push(...bucket);
     }
 
-    return { sortedTeams, statsByTeam };
+    return {sortedTeams, statsByTeam};
   }
 
   createThirdPlaceEntry(group, teamName, statsByTeam) {
@@ -857,7 +857,7 @@ class WorldCupApp {
       rankedBuckets.push(...subBuckets);
     }
 
-    return { rankedBuckets, statsByTeam };
+    return {rankedBuckets, statsByTeam};
   }
 
   generatePermutations(arr) {
@@ -878,16 +878,16 @@ class WorldCupApp {
     const outcomes = [];
 
     const outcomeVariants = [
-      { winner: 'home', score: { home: 1, away: 0 } },
-      { winner: 'away', score: { home: 0, away: 1 } },
-      { winner: 'draw', score: { home: 0, away: 0 } }
+      {winner: 'home', score: {home: 1, away: 0}},
+      {winner: 'away', score: {home: 0, away: 1}},
+      {winner: 'draw', score: {home: 0, away: 0}}
     ];
 
     const buildOutcomes = (index, simulatedMatches) => {
       if (index >= pendingMatches.length) {
         const allMatches = [...completedMatches, ...simulatedMatches];
         const qualRanking = this.rankTeamsInGroupForQualification(groupTeams, allMatches);
-        const { rankedBuckets, statsByTeam } = qualRanking;
+        const {rankedBuckets, statsByTeam} = qualRanking;
 
         const tiedBucketPermutations = rankedBuckets.map(bucket =>
           bucket.length > 1 ? this.generatePermutations(bucket) : [bucket]
@@ -922,7 +922,7 @@ class WorldCupApp {
           ...match,
           status: 'completed',
           winner: variant.winner,
-          score: { home: variant.score.home, away: variant.score.away }
+          score: {home: variant.score.home, away: variant.score.away}
         };
         buildOutcomes(index + 1, [...simulatedMatches, simulatedMatch]);
       }
@@ -952,7 +952,7 @@ class WorldCupApp {
       if (!groupCanAvoidOutranking) bestCaseOutrank += 1;
     }
 
-    return { bestCaseOutrank, worstCaseOutrank };
+    return {bestCaseOutrank, worstCaseOutrank};
   }
 
   getQualificationSummaryForOutcome(position, thirdEntry, scenarioOutcomesByGroup, group) {
@@ -1091,15 +1091,30 @@ class WorldCupApp {
       const homePlayerIds = this.getTeamPlayerIds(match.home.team);
       const awayPlayerIds = this.getTeamPlayerIds(match.away.team);
       if (match.winner === 'home') {
-        for (let pid of homePlayerIds) { scores[pid].groupStagePoints += 3; scores[pid].wins += 1; }
-        for (let pid of awayPlayerIds) { scores[pid].losses += 1; }
+        for (let pid of homePlayerIds) {
+          scores[pid].groupStagePoints += 3;
+          scores[pid].wins += 1;
+        }
+        for (let pid of awayPlayerIds) {
+          scores[pid].losses += 1;
+        }
       } else if (match.winner === 'away') {
-        for (let pid of awayPlayerIds) { scores[pid].groupStagePoints += 3; scores[pid].wins += 1; }
-        for (let pid of homePlayerIds) { scores[pid].losses += 1; }
+        for (let pid of awayPlayerIds) {
+          scores[pid].groupStagePoints += 3;
+          scores[pid].wins += 1;
+        }
+        for (let pid of homePlayerIds) {
+          scores[pid].losses += 1;
+        }
       } else if (match.winner === 'draw') {
-        for (let pid of [...homePlayerIds, ...awayPlayerIds]) { scores[pid].groupStagePoints += 1; scores[pid].draws += 1; }
+        for (let pid of [...homePlayerIds, ...awayPlayerIds]) {
+          scores[pid].groupStagePoints += 1;
+          scores[pid].draws += 1;
+        }
       }
-      for (let pid of [...homePlayerIds, ...awayPlayerIds]) { scores[pid].totalMatches += 1; }
+      for (let pid of [...homePlayerIds, ...awayPlayerIds]) {
+        scores[pid].totalMatches += 1;
+      }
     }
     return scores;
   }
@@ -1126,173 +1141,177 @@ class WorldCupApp {
     const beforeRanked = beforeSnapshot.ranked;
     const afterRanked = afterSnapshot.ranked;
 
-     const beforePositions = {};
-     const afterPositions = {};
-     beforeRanked.forEach((p, i) => { beforePositions[p.name] = i + 1; });
-     afterRanked.forEach((p, i) => { afterPositions[p.name] = i + 1; });
+    const beforePositions = {};
+    const afterPositions = {};
+    beforeRanked.forEach((p, i) => {
+      beforePositions[p.name] = i + 1;
+    });
+    afterRanked.forEach((p, i) => {
+      afterPositions[p.name] = i + 1;
+    });
 
-     const movements = {};
-     for (let player of this.data.players) {
-       const after = afterPositions[player.name];
-       const before = beforePositions[player.name];
-       movements[player.name] = (after != null && before != null) ? before - after : 0;
-     }
-     return movements;
-   }
+    const movements = {};
+    for (let player of this.data.players) {
+      const after = afterPositions[player.name];
+      const before = beforePositions[player.name];
+      movements[player.name] = (after != null && before != null) ? before - after : 0;
+    }
+    return movements;
+  }
 
   getLeaderboardMovements() {
-       const completedMatches = this.getCompletedMatches();
+    const completedMatches = this.getCompletedMatches();
 
-       if (completedMatches.length === 0) {
-         return {};
-       }
-
-       // Find the latest UTC calendar date that has completed matches
-       const latestDate = completedMatches[completedMatches.length - 1].date.slice(0, 10);
-
-       // Matches before the latest batch
-       const prevMatches = completedMatches.filter(m => m.date.slice(0, 10) < latestDate);
-
-      // If nothing came before, everyone is "new" — no movement to show
-      if (prevMatches.length === 0) {
-        return {};
-      }
-
-       return this.getLeaderboardMovementsFromMatches(prevMatches, completedMatches, this.getLeaderboardMetricStage(completedMatches));
+    if (completedMatches.length === 0) {
+      return {};
     }
 
-    getLeaderboardMovementsSince24Hours() {
-      const now = this.getCurrentDateAndTime();
-      const cutoff = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+    // Find the latest UTC calendar date that has completed matches
+    const latestDate = completedMatches[completedMatches.length - 1].date.slice(0, 10);
 
-      const completedMatches = this.getCompletedMatches();
+    // Matches before the latest batch
+    const prevMatches = completedMatches.filter(m => m.date.slice(0, 10) < latestDate);
 
-      if (completedMatches.length === 0) {
-        return {};
-      }
-
-      const matchesBefore24h = completedMatches.filter(m => new Date(m.date) < cutoff);
-
-     if (matchesBefore24h.length === 0) {
-       return {};
-     }
-
-      return this.getLeaderboardMovementsFromMatches(matchesBefore24h, completedMatches, this.getLeaderboardMetricStage(completedMatches));
+    // If nothing came before, everyone is "new" — no movement to show
+    if (prevMatches.length === 0) {
+      return {};
     }
 
-   getRankedPlayers() {
-     const scores = this.calculatePlayerScores();
-     const currentStage = this.getCurrentStage();
-     return this.getRankedPlayersFromScores(scores, currentStage);
-   }
+    return this.getLeaderboardMovementsFromMatches(prevMatches, completedMatches, this.getLeaderboardMetricStage(completedMatches));
+  }
 
-    getCompletedMatches() {
-      return this.data.matches
-        .filter(m => m.status === 'completed')
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+  getLeaderboardMovementsSince24Hours() {
+    const now = this.getCurrentDateAndTime();
+    const cutoff = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+
+    const completedMatches = this.getCompletedMatches();
+
+    if (completedMatches.length === 0) {
+      return {};
     }
 
-    getCompletedGroupMatches() {
-      return this.getCompletedMatches();
+    const matchesBefore24h = completedMatches.filter(m => new Date(m.date) < cutoff);
+
+    if (matchesBefore24h.length === 0) {
+      return {};
     }
 
-    getLeaderboardAtMatchIndex(matchIndex) {
-      const completedMatches = this.getCompletedMatches();
-      if (matchIndex < 0 || matchIndex >= completedMatches.length) {
-        return null;
-      }
-      const matchesUpToIndex = completedMatches.slice(0, matchIndex + 1);
-      return this.getLeaderboardSnapshot(matchesUpToIndex).ranked;
+    return this.getLeaderboardMovementsFromMatches(matchesBefore24h, completedMatches, this.getLeaderboardMetricStage(completedMatches));
+  }
+
+  getRankedPlayers() {
+    const scores = this.calculatePlayerScores();
+    const currentStage = this.getCurrentStage();
+    return this.getRankedPlayersFromScores(scores, currentStage);
+  }
+
+  getCompletedMatches() {
+    return this.data.matches
+      .filter(m => m.status === 'completed')
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  }
+
+  getCompletedGroupMatches() {
+    return this.getCompletedMatches();
+  }
+
+  getLeaderboardAtMatchIndex(matchIndex) {
+    const completedMatches = this.getCompletedMatches();
+    if (matchIndex < 0 || matchIndex >= completedMatches.length) {
+      return null;
+    }
+    const matchesUpToIndex = completedMatches.slice(0, matchIndex + 1);
+    return this.getLeaderboardSnapshot(matchesUpToIndex).ranked;
+  }
+
+  getMovementsBetweenMatches(beforeIndex, afterIndex) {
+    const completedMatches = this.getCompletedMatches();
+    if (beforeIndex < -1 || afterIndex >= completedMatches.length) {
+      return {};
     }
 
-    getMovementsBetweenMatches(beforeIndex, afterIndex) {
-      const completedMatches = this.getCompletedMatches();
-      if (beforeIndex < -1 || afterIndex >= completedMatches.length) {
-        return {};
-      }
+    const beforeMatches = beforeIndex < 0 ? [] : completedMatches.slice(0, beforeIndex + 1);
+    const afterMatches = completedMatches.slice(0, afterIndex + 1);
+    return this.getLeaderboardMovementsFromMatches(beforeMatches, afterMatches, this.getLeaderboardMetricStage(afterMatches));
+  }
 
-      const beforeMatches = beforeIndex < 0 ? [] : completedMatches.slice(0, beforeIndex + 1);
-      const afterMatches = completedMatches.slice(0, afterIndex + 1);
-      return this.getLeaderboardMovementsFromMatches(beforeMatches, afterMatches, this.getLeaderboardMetricStage(afterMatches));
+  renderTimelinePlayerInfo(teamName) {
+    const players = this.getTeamPlayerObjects(teamName);
+    const owner = players.length ? players[0] : null;
+    if (!owner) return '';
+    const initials = playerInitials[owner.name] || owner.name.charAt(0);
+    const avatarHtml = owner.avatarUrl
+      ? `<img src="${owner.avatarUrl}" alt="${owner.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+      : `<span>${initials}</span>`;
+    return `<span class="timeline-player-avatar">${avatarHtml}</span><span class="timeline-player-name">${owner.name}</span>`;
+  }
+
+  updateLeaderboardTimelineContent() {
+    const completedMatches = this.getCompletedMatches();
+    if (completedMatches.length === 0) return;
+
+    const clampedIndex = Math.max(0, Math.min(this.leaderboardTimelineIndex, completedMatches.length - 1));
+    this.leaderboardTimelineIndex = clampedIndex;
+
+    const currentStage = this.getCurrentStage();
+    const showTeamsRemaining = currentStage !== 'group';
+    const currentMatch = completedMatches[clampedIndex];
+
+    const homeFlag = countryFlags[currentMatch.home.team] || '🏴';
+    const awayFlag = countryFlags[currentMatch.away.team] || '🏴';
+    const hasScore = this.hasVisibleScore(currentMatch);
+    const scoreText = hasScore ? `${currentMatch.score.home} - ${currentMatch.score.away}` : 'TBD';
+    const matchDateObj = new Date(currentMatch.date);
+    const matchDateStr = matchDateObj.toLocaleDateString('en-ZA', {month: 'short', day: 'numeric', year: '2-digit'});
+
+    const counterEl = document.getElementById('leaderboardTimelineCounter');
+    const homeFlagEl = document.getElementById('leaderboardTimelineHomeFlag');
+    const homeTeamEl = document.getElementById('leaderboardTimelineHomeTeam');
+    const scoreEl = document.getElementById('leaderboardTimelineScore');
+    const awayFlagEl = document.getElementById('leaderboardTimelineAwayFlag');
+    const awayTeamEl = document.getElementById('leaderboardTimelineAwayTeam');
+    const dateEl = document.getElementById('leaderboardTimelineDate');
+    const sliderEl = document.getElementById('leaderboardMatchSlider');
+    const firstBtnEl = document.getElementById('leaderboardTimelineFirstBtn');
+    const prevBtnEl = document.getElementById('leaderboardTimelinePrevBtn');
+    const nextBtnEl = document.getElementById('leaderboardTimelineNextBtn');
+    const latestBtnEl = document.getElementById('leaderboardTimelineLatestBtn');
+    const homePlayerEl = document.getElementById('leaderboardTimelineHomePlayer');
+    const awayPlayerEl = document.getElementById('leaderboardTimelineAwayPlayer');
+
+    if (counterEl) counterEl.textContent = `Match ${clampedIndex + 1} / ${completedMatches.length}`;
+    if (homeFlagEl) homeFlagEl.textContent = homeFlag;
+    if (homeTeamEl) homeTeamEl.textContent = currentMatch.home.team;
+    if (scoreEl) scoreEl.textContent = scoreText;
+    if (awayFlagEl) awayFlagEl.textContent = awayFlag;
+    if (awayTeamEl) awayTeamEl.textContent = currentMatch.away.team;
+    if (dateEl) dateEl.textContent = matchDateStr;
+    if (homePlayerEl) homePlayerEl.innerHTML = this.renderTimelinePlayerInfo(currentMatch.home.team);
+    if (awayPlayerEl) awayPlayerEl.innerHTML = this.renderTimelinePlayerInfo(currentMatch.away.team);
+
+    if (sliderEl) {
+      sliderEl.max = String(completedMatches.length - 1);
+      sliderEl.value = String(clampedIndex);
     }
 
-   renderTimelinePlayerInfo(teamName) {
-     const players = this.getTeamPlayerObjects(teamName);
-     const owner = players.length ? players[0] : null;
-     if (!owner) return '';
-     const initials = playerInitials[owner.name] || owner.name.charAt(0);
-     const avatarHtml = owner.avatarUrl
-       ? `<img src="${owner.avatarUrl}" alt="${owner.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-       : `<span>${initials}</span>`;
-     return `<span class="timeline-player-avatar">${avatarHtml}</span><span class="timeline-player-name">${owner.name}</span>`;
-   }
+    const atStart = clampedIndex === 0;
+    const atEnd = clampedIndex === completedMatches.length - 1;
+    if (firstBtnEl) firstBtnEl.disabled = atStart;
+    if (prevBtnEl) prevBtnEl.disabled = atStart;
+    if (nextBtnEl) nextBtnEl.disabled = atEnd;
+    if (latestBtnEl) latestBtnEl.disabled = atEnd;
 
-   updateLeaderboardTimelineContent() {
-      const completedMatches = this.getCompletedMatches();
-      if (completedMatches.length === 0) return;
+    const rankedAtIndex = this.getLeaderboardAtMatchIndex(clampedIndex);
+    let movements = {};
+    if (clampedIndex > 0) {
+      movements = this.getMovementsBetweenMatches(clampedIndex - 1, clampedIndex);
+    }
 
-      const clampedIndex = Math.max(0, Math.min(this.leaderboardTimelineIndex, completedMatches.length - 1));
-      this.leaderboardTimelineIndex = clampedIndex;
-
-      const currentStage = this.getCurrentStage();
-      const showTeamsRemaining = currentStage !== 'group';
-      const currentMatch = completedMatches[clampedIndex];
-
-      const homeFlag = countryFlags[currentMatch.home.team] || '🏴';
-      const awayFlag = countryFlags[currentMatch.away.team] || '🏴';
-      const hasScore = this.hasVisibleScore(currentMatch);
-      const scoreText = hasScore ? `${currentMatch.score.home} - ${currentMatch.score.away}` : 'TBD';
-      const matchDateObj = new Date(currentMatch.date);
-      const matchDateStr = matchDateObj.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric', year: '2-digit' });
-
-      const counterEl = document.getElementById('leaderboardTimelineCounter');
-      const homeFlagEl = document.getElementById('leaderboardTimelineHomeFlag');
-      const homeTeamEl = document.getElementById('leaderboardTimelineHomeTeam');
-      const scoreEl = document.getElementById('leaderboardTimelineScore');
-      const awayFlagEl = document.getElementById('leaderboardTimelineAwayFlag');
-      const awayTeamEl = document.getElementById('leaderboardTimelineAwayTeam');
-      const dateEl = document.getElementById('leaderboardTimelineDate');
-      const sliderEl = document.getElementById('leaderboardMatchSlider');
-      const firstBtnEl = document.getElementById('leaderboardTimelineFirstBtn');
-      const prevBtnEl = document.getElementById('leaderboardTimelinePrevBtn');
-      const nextBtnEl = document.getElementById('leaderboardTimelineNextBtn');
-      const latestBtnEl = document.getElementById('leaderboardTimelineLatestBtn');
-      const homePlayerEl = document.getElementById('leaderboardTimelineHomePlayer');
-      const awayPlayerEl = document.getElementById('leaderboardTimelineAwayPlayer');
-
-      if (counterEl) counterEl.textContent = `Match ${clampedIndex + 1} / ${completedMatches.length}`;
-      if (homeFlagEl) homeFlagEl.textContent = homeFlag;
-      if (homeTeamEl) homeTeamEl.textContent = currentMatch.home.team;
-      if (scoreEl) scoreEl.textContent = scoreText;
-      if (awayFlagEl) awayFlagEl.textContent = awayFlag;
-      if (awayTeamEl) awayTeamEl.textContent = currentMatch.away.team;
-      if (dateEl) dateEl.textContent = matchDateStr;
-      if (homePlayerEl) homePlayerEl.innerHTML = this.renderTimelinePlayerInfo(currentMatch.home.team);
-      if (awayPlayerEl) awayPlayerEl.innerHTML = this.renderTimelinePlayerInfo(currentMatch.away.team);
-
-     if (sliderEl) {
-       sliderEl.max = String(completedMatches.length - 1);
-       sliderEl.value = String(clampedIndex);
-     }
-
-     const atStart = clampedIndex === 0;
-     const atEnd = clampedIndex === completedMatches.length - 1;
-     if (firstBtnEl) firstBtnEl.disabled = atStart;
-     if (prevBtnEl) prevBtnEl.disabled = atStart;
-     if (nextBtnEl) nextBtnEl.disabled = atEnd;
-     if (latestBtnEl) latestBtnEl.disabled = atEnd;
-
-     const rankedAtIndex = this.getLeaderboardAtMatchIndex(clampedIndex);
-     let movements = {};
-     if (clampedIndex > 0) {
-       movements = this.getMovementsBetweenMatches(clampedIndex - 1, clampedIndex);
-     }
-
-     const tableContainer = document.getElementById('leaderboardTableContainer');
-     if (tableContainer && rankedAtIndex) {
-       tableContainer.innerHTML = this.renderLeaderboardTable(rankedAtIndex, movements, showTeamsRemaining);
-     }
-   }
+    const tableContainer = document.getElementById('leaderboardTableContainer');
+    if (tableContainer && rankedAtIndex) {
+      tableContainer.innerHTML = this.renderLeaderboardTable(rankedAtIndex, movements, showTeamsRemaining);
+    }
+  }
 
   awardGroupMatchPoints(match, pointsMap) {
     if (match.stage !== 'group' || match.status !== 'completed') return;
@@ -1524,8 +1543,8 @@ class WorldCupApp {
     if (nextMatch) {
       matchLines.push('');
       const nextDateObj = new Date(nextMatch.date);
-      const nextDateStr = nextDateObj.toLocaleDateString('en-ZA', { weekday: 'long', day: 'numeric', month: 'long' });
-      const nextTimeStr = nextDateObj.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
+      const nextDateStr = nextDateObj.toLocaleDateString('en-ZA', {weekday: 'long', day: 'numeric', month: 'long'});
+      const nextTimeStr = nextDateObj.toLocaleTimeString('en-ZA', {hour: '2-digit', minute: '2-digit'});
       const homeFlag = countryFlags[nextMatch.home.team] || '';
       const awayFlag = countryFlags[nextMatch.away.team] || '';
       const homePlayers = this.getTeamPlayerNames(nextMatch.home.team);
@@ -1554,36 +1573,43 @@ class WorldCupApp {
     }
   }
 
-   renderMatchCard(match) {
-      const displayStatus = this.getDisplayMatchStatus(match);
-      const hasScore = this.hasVisibleScore(match);
-      const homeFlag = countryFlags[match.home.team] || '🏴';
-     const awayFlag = countryFlags[match.away.team] || '🏴';
-     const dateObj = new Date(match.date);
-     const dateStr = dateObj.toLocaleDateString('en-ZA', { weekday: 'short', month: 'short', day: 'numeric' });
-     const timeStr = dateObj.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
+  renderMatchCard(match) {
+    const displayStatus = this.getDisplayMatchStatus(match);
+    const hasScore = this.hasVisibleScore(match);
+    const homeFlag = countryFlags[match.home.team] || '🏴';
+    const awayFlag = countryFlags[match.away.team] || '🏴';
+    const dateObj = new Date(match.date);
+    const dateStr = dateObj.toLocaleDateString('en-ZA', {weekday: 'short', month: 'short', day: 'numeric'});
+    const timeStr = dateObj.toLocaleTimeString('en-ZA', {hour: '2-digit', minute: '2-digit'});
 
-     const { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds, homePlayerObjects, awayPlayerObjects } = this.getPlayersForMatch(match);
-     const homePlayersStr = homePlayers.length ? homePlayers.join(', ') : 'No one';
-     const awayPlayersStr = awayPlayers.length ? awayPlayers.join(', ') : 'No one';
+    const {
+      homePlayers,
+      awayPlayers,
+      homePlayerIds,
+      awayPlayerIds,
+      homePlayerObjects,
+      awayPlayerObjects
+    } = this.getPlayersForMatch(match);
+    const homePlayersStr = homePlayers.length ? homePlayers.join(', ') : 'No one';
+    const awayPlayersStr = awayPlayers.length ? awayPlayers.join(', ') : 'No one';
 
-      // Build player avatars HTML
-      const homeAvatarsHtml = homePlayerObjects.map(p => {
-        const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.2rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
-        return `<div class="match-avatar-small" title="${p.name}">${avatarImg}</div>`;
-      }).join('');
+    // Build player avatars HTML
+    const homeAvatarsHtml = homePlayerObjects.map(p => {
+      const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.2rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
+      return `<div class="match-avatar-small" title="${p.name}">${avatarImg}</div>`;
+    }).join('');
 
-      const awayAvatarsHtml = awayPlayerObjects.map(p => {
-        const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.2rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
-        return `<div class="match-avatar-small" title="${p.name}">${avatarImg}</div>`;
-      }).join('');
+    const awayAvatarsHtml = awayPlayerObjects.map(p => {
+      const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.2rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
+      return `<div class="match-avatar-small" title="${p.name}">${avatarImg}</div>`;
+    }).join('');
 
-     let stageName = match.stage.replace(/_/g, ' ').toUpperCase();
-     if (match.stage === 'group' && match.group) {
-       stageName = `GROUP ${match.group}`;
-     }
+    let stageName = match.stage.replace(/_/g, ' ').toUpperCase();
+    if (match.stage === 'group' && match.group) {
+      stageName = `GROUP ${match.group}`;
+    }
 
-     return `
+    return `
        <div class="match-card" onclick="app.showMatchDetail('${match.id}')">
          <div class="match-header">
            <span class="match-stage">${stageName}</span>
@@ -1615,33 +1641,33 @@ class WorldCupApp {
          <div class="match-footer">${match.venue}</div>
        </div>
      `;
-   }
+  }
 
-   showLanding(updateHash = true) {
-     this.closePage();
-     const page = document.getElementById('landingPage');
+  showLanding(updateHash = true) {
+    this.closePage();
+    const page = document.getElementById('landingPage');
 
-     if (updateHash) {
-       this.setHash('home');
-     }
+    if (updateHash) {
+      this.setHash('home');
+    }
 
-     // Current stage
-     const currentStage = this.getCurrentStage();
-     const stageNames = {
-       'group': 'Group Stage',
-       'round_of_32': 'Round of 32',
-       'round_of_16': 'Round of 16',
-       'quarter_final': 'Quarterfinals',
-       'semi_final': 'Semifinals',
-       'third_place': '3rd Place Match',
-       'final': 'Final'
-     };
-     document.getElementById('currentStageDisplay').innerHTML = `<div class="stage-display">${stageNames[currentStage]}</div>`;
+    // Current stage
+    const currentStage = this.getCurrentStage();
+    const stageNames = {
+      'group': 'Group Stage',
+      'round_of_32': 'Round of 32',
+      'round_of_16': 'Round of 16',
+      'quarter_final': 'Quarterfinals',
+      'semi_final': 'Semifinals',
+      'third_place': '3rd Place Match',
+      'final': 'Final'
+    };
+    document.getElementById('currentStageDisplay').innerHTML = `<div class="stage-display">${stageNames[currentStage]}</div>`;
 
-     // Next match
-     const nextMatch = this.getNextMatch();
-     document.getElementById('nextMatchDisplay').innerHTML = this.renderMatchCard(nextMatch);
-     this.startNextMatchCountdown(nextMatch);
+    // Next match
+    const nextMatch = this.getNextMatch();
+    document.getElementById('nextMatchDisplay').innerHTML = this.renderMatchCard(nextMatch);
+    this.startNextMatchCountdown(nextMatch);
 
     // Schedule - only remaining (non-completed) matches
     const now = this.getCurrentDateAndTime();
@@ -1702,30 +1728,30 @@ class WorldCupApp {
     `;
   }
 
-   renderLeaderboardTable(ranked, movements, showTeamsRemaining) {
-     let leaderboardHtml = '';
-     for (let i = 0; i < ranked.length; i++) {
-       const player = ranked[i];
-       const initials = playerInitials[player.name] || player.name.charAt(0);
-       const playerData = this.data.players.find(p => p.name === player.name);
-       const avatarUrl = playerData ? playerData.avatarUrl : null;
-       const avatarHtml = avatarUrl
-         ? `<img src="${avatarUrl}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
-         : `<span>${initials}</span>`;
-       const topClass = i < 3 ? `top-${i + 1}` : '';
-       const rankClass = i < 3 ? `top-${i + 1}` : '';
+  renderLeaderboardTable(ranked, movements, showTeamsRemaining) {
+    let leaderboardHtml = '';
+    for (let i = 0; i < ranked.length; i++) {
+      const player = ranked[i];
+      const initials = playerInitials[player.name] || player.name.charAt(0);
+      const playerData = this.data.players.find(p => p.name === player.name);
+      const avatarUrl = playerData ? playerData.avatarUrl : null;
+      const avatarHtml = avatarUrl
+        ? `<img src="${avatarUrl}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+        : `<span>${initials}</span>`;
+      const topClass = i < 3 ? `top-${i + 1}` : '';
+      const rankClass = i < 3 ? `top-${i + 1}` : '';
 
-       const movement = movements[player.name] ?? 0;
-       let movementBadge;
-       if (movement > 0) {
-         movementBadge = `<span class="lb-movement up">▲ ${movement}</span>`;
-       } else if (movement < 0) {
-         movementBadge = `<span class="lb-movement down">▼ ${Math.abs(movement)}</span>`;
-       } else {
-         movementBadge = `<span class="lb-movement neutral">—</span>`;
-       }
+      const movement = movements[player.name] ?? 0;
+      let movementBadge;
+      if (movement > 0) {
+        movementBadge = `<span class="lb-movement up">▲ ${movement}</span>`;
+      } else if (movement < 0) {
+        movementBadge = `<span class="lb-movement down">▼ ${Math.abs(movement)}</span>`;
+      } else {
+        movementBadge = `<span class="lb-movement neutral">—</span>`;
+      }
 
-       leaderboardHtml += `
+      leaderboardHtml += `
          <div class="leaderboard-row ${topClass}">
            <div class="rank ${rankClass}"></div>
            <div class="leaderboard-player" onclick="app.showPlayerDetail('${player.name}'); event.stopPropagation();">
@@ -1748,56 +1774,56 @@ class WorldCupApp {
            ${movementBadge}
          </div>
        `;
-     }
-     return leaderboardHtml;
-   }
+    }
+    return leaderboardHtml;
+  }
 
-   showLeaderboard(updateHash = true) {
-     this.closePage();
-     const page = document.getElementById('leaderboardPage');
+  showLeaderboard(updateHash = true) {
+    this.closePage();
+    const page = document.getElementById('leaderboardPage');
 
-     if (updateHash) {
-       this.setHash('leaderboard');
-     }
+    if (updateHash) {
+      this.setHash('leaderboard');
+    }
 
-     const currentStage = this.getCurrentStage();
-     const stageNames = {
-       'group': 'Group Stage',
-       'round_of_32': 'Round of 32',
-       'round_of_16': 'Round of 16',
-       'quarter_final': 'Quarterfinals',
-       'semi_final': 'Semifinals',
-       'third_place': '3rd Place Match',
-       'final': 'Final'
-     };
+    const currentStage = this.getCurrentStage();
+    const stageNames = {
+      'group': 'Group Stage',
+      'round_of_32': 'Round of 32',
+      'round_of_16': 'Round of 16',
+      'quarter_final': 'Quarterfinals',
+      'semi_final': 'Semifinals',
+      'third_place': '3rd Place Match',
+      'final': 'Final'
+    };
 
-      document.getElementById('leaderboardStage').textContent = `Current Stage: ${stageNames[currentStage]}`;
+    document.getElementById('leaderboardStage').textContent = `Current Stage: ${stageNames[currentStage]}`;
 
-      const showTeamsRemaining = currentStage !== 'group';
-      const completedMatches = this.getCompletedMatches();
-      this.leaderboardTimelineIndex = completedMatches.length - 1;
+    const showTeamsRemaining = currentStage !== 'group';
+    const completedMatches = this.getCompletedMatches();
+    this.leaderboardTimelineIndex = completedMatches.length - 1;
 
-      // Initialize timeline index if not set
-      if (completedMatches.length === 0) {
-        document.getElementById('leaderboardDisplay').innerHTML = '<p>No completed matches yet</p>';
-        page.classList.remove('hidden');
-        this.currentPage = 'leaderboard';
-       return;
-     }
+    // Initialize timeline index if not set
+    if (completedMatches.length === 0) {
+      document.getElementById('leaderboardDisplay').innerHTML = '<p>No completed matches yet</p>';
+      page.classList.remove('hidden');
+      this.currentPage = 'leaderboard';
+      return;
+    }
 
-      // Render timeline control
-     let timelineControlHtml = '';
-     if (completedMatches.length > 0) {
-       const currentIndex = Math.min(this.leaderboardTimelineIndex, completedMatches.length - 1);
-       const match = completedMatches[currentIndex];
-       const homeFlag = countryFlags[match.home.team] || '🏴';
-       const awayFlag = countryFlags[match.away.team] || '🏴';
-       const hasScore = this.hasVisibleScore(match);
-       const scoreText = hasScore ? `${match.score.home} - ${match.score.away}` : 'TBD';
-       const matchDateObj = new Date(match.date);
-       const matchDateStr = matchDateObj.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric', year: '2-digit' });
+    // Render timeline control
+    let timelineControlHtml = '';
+    if (completedMatches.length > 0) {
+      const currentIndex = Math.min(this.leaderboardTimelineIndex, completedMatches.length - 1);
+      const match = completedMatches[currentIndex];
+      const homeFlag = countryFlags[match.home.team] || '🏴';
+      const awayFlag = countryFlags[match.away.team] || '🏴';
+      const hasScore = this.hasVisibleScore(match);
+      const scoreText = hasScore ? `${match.score.home} - ${match.score.away}` : 'TBD';
+      const matchDateObj = new Date(match.date);
+      const matchDateStr = matchDateObj.toLocaleDateString('en-ZA', {month: 'short', day: 'numeric', year: '2-digit'});
 
-       timelineControlHtml = `
+      timelineControlHtml = `
          <div class="leaderboard-timeline-control">
             <button class="timeline-toggle-btn ${this.leaderboardTimelineExpanded ? 'expanded' : ''}" onclick="app.toggleLeaderboardTimeline()">
              <span class="timeline-toggle-icon">⏱️</span>
@@ -1832,111 +1858,111 @@ class WorldCupApp {
            </div>
          </div>
        `;
-     }
+    }
 
-     // Get leaderboard at current timeline point
-     const rankedAtIndex = this.getLeaderboardAtMatchIndex(this.leaderboardTimelineIndex);
-     let movements = {};
-     if (this.leaderboardTimelineIndex > 0) {
-       movements = this.getMovementsBetweenMatches(this.leaderboardTimelineIndex - 1, this.leaderboardTimelineIndex);
-     }
+    // Get leaderboard at current timeline point
+    const rankedAtIndex = this.getLeaderboardAtMatchIndex(this.leaderboardTimelineIndex);
+    let movements = {};
+    if (this.leaderboardTimelineIndex > 0) {
+      movements = this.getMovementsBetweenMatches(this.leaderboardTimelineIndex - 1, this.leaderboardTimelineIndex);
+    }
 
-     const leaderboardHtml = this.renderLeaderboardTable(rankedAtIndex, movements, showTeamsRemaining);
+    const leaderboardHtml = this.renderLeaderboardTable(rankedAtIndex, movements, showTeamsRemaining);
 
-     document.getElementById('leaderboardDisplay').innerHTML = timelineControlHtml + '<div id="leaderboardTableContainer" class="leaderboard-table">' + leaderboardHtml + '</div>';
+    document.getElementById('leaderboardDisplay').innerHTML = timelineControlHtml + '<div id="leaderboardTableContainer" class="leaderboard-table">' + leaderboardHtml + '</div>';
+    this.updateLeaderboardTimelineContent();
+    page.classList.remove('hidden');
+    this.currentPage = 'leaderboard';
+  }
+
+  toggleLeaderboardTimeline() {
+    this.leaderboardTimelineExpanded = !this.leaderboardTimelineExpanded;
+    const panel = document.getElementById('leaderboardTimelinePanel');
+    const button = document.querySelector('.timeline-toggle-btn');
+    if (panel) {
+      panel.classList.toggle('hidden', !this.leaderboardTimelineExpanded);
+    }
+    if (button) {
+      button.classList.toggle('expanded', this.leaderboardTimelineExpanded);
+    }
+  }
+
+  nextLeaderboardMatch() {
+    const completedMatches = this.getCompletedMatches();
+    if (this.leaderboardTimelineIndex < completedMatches.length - 1) {
+      this.leaderboardTimelineIndex++;
       this.updateLeaderboardTimelineContent();
-     page.classList.remove('hidden');
-     this.currentPage = 'leaderboard';
-   }
+    }
+  }
 
-   toggleLeaderboardTimeline() {
-     this.leaderboardTimelineExpanded = !this.leaderboardTimelineExpanded;
-     const panel = document.getElementById('leaderboardTimelinePanel');
-     const button = document.querySelector('.timeline-toggle-btn');
-     if (panel) {
-       panel.classList.toggle('hidden', !this.leaderboardTimelineExpanded);
-     }
-     if (button) {
-       button.classList.toggle('expanded', this.leaderboardTimelineExpanded);
-     }
-   }
+  prevLeaderboardMatch() {
+    if (this.leaderboardTimelineIndex > 0) {
+      this.leaderboardTimelineIndex--;
+      this.updateLeaderboardTimelineContent();
+    }
+  }
 
-   nextLeaderboardMatch() {
-      const completedMatches = this.getCompletedMatches();
-     if (this.leaderboardTimelineIndex < completedMatches.length - 1) {
-       this.leaderboardTimelineIndex++;
-       this.updateLeaderboardTimelineContent();
-     }
-   }
+  jumpToLeaderboardMatch(index) {
+    const completedMatches = this.getCompletedMatches();
+    if (index >= 0 && index < completedMatches.length) {
+      this.leaderboardTimelineIndex = index;
+      this.updateLeaderboardTimelineContent();
+    }
+  }
 
-   prevLeaderboardMatch() {
-     if (this.leaderboardTimelineIndex > 0) {
-       this.leaderboardTimelineIndex--;
-       this.updateLeaderboardTimelineContent();
-     }
-   }
+  showMatches(preselectedTeam = null, updateHash = true) {
+    this.closePage();
+    const page = document.getElementById('matchesPage');
+    const filtersPanel = document.getElementById('filtersToggle');
+    const filtersToggleButton = document.getElementById('filtersToggleButton');
 
-   jumpToLeaderboardMatch(index) {
-      const completedMatches = this.getCompletedMatches();
-      if (index >= 0 && index < completedMatches.length) {
-        this.leaderboardTimelineIndex = index;
-        this.updateLeaderboardTimelineContent();
+    if (updateHash) {
+      if (preselectedTeam) {
+        this.setHash(`matches?team=${encodeURIComponent(preselectedTeam)}`);
+      } else {
+        this.setHash('matches');
       }
-   }
+    }
 
-   showMatches(preselectedTeam = null, updateHash = true) {
-     this.closePage();
-     const page = document.getElementById('matchesPage');
-     const filtersPanel = document.getElementById('filtersToggle');
-     const filtersToggleButton = document.getElementById('filtersToggleButton');
+    // Initialize filters
+    this.initializeMatchFilters();
 
-     if (updateHash) {
-       if (preselectedTeam) {
-         this.setHash(`matches?team=${encodeURIComponent(preselectedTeam)}`);
-       } else {
-         this.setHash('matches');
-       }
-     }
+    if (preselectedTeam) {
+      document.getElementById('teamFilter').value = preselectedTeam;
+      filtersPanel.classList.remove('hidden');
+      filtersToggleButton.textContent = 'Hide Filters ▲';
+    } else {
+      filtersPanel.classList.add('hidden');
+      filtersToggleButton.textContent = 'Show Filters ▼';
+    }
 
-     // Initialize filters
-     this.initializeMatchFilters();
+    // Apply filters to display matches
+    this.applyMatchFilters();
 
-     if (preselectedTeam) {
-       document.getElementById('teamFilter').value = preselectedTeam;
-       filtersPanel.classList.remove('hidden');
-       filtersToggleButton.textContent = 'Hide Filters ▲';
-     } else {
-       filtersPanel.classList.add('hidden');
-       filtersToggleButton.textContent = 'Show Filters ▼';
-     }
-
-     // Apply filters to display matches
-     this.applyMatchFilters();
-
-     page.classList.remove('hidden');
-     this.currentPage = 'matches';
-   }
+    page.classList.remove('hidden');
+    this.currentPage = 'matches';
+  }
 
   showTeams(updateHash = true) {
     this.closePage();
     const page = document.getElementById('teamsPage');
 
-     if (updateHash) {
-       this.setHash('teams');
-      }
+    if (updateHash) {
+      this.setHash('teams');
+    }
 
-       const teamPoints = this.calculateTeamGroupPoints();
-       const groupedTeams = this.getGroupTeamsMap();
-       const groupedMatches = this.getGroupMatchesByGroup();
-       const qualificationByTeam = this.getTeamQualificationOutcomes();
-       const currentQualifyingTeams = this.getCurrentQualifyingTeamsFromStandings();
-       const currentStage = this.getCurrentStage();
-       const activeTeams = this.getCurrentActiveTeams();
+    const teamPoints = this.calculateTeamGroupPoints();
+    const groupedTeams = this.getGroupTeamsMap();
+    const groupedMatches = this.getGroupMatchesByGroup();
+    const qualificationByTeam = this.getTeamQualificationOutcomes();
+    const currentQualifyingTeams = this.getCurrentQualifyingTeamsFromStandings();
+    const currentStage = this.getCurrentStage();
+    const activeTeams = this.getCurrentActiveTeams();
 
-      const sortedGroups = Object.keys(groupedTeams).sort((a, b) => a.localeCompare(b));
+    const sortedGroups = Object.keys(groupedTeams).sort((a, b) => a.localeCompare(b));
 
-      document.getElementById('teamsLegend').innerHTML = currentStage === 'group'
-        ? `
+    document.getElementById('teamsLegend').innerHTML = currentStage === 'group'
+      ? `
           <div class="teams-status-legend" aria-label="Qualification color legend">
             <div class="teams-status-legend-item">
               <span class="teams-status-legend-swatch swatch-locked-advance"></span>
@@ -1956,7 +1982,7 @@ class WorldCupApp {
             </div>
           </div>
         `
-        : `
+      : `
           <div class="teams-status-legend" aria-label="Elimination status legend">
             <div class="teams-status-legend-item">
               <span class="teams-status-legend-swatch swatch-locked-advance"></span>
@@ -1969,27 +1995,27 @@ class WorldCupApp {
           </div>
         `;
 
-      let html = '';
-      for (let group of sortedGroups) {
-        const completedGroupMatches = (groupedMatches[group] || []).filter(match => match.status === 'completed');
-        const teams = this.rankTeamsInGroup(groupedTeams[group], completedGroupMatches).sortedTeams;
-       html += `
+    let html = '';
+    for (let group of sortedGroups) {
+      const completedGroupMatches = (groupedMatches[group] || []).filter(match => match.status === 'completed');
+      const teams = this.rankTeamsInGroup(groupedTeams[group], completedGroupMatches).sortedTeams;
+      html += `
          <section class="group-card">
            <h3>Group ${group}</h3>
            <div class="group-teams-list">
              ${teams.map(teamName => {
-               const teamFlag = countryFlags[teamName] || '🏴';
-                 const statusTag = this.getTeamStatusTag(teamName, qualificationByTeam, currentQualifyingTeams, activeTeams);
-               const teamPlayers = this.getTeamPlayerObjects(teamName);
-               const owner = teamPlayers.length ? teamPlayers[0] : null;
-               const ownerInitial = owner ? (playerInitials[owner.name] || owner.name.charAt(0)) : '?';
-               const ownerAvatar = owner
-                 ? (owner.avatarUrl
-                     ? `<img src="${owner.avatarUrl}" alt="${owner.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
-                     : `<span>${ownerInitial}</span>`)
-                 : '<span>?</span>';
-               const ownerName = owner ? owner.name : 'Unassigned';
-                return `
+        const teamFlag = countryFlags[teamName] || '🏴';
+        const statusTag = this.getTeamStatusTag(teamName, qualificationByTeam, currentQualifyingTeams, activeTeams);
+        const teamPlayers = this.getTeamPlayerObjects(teamName);
+        const owner = teamPlayers.length ? teamPlayers[0] : null;
+        const ownerInitial = owner ? (playerInitials[owner.name] || owner.name.charAt(0)) : '?';
+        const ownerAvatar = owner
+          ? (owner.avatarUrl
+            ? `<img src="${owner.avatarUrl}" alt="${owner.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+            : `<span>${ownerInitial}</span>`)
+          : '<span>?</span>';
+        const ownerName = owner ? owner.name : 'Unassigned';
+        return `
                   <button class="team-chip ${statusTag.className}" onclick="app.showMatchesByTeam('${encodeURIComponent(teamName)}')" aria-label="View matches for ${teamName}" title="${statusTag.title}">
                      <span class="team-chip-main">${teamFlag} ${teamName} (${teamPoints[teamName] || 0})</span>
                    <span class="team-chip-owner">
@@ -1998,45 +2024,45 @@ class WorldCupApp {
                    </span>
                  </button>
                `;
-             }).join('')}
+      }).join('')}
            </div>
          </section>
        `;
-     }
+    }
 
-     document.getElementById('teamsDisplay').innerHTML = html;
-     page.classList.remove('hidden');
-     this.currentPage = 'teams';
-   }
+    document.getElementById('teamsDisplay').innerHTML = html;
+    page.classList.remove('hidden');
+    this.currentPage = 'teams';
+  }
 
-   showMatchesByTeam(encodedTeamName, updateHash = true) {
-     const teamName = decodeURIComponent(encodedTeamName);
-     this.showMatches(teamName, updateHash);
-   }
+  showMatchesByTeam(encodedTeamName, updateHash = true) {
+    const teamName = decodeURIComponent(encodedTeamName);
+    this.showMatches(teamName, updateHash);
+  }
 
-   showPlayerDetailByEncodedName(encodedPlayerName, updateHash = true) {
-     const playerName = decodeURIComponent(encodedPlayerName);
-     this.showPlayerDetail(playerName, updateHash);
-   }
+  showPlayerDetailByEncodedName(encodedPlayerName, updateHash = true) {
+    const playerName = decodeURIComponent(encodedPlayerName);
+    this.showPlayerDetail(playerName, updateHash);
+  }
 
-   showPrizes(updateHash = true) {
-     this.closePage();
-     const page = document.getElementById('prizesPage');
+  showPrizes(updateHash = true) {
+    this.closePage();
+    const page = document.getElementById('prizesPage');
 
-     if (updateHash) {
-       this.setHash('prizes');
-     }
+    if (updateHash) {
+      this.setHash('prizes');
+    }
 
-     const prizeAssignments = this.getPrizeAssignments();
+    const prizeAssignments = this.getPrizeAssignments();
 
-     let html = `
+    let html = `
        <div class="prizes-grid">
      `;
 
-     for (let prize of prizeAssignments) {
-       const statusClass = prize.assigned ? 'assigned' : 'pending';
-       const statusText = prize.assigned ? 'Assigned' : 'Pending';
-       html += `
+    for (let prize of prizeAssignments) {
+      const statusClass = prize.assigned ? 'assigned' : 'pending';
+      const statusText = prize.assigned ? 'Assigned' : 'Pending';
+      html += `
          <div class="prize-card">
            <div class="prize-header">
              <div class="prize-title">${prize.title}</div>
@@ -2047,127 +2073,127 @@ class WorldCupApp {
            <div class="prize-info">${prize.info}</div>
          </div>
        `;
-     }
+    }
 
-     html += '</div>';
-     document.getElementById('prizesDisplay').innerHTML = html;
-     page.classList.remove('hidden');
-     this.currentPage = 'prizes';
-   }
+    html += '</div>';
+    document.getElementById('prizesDisplay').innerHTML = html;
+    page.classList.remove('hidden');
+    this.currentPage = 'prizes';
+  }
 
-   initializeMatchFilters() {
-      // Populate group filter from group-stage matches
-      const groupFilter = document.getElementById('groupFilter');
-      while (groupFilter.options.length > 1) {
-        groupFilter.remove(1);
+  initializeMatchFilters() {
+    // Populate group filter from group-stage matches
+    const groupFilter = document.getElementById('groupFilter');
+    while (groupFilter.options.length > 1) {
+      groupFilter.remove(1);
+    }
+    const groups = [...new Set(
+      this.data.matches
+        .filter(m => m.stage === 'group' && m.group)
+        .map(m => m.group)
+    )].sort((a, b) => a.localeCompare(b));
+    for (let group of groups) {
+      const option = document.createElement('option');
+      option.value = group;
+      option.textContent = `Group ${group}`;
+      groupFilter.appendChild(option);
+    }
+
+    // Populate team filter
+    const teamFilter = document.getElementById('teamFilter');
+    // Clear existing options except the first one
+    while (teamFilter.options.length > 1) {
+      teamFilter.remove(1);
+    }
+    const teams = [...new Set(this.data.teams.map(t => t.name))];
+    teams.sort();
+    for (let team of teams) {
+      const option = document.createElement('option');
+      option.value = team;
+      option.textContent = team;
+      teamFilter.appendChild(option);
+    }
+
+    // Populate player filter
+    const playerFilter = document.getElementById('playerFilter');
+    // Clear existing options except the first one
+    while (playerFilter.options.length > 1) {
+      playerFilter.remove(1);
+    }
+    const players = this.data.players.map(p => p.name);
+    players.sort();
+    for (let player of players) {
+      const option = document.createElement('option');
+      option.value = player;
+      option.textContent = player;
+      playerFilter.appendChild(option);
+    }
+
+    // Reset all filters
+    document.getElementById('stageFilter').value = '';
+    document.getElementById('groupFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('teamFilter').value = '';
+    document.getElementById('playerFilter').value = '';
+  }
+
+  applyMatchFilters() {
+    const stageFilter = document.getElementById('stageFilter').value;
+    const groupFilter = document.getElementById('groupFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    const teamFilter = document.getElementById('teamFilter').value;
+    const playerFilter = document.getElementById('playerFilter').value;
+    const matchesCountElement = document.getElementById('matchesCount');
+
+    let filteredMatches = this.data.matches;
+
+    // Filter by stage
+    if (stageFilter) {
+      filteredMatches = filteredMatches.filter(m => m.stage === stageFilter);
+    }
+
+    // Filter by group
+    if (groupFilter) {
+      filteredMatches = filteredMatches.filter(m => m.group === groupFilter);
+    }
+
+    // Filter by status
+    if (statusFilter) {
+      filteredMatches = filteredMatches.filter(m => this.getDisplayMatchStatus(m) === statusFilter);
+    }
+
+    // Filter by team
+    if (teamFilter) {
+      filteredMatches = filteredMatches.filter(m =>
+        m.home.team === teamFilter || m.away.team === teamFilter
+      );
+    }
+
+    // Filter by player
+    if (playerFilter) {
+      filteredMatches = filteredMatches.filter(m => {
+        const homePlayerIds = this.getTeamPlayerIds(m.home.team);
+        const awayPlayerIds = this.getTeamPlayerIds(m.away.team);
+        const playerObj = this.data.players.find(p => p.name === playerFilter);
+        if (!playerObj) return false;
+        return homePlayerIds.includes(playerObj.id) || awayPlayerIds.includes(playerObj.id);
+      });
+    }
+
+    // Render filtered matches
+    let html = '';
+    if (filteredMatches.length === 0) {
+      html = '<div style="text-align: center; padding: 2rem; color: #666;">No matches found matching the selected filters.</div>';
+    } else {
+      for (let match of filteredMatches) {
+        html += this.renderMatchCard(match);
       }
-      const groups = [...new Set(
-        this.data.matches
-          .filter(m => m.stage === 'group' && m.group)
-          .map(m => m.group)
-      )].sort((a, b) => a.localeCompare(b));
-      for (let group of groups) {
-        const option = document.createElement('option');
-        option.value = group;
-        option.textContent = `Group ${group}`;
-        groupFilter.appendChild(option);
-      }
+    }
 
-     // Populate team filter
-     const teamFilter = document.getElementById('teamFilter');
-     // Clear existing options except the first one
-     while (teamFilter.options.length > 1) {
-       teamFilter.remove(1);
-     }
-     const teams = [...new Set(this.data.teams.map(t => t.name))];
-     teams.sort();
-     for (let team of teams) {
-       const option = document.createElement('option');
-       option.value = team;
-       option.textContent = team;
-       teamFilter.appendChild(option);
-     }
-
-     // Populate player filter
-     const playerFilter = document.getElementById('playerFilter');
-     // Clear existing options except the first one
-     while (playerFilter.options.length > 1) {
-       playerFilter.remove(1);
-     }
-     const players = this.data.players.map(p => p.name);
-     players.sort();
-     for (let player of players) {
-       const option = document.createElement('option');
-       option.value = player;
-       option.textContent = player;
-       playerFilter.appendChild(option);
-     }
-
-     // Reset all filters
-     document.getElementById('stageFilter').value = '';
-      document.getElementById('groupFilter').value = '';
-     document.getElementById('statusFilter').value = '';
-     document.getElementById('teamFilter').value = '';
-     document.getElementById('playerFilter').value = '';
-   }
-
-   applyMatchFilters() {
-     const stageFilter = document.getElementById('stageFilter').value;
-      const groupFilter = document.getElementById('groupFilter').value;
-     const statusFilter = document.getElementById('statusFilter').value;
-     const teamFilter = document.getElementById('teamFilter').value;
-     const playerFilter = document.getElementById('playerFilter').value;
-     const matchesCountElement = document.getElementById('matchesCount');
-
-     let filteredMatches = this.data.matches;
-
-     // Filter by stage
-     if (stageFilter) {
-       filteredMatches = filteredMatches.filter(m => m.stage === stageFilter);
-     }
-
-      // Filter by group
-      if (groupFilter) {
-        filteredMatches = filteredMatches.filter(m => m.group === groupFilter);
-      }
-
-     // Filter by status
-     if (statusFilter) {
-       filteredMatches = filteredMatches.filter(m => this.getDisplayMatchStatus(m) === statusFilter);
-     }
-
-     // Filter by team
-     if (teamFilter) {
-       filteredMatches = filteredMatches.filter(m =>
-         m.home.team === teamFilter || m.away.team === teamFilter
-       );
-     }
-
-     // Filter by player
-     if (playerFilter) {
-       filteredMatches = filteredMatches.filter(m => {
-         const homePlayerIds = this.getTeamPlayerIds(m.home.team);
-         const awayPlayerIds = this.getTeamPlayerIds(m.away.team);
-         const playerObj = this.data.players.find(p => p.name === playerFilter);
-         if (!playerObj) return false;
-         return homePlayerIds.includes(playerObj.id) || awayPlayerIds.includes(playerObj.id);
-       });
-     }
-
-     // Render filtered matches
-     let html = '';
-     if (filteredMatches.length === 0) {
-       html = '<div style="text-align: center; padding: 2rem; color: #666;">No matches found matching the selected filters.</div>';
-     } else {
-       for (let match of filteredMatches) {
-         html += this.renderMatchCard(match);
-       }
-     }
-
-     const matchWord = filteredMatches.length === 1 ? 'match' : 'matches';
-     matchesCountElement.textContent = `Showing ${filteredMatches.length} ${matchWord}`;
-     document.getElementById('matchesDisplay').innerHTML = html;
-   }
+    const matchWord = filteredMatches.length === 1 ? 'match' : 'matches';
+    matchesCountElement.textContent = `Showing ${filteredMatches.length} ${matchWord}`;
+    document.getElementById('matchesDisplay').innerHTML = html;
+  }
 
   showPlayerDetail(playerName, updateHash = true) {
     this.closePage();
@@ -2295,7 +2321,7 @@ class WorldCupApp {
         <div class="player-teams-section">
           <h3>Teams</h3>
           ${currentStage === 'group'
-            ? `
+      ? `
               <div class="teams-status-legend" aria-label="Qualification color legend">
                 <div class="teams-status-legend-item">
                   <span class="teams-status-legend-swatch swatch-locked-advance"></span>
@@ -2315,7 +2341,7 @@ class WorldCupApp {
                 </div>
               </div>
             `
-            : `
+      : `
               <div class="teams-status-legend" aria-label="Elimination status legend">
                 <div class="teams-status-legend-item">
                   <span class="teams-status-legend-swatch swatch-locked-advance"></span>
@@ -2341,49 +2367,56 @@ class WorldCupApp {
     this.currentPage = 'playerDetail';
   }
 
-   showMatchDetail(matchId, updateHash = true) {
-     this.closePage();
-     const page = document.getElementById('matchDetailPage');
+  showMatchDetail(matchId, updateHash = true) {
+    this.closePage();
+    const page = document.getElementById('matchDetailPage');
 
-     if (updateHash) {
-       this.setHash(`match/${encodeURIComponent(matchId)}`);
-     }
+    if (updateHash) {
+      this.setHash(`match/${encodeURIComponent(matchId)}`);
+    }
 
-     const match = this.data.matches.find(m => m.id === matchId);
-     if (!match) return;
-     const displayStatus = this.getDisplayMatchStatus(match);
-     const hasScore = this.hasVisibleScore(match);
+    const match = this.data.matches.find(m => m.id === matchId);
+    if (!match) return;
+    const displayStatus = this.getDisplayMatchStatus(match);
+    const hasScore = this.hasVisibleScore(match);
 
-     const homeFlag = countryFlags[match.home.team] || '🏴';
-     const awayFlag = countryFlags[match.away.team] || '🏴';
-     const dateObj = new Date(match.date);
-     const dateStr = dateObj.toLocaleDateString('en-ZA', {
-       weekday: 'long',
-       month: 'long',
-       day: 'numeric',
-       year: 'numeric'
-     });
-     const timeStr = dateObj.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
+    const homeFlag = countryFlags[match.home.team] || '🏴';
+    const awayFlag = countryFlags[match.away.team] || '🏴';
+    const dateObj = new Date(match.date);
+    const dateStr = dateObj.toLocaleDateString('en-ZA', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+    const timeStr = dateObj.toLocaleTimeString('en-ZA', {hour: '2-digit', minute: '2-digit'});
 
-     let stageName = match.stage.replace(/_/g, ' ').toUpperCase();
-     if (match.stage === 'group' && match.group) {
-       stageName = `GROUP ${match.group}`;
-     }
-     const { homePlayers, awayPlayers, homePlayerIds, awayPlayerIds, homePlayerObjects, awayPlayerObjects } = this.getPlayersForMatch(match);
+    let stageName = match.stage.replace(/_/g, ' ').toUpperCase();
+    if (match.stage === 'group' && match.group) {
+      stageName = `GROUP ${match.group}`;
+    }
+    const {
+      homePlayers,
+      awayPlayers,
+      homePlayerIds,
+      awayPlayerIds,
+      homePlayerObjects,
+      awayPlayerObjects
+    } = this.getPlayersForMatch(match);
 
-      // Build home team avatars HTML
-      const homeAvatarsHtml = homePlayerObjects.map(p => {
-        const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.5rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
-        return `<button type="button" class="match-detail-avatar match-detail-avatar-clickable" title="${p.name}" aria-label="View ${p.name} details" onclick="app.showPlayerDetailByEncodedName('${encodeURIComponent(p.name)}')">${avatarImg}</button>`;
-      }).join('');
+    // Build home team avatars HTML
+    const homeAvatarsHtml = homePlayerObjects.map(p => {
+      const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.5rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
+      return `<button type="button" class="match-detail-avatar match-detail-avatar-clickable" title="${p.name}" aria-label="View ${p.name} details" onclick="app.showPlayerDetailByEncodedName('${encodeURIComponent(p.name)}')">${avatarImg}</button>`;
+    }).join('');
 
-      // Build away team avatars HTML
-      const awayAvatarsHtml = awayPlayerObjects.map(p => {
-        const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.5rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
-        return `<button type="button" class="match-detail-avatar match-detail-avatar-clickable" title="${p.name}" aria-label="View ${p.name} details" onclick="app.showPlayerDetailByEncodedName('${encodeURIComponent(p.name)}')">${avatarImg}</button>`;
-      }).join('');
+    // Build away team avatars HTML
+    const awayAvatarsHtml = awayPlayerObjects.map(p => {
+      const avatarImg = p.avatarUrl ? `<img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<span style="font-size: 1.5rem; font-weight: bold;">${p.name.charAt(0)}</span>`;
+      return `<button type="button" class="match-detail-avatar match-detail-avatar-clickable" title="${p.name}" aria-label="View ${p.name} details" onclick="app.showPlayerDetailByEncodedName('${encodeURIComponent(p.name)}')">${avatarImg}</button>`;
+    }).join('');
 
-     const html = `
+    const html = `
        <div style="background: white; border-radius: 10px; padding: 2rem;">
          <div style="background: linear-gradient(135deg, #1a472a 0%, #003f7f 100%); color: white; padding: 2rem; border-radius: 10px; margin-bottom: 2rem; text-align: center;">
            <div style="font-size: 0.9rem; margin-bottom: 1rem;">
@@ -2422,13 +2455,13 @@ class WorldCupApp {
              </div>
              <p style="margin-top: 1rem; color: #666;">
                 ${displayStatus === 'in_progress' ? 'Match currently in progress' :
-                  displayStatus === 'pending' ? 'Pending score confirmation' :
-                  displayStatus === 'completed' ? (
-                    match.winner === 'home' ? `${match.home.team} wins!` :
-                    match.winner === 'away' ? `${match.away.team} wins!` :
-                    'Match ended in a draw'
-                  ) :
-                  'Live score update'}
+      displayStatus === 'pending' ? 'Pending score confirmation' :
+        displayStatus === 'completed' ? (
+            match.winner === 'home' ? `${match.home.team} wins!` :
+              match.winner === 'away' ? `${match.away.team} wins!` :
+                'Match ended in a draw'
+          ) :
+          'Live score update'}
              </p>
            </div>
          ` : `
@@ -2439,10 +2472,10 @@ class WorldCupApp {
        </div>
      `;
 
-     document.getElementById('matchDetailContent').innerHTML = html;
-     page.classList.remove('hidden');
-     this.currentPage = 'matchDetail';
-   }
+    document.getElementById('matchDetailContent').innerHTML = html;
+    page.classList.remove('hidden');
+    this.currentPage = 'matchDetail';
+  }
 
   closePage() {
     this.scrollToTop();
@@ -2452,7 +2485,7 @@ class WorldCupApp {
   }
 
   scrollToTop() {
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    window.scrollTo({top: 0, left: 0, behavior: 'auto'});
   }
 }
 
