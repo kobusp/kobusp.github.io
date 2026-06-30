@@ -471,6 +471,14 @@
               <label for="awayScore">Away score</label>
               <input id="awayScore" type="number" min="0" step="1" inputmode="numeric" placeholder="Blank = null">
             </div>
+            <div id="homePenaltyField" class="hidden">
+              <label for="homePenalty">Home penalties</label>
+              <input id="homePenalty" type="number" min="0" step="1" inputmode="numeric" placeholder="Blank = null">
+            </div>
+            <div id="awayPenaltyField" class="hidden">
+              <label for="awayPenalty">Away penalties</label>
+              <input id="awayPenalty" type="number" min="0" step="1" inputmode="numeric" placeholder="Blank = null">
+            </div>
             <div>
               <label for="statusSelect">Status</label>
               <select id="statusSelect">
@@ -482,7 +490,7 @@
             <div class="full">
               <label for="winnerSelect">Winner</label>
               <select id="winnerSelect"></select>
-              <div class="helper">For group-stage draws, pick <strong>Draw</strong>. For knockout matches, equal scores are rejected.</div>
+              <div class="helper">For group-stage draws, pick <strong>Draw</strong>. For knockout matches decided on penalties (level after full time), fill in the penalty shootout scores above and leave them blank otherwise.</div>
             </div>
             <div class="full">
               <label for="matchNotes">Validation</label>

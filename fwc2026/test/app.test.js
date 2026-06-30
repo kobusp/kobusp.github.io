@@ -96,6 +96,21 @@ test('hasVisibleScore detects when both scores are present', () => {
   assert.equal(app.hasVisibleScore({}), false);
 });
 
+test('hasPenaltyShootout and formatScoreText render penalty results consistently', () => {
+  const app = createApp({ matches: [] });
+
+  assert.equal(app.hasPenaltyShootout({ penalties: { home: 4, away: 3 } }), true);
+  assert.equal(app.hasPenaltyShootout({ penalties: { home: null, away: null } }), false);
+  assert.equal(app.hasPenaltyShootout({}), false);
+
+  assert.equal(
+    app.formatScoreText({ score: { home: 1, away: 1 }, penalties: { home: 3, away: 4 } }),
+    '1(3) - 1(4)'
+  );
+  assert.equal(app.formatScoreText({ score: { home: 2, away: 0 } }), '2 - 0');
+  assert.equal(app.formatScoreText({ score: { home: null, away: null } }), null);
+});
+
 test('mergeMatchesWithResults overlays results and falls back to defaults', () => {
   const app = createApp({ matches: [] });
   app.resultsByMatchId = new Map([
@@ -108,8 +123,8 @@ test('mergeMatchesWithResults overlays results and falls back to defaults', () =
   ]);
 
   assert.deepEqual(merged, [
-    { id: 'M1', stage: 'group', status: 'completed', score: { home: 2, away: 1 }, winner: 'home' },
-    { id: 'M2', stage: 'group', status: 'scheduled', score: { home: null, away: null }, winner: null },
+    { id: 'M1', stage: 'group', status: 'completed', score: { home: 2, away: 1 }, penalties: { home: null, away: null }, winner: 'home' },
+    { id: 'M2', stage: 'group', status: 'scheduled', score: { home: null, away: null }, penalties: { home: null, away: null }, winner: null },
   ]);
 });
 

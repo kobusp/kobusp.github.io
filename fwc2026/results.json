@@ -7,6 +7,10 @@
         "home": 2,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -15,6 +19,10 @@
       "score": {
         "home": 2,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -25,6 +33,10 @@
         "home": 1,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -33,6 +45,10 @@
       "score": {
         "home": 4,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -43,6 +59,10 @@
         "home": 1,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -51,6 +71,10 @@
       "score": {
         "home": 1,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "draw"
     },
@@ -61,6 +85,10 @@
         "home": 0,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "away"
     },
     {
@@ -69,6 +97,10 @@
       "score": {
         "home": 2,
         "away": 0
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -79,6 +111,10 @@
         "home": 7,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -87,6 +123,10 @@
       "score": {
         "home": 2,
         "away": 2
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "draw"
     },
@@ -97,6 +137,10 @@
         "home": 1,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -105,6 +149,10 @@
       "score": {
         "home": 5,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -115,6 +163,10 @@
         "home": 0,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -123,6 +175,10 @@
       "score": {
         "home": 1,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "draw"
     },
@@ -133,6 +189,10 @@
         "home": 1,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -141,6 +201,10 @@
       "score": {
         "home": 2,
         "away": 2
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "draw"
     },
@@ -151,6 +215,10 @@
         "home": 3,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -159,6 +227,10 @@
       "score": {
         "home": 1,
         "away": 4
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -169,6 +241,10 @@
         "home": 3,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -177,6 +253,10 @@
       "score": {
         "home": 3,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -187,6 +267,10 @@
         "home": 1,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -195,6 +279,10 @@
       "score": {
         "home": 4,
         "away": 2
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -205,6 +293,10 @@
         "home": 1,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -213,6 +305,10 @@
       "score": {
         "home": 1,
         "away": 3
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -223,6 +319,10 @@
         "home": 1,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -231,6 +331,10 @@
       "score": {
         "home": 4,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -241,6 +345,10 @@
         "home": 6,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -249,6 +357,10 @@
       "score": {
         "home": 1,
         "away": 0
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -259,6 +371,10 @@
         "home": 2,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -267,6 +383,10 @@
       "score": {
         "home": 0,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -277,6 +397,10 @@
         "home": 3,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -285,6 +409,10 @@
       "score": {
         "home": 0,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -295,6 +423,10 @@
         "home": 5,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -303,6 +435,10 @@
       "score": {
         "home": 2,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -313,6 +449,10 @@
         "home": 0,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -321,6 +461,10 @@
       "score": {
         "home": 0,
         "away": 4
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -331,6 +475,10 @@
         "home": 4,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -339,6 +487,10 @@
       "score": {
         "home": 0,
         "away": 0
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "draw"
     },
@@ -349,6 +501,10 @@
         "home": 2,
         "away": 2
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -357,6 +513,10 @@
       "score": {
         "home": 1,
         "away": 3
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -367,6 +527,10 @@
         "home": 2,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -375,6 +539,10 @@
       "score": {
         "home": 3,
         "away": 0
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -385,6 +553,10 @@
         "home": 3,
         "away": 2
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -393,6 +565,10 @@
       "score": {
         "home": 1,
         "away": 2
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -403,6 +579,10 @@
         "home": 5,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -411,6 +591,10 @@
       "score": {
         "home": 0,
         "away": 0
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "draw"
     },
@@ -421,6 +605,10 @@
         "home": 0,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "away"
     },
     {
@@ -429,6 +617,10 @@
       "score": {
         "home": 1,
         "away": 0
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -439,6 +631,10 @@
         "home": 2,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -447,6 +643,10 @@
       "score": {
         "home": 3,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -457,6 +657,10 @@
         "home": 0,
         "away": 3
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "away"
     },
     {
@@ -465,6 +669,10 @@
       "score": {
         "home": 4,
         "away": 2
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -475,6 +683,10 @@
         "home": 0,
         "away": 3
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "away"
     },
     {
@@ -483,6 +695,10 @@
       "score": {
         "home": 1,
         "away": 0
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -493,6 +709,10 @@
         "home": 0,
         "away": 2
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "away"
     },
     {
@@ -501,6 +721,10 @@
       "score": {
         "home": 2,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -511,6 +735,10 @@
         "home": 1,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -519,6 +747,10 @@
       "score": {
         "home": 1,
         "away": 3
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -529,6 +761,10 @@
         "home": 3,
         "away": 2
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
@@ -537,6 +773,10 @@
       "score": {
         "home": 0,
         "away": 0
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "draw"
     },
@@ -547,6 +787,10 @@
         "home": 1,
         "away": 4
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "away"
     },
     {
@@ -555,6 +799,10 @@
       "score": {
         "home": 5,
         "away": 0
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -565,6 +813,10 @@
         "home": 0,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -573,6 +825,10 @@
       "score": {
         "home": 0,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -583,6 +839,10 @@
         "home": 1,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -591,6 +851,10 @@
       "score": {
         "home": 1,
         "away": 5
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -601,6 +865,10 @@
         "home": 0,
         "away": 2
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "away"
     },
     {
@@ -609,6 +877,10 @@
       "score": {
         "home": 2,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -619,6 +891,10 @@
         "home": 0,
         "away": 0
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -627,6 +903,10 @@
       "score": {
         "home": 3,
         "away": 1
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "home"
     },
@@ -637,6 +917,10 @@
         "home": 3,
         "away": 3
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "draw"
     },
     {
@@ -645,6 +929,10 @@
       "score": {
         "home": 1,
         "away": 3
+      },
+      "penalties": {
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -655,12 +943,20 @@
         "home": 0,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "away"
     },
     {
       "id": "M74",
       "status": "completed",
       "score": {
+        "home": 1,
+        "away": 1
+      },
+      "penalties": {
         "home": 3,
         "away": 4
       },
@@ -670,6 +966,10 @@
       "id": "M75",
       "status": "completed",
       "score": {
+        "home": 1,
+        "away": 1
+      },
+      "penalties": {
         "home": 2,
         "away": 3
       },
@@ -682,12 +982,20 @@
         "home": 2,
         "away": 1
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "home"
     },
     {
       "id": "M77",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -700,12 +1008,20 @@
         "home": 1,
         "away": 2
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": "away"
     },
     {
       "id": "M79",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -718,12 +1034,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M81",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -736,12 +1060,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M83",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -754,12 +1086,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M85",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -772,12 +1112,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M87",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -790,12 +1138,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M89",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -808,12 +1164,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M91",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -826,12 +1190,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M93",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -844,12 +1216,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M95",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -862,12 +1242,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M97",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -880,12 +1268,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M99",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -898,12 +1294,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M101",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },
@@ -916,6 +1320,10 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
@@ -925,12 +1333,20 @@
         "home": null,
         "away": null
       },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
       "winner": null
     },
     {
       "id": "M104",
       "status": "scheduled",
       "score": {
+        "home": null,
+        "away": null
+      },
+      "penalties": {
         "home": null,
         "away": null
       },

@@ -14,6 +14,8 @@
 	getDisplayMatchStatus,
 	mergeMatchesWithResults,
 	extractResultsData,
+	hasPenaltyShootout,
+	formatScoreText,
 	buildUpdatedMatch: buildUpdatedMatchFromInputs,
   } = window.matchResultUtils || {};
 
@@ -23,6 +25,8 @@
 	|| typeof getDisplayMatchStatus !== 'function'
 	|| typeof mergeMatchesWithResults !== 'function'
 	|| typeof extractResultsData !== 'function'
+	|| typeof hasPenaltyShootout !== 'function'
+	|| typeof formatScoreText !== 'function'
 	|| typeof buildUpdatedMatchFromInputs !== 'function'
   ) {
 	throw new Error('match-result-utils.js failed to load.');
@@ -91,14 +95,8 @@
   }
 
   function getMatchScoreText(match) {
-	const home = match?.score?.home;
-	const away = match?.score?.away;
-
-	if (home === null || away === null || home === undefined || away === undefined) {
-	  return 'Score: —';
-	}
-
-	return `Score: ${home} - ${away}`;
+	const scoreText = formatScoreText(match);
+	return scoreText ? `Score: ${scoreText}` : 'Score: —';
   }
 
   function getMatchWinnerOptions(match) {
@@ -216,9 +214,9 @@
 		? (match.winner === 'draw'
 		  ? 'Draw'
 		  : match.winner === 'home'
-			? `${match.home.team} won`
+			? `${match.home.team} won${hasPenaltyShootout(match) ? ' (penalties)' : ''}`
 			: match.winner === 'away'
-			  ? `${match.away.team} won`
+			  ? `${match.away.team} won${hasPenaltyShootout(match) ? ' (penalties)' : ''}`
 			  : 'Winner unset')
 		: displayStatus === 'in_progress'
 		  ? 'Live now'
@@ -260,6 +258,20 @@
 	elements.editorForm.classList.toggle('hidden', !visible);
   }
 
+  function updatePenaltyFieldVisibility(match) {
+	const status = elements.statusSelect.value;
+	const isKnockout = match?.stage !== 'group';
+	const showPenalties = status === 'completed' && isKnockout;
+
+	elements.homePenaltyField.classList.toggle('hidden', !showPenalties);
+	elements.awayPenaltyField.classList.toggle('hidden', !showPenalties);
+
+	if (!showPenalties) {
+	  elements.homePenalty.value = '';
+	  elements.awayPenalty.value = '';
+	}
+  }
+
   function updateValidationPreview(matchOverride = null) {
 	const match = matchOverride || state.draftData.matches.find(item => item.id === state.selectedMatchId);
 	if (!match) {
@@ -267,10 +279,15 @@
 	  return;
 	}
 
+	updatePenaltyFieldVisibility(match);
+
 	const homeScore = parseNullableInteger(elements.homeScore.value);
 	const awayScore = parseNullableInteger(elements.awayScore.value);
+	const homePenalties = parseNullableInteger(elements.homePenalty.value);
+	const awayPenalties = parseNullableInteger(elements.awayPenalty.value);
 	const status = elements.statusSelect.value;
 	const winner = elements.winnerSelect.value;
+	const isKnockout = match.stage !== 'group';
 	const issues = [];
 
 	if (status === 'completed') {
@@ -280,21 +297,31 @@
 
 	  if (homeScore !== null && awayScore !== null) {
 		const inferredWinner = inferWinnerFromScores(homeScore, awayScore);
+		const isLevel = homeScore === awayScore;
 
-		if (match.stage !== 'group' && homeScore === awayScore) {
-		  issues.push('Knockout matches cannot finish level.');
-		}
-
-		if (match.stage === 'group' && winner && winner !== inferredWinner) {
-		  issues.push('The selected winner does not match the scores.');
-		}
-
-		if (match.stage !== 'group' && winner && winner !== inferredWinner) {
-		  issues.push('The selected winner does not match the scores.');
-		}
-
-		if (match.stage === 'group' && winner === 'draw' && homeScore !== awayScore) {
-		  issues.push('Draw is only valid when the scores are level.');
+		if (!isKnockout) {
+		  if (winner && winner !== inferredWinner) {
+			issues.push('The selected winner does not match the scores.');
+		  }
+		} else if (!isLevel) {
+		  if (homePenalties !== null || awayPenalties !== null) {
+			issues.push('Penalty shootout scores only apply when full-time scores are level — clear them if this match was not decided on penalties.');
+		  }
+		  if (winner && winner !== inferredWinner) {
+			issues.push('The selected winner does not match the scores.');
+		  }
+		} else {
+		  // Knockout match level after full time: penalties decide the winner.
+		  if (homePenalties === null || awayPenalties === null) {
+			issues.push('Knockout matches level after full time need penalty shootout scores.');
+		  } else if (homePenalties === awayPenalties) {
+			issues.push('Penalty shootouts cannot end in a draw.');
+		  } else {
+			const penaltyWinner = homePenalties > awayPenalties ? 'home' : 'away';
+			if (winner && winner !== penaltyWinner) {
+			  issues.push('The selected winner does not match the penalty shootout result.');
+			}
+		  }
 		}
 	  }
 	} else if (status === 'in_progress') {
@@ -324,6 +351,8 @@
 	elements.matchVenue.value = match.venue || '—';
 	elements.homeScore.value = match.score?.home ?? '';
 	elements.awayScore.value = match.score?.away ?? '';
+	elements.homePenalty.value = match.penalties?.home ?? '';
+	elements.awayPenalty.value = match.penalties?.away ?? '';
 	elements.statusSelect.value = match.status || 'scheduled';
 	renderWinnerOptions(match);
 	elements.winnerSelect.value = match.winner ?? '';
@@ -338,6 +367,8 @@
 	  status: elements.statusSelect.value,
 	  homeScore: elements.homeScore.value,
 	  awayScore: elements.awayScore.value,
+	  homePenalties: elements.homePenalty.value,
+	  awayPenalties: elements.awayPenalty.value,
 	  winner: elements.winnerSelect.value || null,
 	});
   }
@@ -544,7 +575,7 @@
 	  }
 	});
 
-	[elements.homeScore, elements.awayScore, elements.statusSelect, elements.winnerSelect].forEach(element => {
+	[elements.homeScore, elements.awayScore, elements.homePenalty, elements.awayPenalty, elements.statusSelect, elements.winnerSelect].forEach(element => {
 	  element.addEventListener('input', () => updateValidationPreview());
 	  element.addEventListener('change', () => updateValidationPreview());
 	});
@@ -570,6 +601,10 @@
 	elements.matchVenue = $('matchVenue');
 	elements.homeScore = $('homeScore');
 	elements.awayScore = $('awayScore');
+	elements.homePenalty = $('homePenalty');
+	elements.awayPenalty = $('awayPenalty');
+	elements.homePenaltyField = $('homePenaltyField');
+	elements.awayPenaltyField = $('awayPenaltyField');
 	elements.statusSelect = $('statusSelect');
 	elements.winnerSelect = $('winnerSelect');
 	elements.matchNotes = $('matchNotes');

@@ -153,10 +153,29 @@ class WorldCupApp {
       && match?.score?.away !== null && match?.score?.away !== undefined;
   }
 
+  hasPenaltyShootout(match) {
+    const penalties = match?.penalties;
+    return Number.isFinite(penalties?.home) && Number.isFinite(penalties?.away);
+  }
+
+  formatScoreText(match) {
+    if (!this.hasVisibleScore(match)) {
+      return null;
+    }
+
+    const {home, away} = match.score;
+    if (this.hasPenaltyShootout(match)) {
+      return `${home}(${match.penalties.home}) - ${away}(${match.penalties.away})`;
+    }
+
+    return `${home} - ${away}`;
+  }
+
   getDefaultMatchResult() {
     return {
       status: 'scheduled',
       score: {home: null, away: null},
+      penalties: {home: null, away: null},
       winner: null
     };
   }
@@ -165,12 +184,17 @@ class WorldCupApp {
     return matches.map(match => {
       const result = this.resultsByMatchId.get(match.id) || this.getDefaultMatchResult();
       const score = result.score || {home: null, away: null};
+      const penalties = result.penalties || {home: null, away: null};
       return {
         ...match,
         status: result.status || 'scheduled',
         score: {
           home: score.home ?? null,
           away: score.away ?? null
+        },
+        penalties: {
+          home: penalties.home ?? null,
+          away: penalties.away ?? null
         },
         winner: result.winner ?? null
       };
@@ -1269,7 +1293,7 @@ class WorldCupApp {
     const homeFlag = countryFlags[currentMatch.home.team] || '🏴';
     const awayFlag = countryFlags[currentMatch.away.team] || '🏴';
     const hasScore = this.hasVisibleScore(currentMatch);
-    const scoreText = hasScore ? `${currentMatch.score.home} - ${currentMatch.score.away}` : 'TBD';
+    const scoreText = hasScore ? this.formatScoreText(currentMatch) : 'TBD';
     const matchDateObj = new Date(currentMatch.date);
     const matchDateStr = matchDateObj.toLocaleDateString('en-ZA', {month: 'short', day: 'numeric', year: '2-digit'});
 
@@ -1498,7 +1522,7 @@ class WorldCupApp {
   formatShareMatchBlock(match) {
     const homeLine = this.formatShareTeam(match.home.team);
     const awayLine = this.formatShareTeam(match.away.team);
-    const scoreLine = `${match.score.home} - ${match.score.away}`;
+    const scoreLine = this.formatScoreText(match) || `${match.score.home} - ${match.score.away}`;
     const centeredScoreLine = this.formatShareIndentedScore(this.formatWhatsAppBold(scoreLine));
 
     return [homeLine, centeredScoreLine, awayLine].join('\n');
@@ -1634,7 +1658,7 @@ class WorldCupApp {
            </div>
            <div class="score-display">
               ${hasScore ? `
-                <div class="score-line">${match.score.home} - ${match.score.away}</div>
+                <div class="score-line">${this.formatScoreText(match)}</div>
                 <div class="vs-text">vs</div>
              ` : `
                <div class="vs-text">vs</div>
@@ -1846,7 +1870,7 @@ class WorldCupApp {
       const homeFlag = countryFlags[match.home.team] || '🏴';
       const awayFlag = countryFlags[match.away.team] || '🏴';
       const hasScore = this.hasVisibleScore(match);
-      const scoreText = hasScore ? `${match.score.home} - ${match.score.away}` : 'TBD';
+      const scoreText = hasScore ? this.formatScoreText(match) : 'TBD';
       const matchDateObj = new Date(match.date);
       const matchDateStr = matchDateObj.toLocaleDateString('en-ZA', {month: 'short', day: 'numeric', year: '2-digit'});
 
@@ -2281,7 +2305,7 @@ class WorldCupApp {
 
         let resultHtml = '';
         if (this.hasVisibleScore(match)) {
-          resultHtml = `${match.score.home} - ${match.score.away}`;
+          resultHtml = this.formatScoreText(match);
         } else {
           resultHtml = 'TBD';
         }
@@ -2406,6 +2430,7 @@ class WorldCupApp {
     if (!match) return;
     const displayStatus = this.getDisplayMatchStatus(match);
     const hasScore = this.hasVisibleScore(match);
+    const hasPenalties = this.hasPenaltyShootout(match);
 
     const homeFlag = countryFlags[match.home.team] || '🏴';
     const awayFlag = countryFlags[match.away.team] || '🏴';
@@ -2476,16 +2501,17 @@ class WorldCupApp {
            <div style="background: #f0f0f0; padding: 2rem; border-radius: 10px; text-align: center; margin-bottom: 2rem;">
               <p style="color: #666; margin-bottom: 1rem;">${displayStatus === 'completed' ? 'Final Score' : 'Current Score'}</p>
              <div style="font-size: 3rem; font-weight: bold; color: #003f7f; display: flex; justify-content: center; align-items: center; gap: 1rem;">
-               <span>${match.score.home}</span>
+               <span>${match.score.home}${hasPenalties ? `<span style="font-size: 1.5rem;">(${match.penalties.home})</span>` : ''}</span>
                <span style="font-size: 1.5rem; color: #666;">-</span>
-               <span>${match.score.away}</span>
+               <span>${match.score.away}${hasPenalties ? `<span style="font-size: 1.5rem;">(${match.penalties.away})</span>` : ''}</span>
              </div>
+             ${hasPenalties ? `<p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">Decided on penalties</p>` : ''}
              <p style="margin-top: 1rem; color: #666;">
                 ${displayStatus === 'in_progress' ? 'Match currently in progress' :
       displayStatus === 'pending' ? 'Pending score confirmation' :
         displayStatus === 'completed' ? (
-            match.winner === 'home' ? `${match.home.team} wins!` :
-              match.winner === 'away' ? `${match.away.team} wins!` :
+            match.winner === 'home' ? `${match.home.team} wins${hasPenalties ? ' on penalties' : ''}!` :
+              match.winner === 'away' ? `${match.away.team} wins${hasPenalties ? ' on penalties' : ''}!` :
                 'Match ended in a draw'
           ) :
           'Live score update'}
