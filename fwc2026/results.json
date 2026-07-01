@@ -1042,19 +1042,6 @@
     },
     {
       "id": "M81",
-      "status": "completed",
-      "score": {
-        "home": 3,
-        "away": 2
-      },
-      "penalties": {
-        "home": null,
-        "away": null
-      },
-      "winner": "home"
-    },
-    {
-      "id": "M82",
       "status": "scheduled",
       "score": {
         "home": null,
@@ -1065,6 +1052,19 @@
         "away": null
       },
       "winner": null
+    },
+    {
+      "id": "M82",
+      "status": "completed",
+      "score": {
+        "home": 3,
+        "away": 2
+      },
+      "penalties": {
+        "home": null,
+        "away": null
+      },
+      "winner": "home"
     },
     {
       "id": "M83",
