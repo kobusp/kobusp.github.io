@@ -970,8 +970,8 @@
         "away": 1
       },
       "penalties": {
-        "home": null,
-        "away": null
+        "home": 2,
+        "away": 3
       },
       "winner": "away"
     },
