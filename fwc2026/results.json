@@ -957,8 +957,8 @@
         "away": 1
       },
       "penalties": {
-        "home": 3,
-        "away": 4
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -970,8 +970,8 @@
         "away": 1
       },
       "penalties": {
-        "home": 2,
-        "away": 3
+        "home": null,
+        "away": null
       },
       "winner": "away"
     },
@@ -1016,16 +1016,16 @@
     },
     {
       "id": "M79",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 2,
+        "away": 0
       },
       "penalties": {
         "home": null,
         "away": null
       },
-      "winner": null
+      "winner": "home"
     },
     {
       "id": "M80",
