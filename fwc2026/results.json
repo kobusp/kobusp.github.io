@@ -1159,16 +1159,16 @@
     },
     {
       "id": "M90",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 0,
+        "away": 3
       },
       "penalties": {
         "home": null,
         "away": null
       },
-      "winner": null
+      "winner": "away"
     },
     {
       "id": "M91",
