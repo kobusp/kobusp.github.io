@@ -1471,7 +1471,7 @@
         "team": "Paraguay"
       },
       "away": {
-        "team": "W77"
+        "team": "France"
       },
       "venue": "Lincoln Financial Field, Philadelphia"
     },
@@ -1504,10 +1504,10 @@
       "stage": "round_of_16",
       "date": "2026-07-06T00:00:00Z",
       "home": {
-        "team": "W79"
+        "team": "Mexico"
       },
       "away": {
-        "team": "W80"
+        "team": "England"
       },
       "venue": "Estadio Azteca, Mexico City"
     },
@@ -1516,10 +1516,10 @@
       "stage": "round_of_16",
       "date": "2026-07-06T19:00:00Z",
       "home": {
-        "team": "W83"
+        "team": "Portugal"
       },
       "away": {
-        "team": "W84"
+        "team": "Spain"
       },
       "venue": "AT&T Stadium, Arlington"
     },
@@ -1528,10 +1528,10 @@
       "stage": "round_of_16",
       "date": "2026-07-07T00:00:00Z",
       "home": {
-        "team": "W81"
+        "team": "USA"
       },
       "away": {
-        "team": "W82"
+        "team": "Belgium"
       },
       "venue": "Lumen Field, Seattle"
     },
@@ -1540,10 +1540,10 @@
       "stage": "round_of_16",
       "date": "2026-07-07T16:00:00Z",
       "home": {
-        "team": "W86"
+        "team": "Argentina"
       },
       "away": {
-        "team": "W88"
+        "team": "Egypt"
       },
       "venue": "Mercedes-Benz Stadium, Atlanta"
     },
@@ -1552,10 +1552,10 @@
       "stage": "round_of_16",
       "date": "2026-07-07T20:00:00Z",
       "home": {
-        "team": "W85"
+        "team": "Switzerland"
       },
       "away": {
-        "team": "W87"
+        "team": "Colombia"
       },
       "venue": "BC Place, Vancouver"
     },
