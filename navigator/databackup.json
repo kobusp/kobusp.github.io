@@ -1,0 +1,132 @@
+{
+  "profile": {
+    "name": "Kobus",
+    "salary": 48136.78,
+    "payday": "2026-07-23",
+    "currentBalance": 782.46,
+    "emergencyReserve": 0
+  },
+  "recurring": [
+    {
+      "id": "xypb18ou",
+      "name": "Bond",
+      "amount": 16971.63,
+      "dueDay": 1,
+      "isSeeded": false
+    },
+    {
+      "id": "qi8kfapg",
+      "name": "IWYZE Insurance",
+      "amount": 1818.36,
+      "dueDay": 1,
+      "isSeeded": false
+    },
+    {
+      "id": "azebns12",
+      "name": "Hollard Life Insurance",
+      "amount": 1063.39,
+      "dueDay": 1,
+      "isSeeded": false
+    },
+    {
+      "id": "oq4rlsd7",
+      "name": "ABSA Home Insurance",
+      "amount": 898.78,
+      "dueDay": 1,
+      "isSeeded": false
+    },
+    {
+      "id": "3os7fz7e",
+      "name": "Sanlam Retirement",
+      "amount": 1298.15,
+      "dueDay": 1,
+      "isSeeded": false
+    },
+    {
+      "id": "6a5rc3rs",
+      "name": "Account fee",
+      "amount": 255,
+      "dueDay": 1,
+      "isSeeded": false
+    },
+    {
+      "id": "vgcmcsvq",
+      "name": "Afrihost",
+      "amount": 84,
+      "dueDay": 1,
+      "isSeeded": false
+    },
+    {
+      "id": "vlc959z3",
+      "name": "RSA Web",
+      "amount": 1214.4,
+      "dueDay": 1,
+      "isSeeded": false
+    },
+    {
+      "id": "u1uqk3iy",
+      "name": "Liberty Life Insurance",
+      "amount": 1179.59,
+      "dueDay": 1,
+      "isSeeded": false
+    },
+    {
+      "id": "fcmk30x7",
+      "name": "Netflix",
+      "amount": 229,
+      "dueDay": 8,
+      "isSeeded": false
+    },
+    {
+      "id": "k0ar9g3p",
+      "name": "YouTube Premium",
+      "amount": 149.99,
+      "dueDay": 13,
+      "isSeeded": false
+    },
+    {
+      "id": "2fjj1odw",
+      "name": "Apple Subscription",
+      "amount": 59.99,
+      "dueDay": 8,
+      "isSeeded": false
+    },
+    {
+      "id": "f328qwxo",
+      "name": "Wolves Ice Hockey",
+      "amount": 950,
+      "dueDay": 1,
+      "isSeeded": false
+    }
+  ],
+  "savings": [
+    {
+      "id": "qqojcrq4",
+      "name": "Emergency Fund",
+      "amount": 100,
+      "priority": "essential",
+      "isSeeded": false
+    }
+  ],
+  "events": [
+    {
+      "id": "xhcivpcs",
+      "description": "Doctor",
+      "amount": 7000,
+      "type": "expense",
+      "isSeeded": false,
+      "date": "2026-07-23T10:00:00.000Z"
+    },
+    {
+      "id": "izkowfhf",
+      "description": "Credit Card",
+      "amount": 5000,
+      "type": "expense",
+      "isSeeded": false,
+      "date": "2026-07-22T22:00:00.000Z"
+    }
+  ],
+  "ui": {
+    "viewCycleOffset": 0
+  }
+}
