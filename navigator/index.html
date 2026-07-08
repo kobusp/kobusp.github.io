@@ -185,23 +185,23 @@
             <option value="next">Next salary cycle</option>
           </select>
         </div>
-
-        <div id="importModalWrap" class="modal-wrap" role="dialog" aria-modal="true" aria-labelledby="importTitle">
-          <div class="modal">
-            <h2 id="importTitle">Import Data</h2>
-            <p class="tiny">Paste exported JSON below. Import will overwrite all currently stored data.</p>
-            <textarea id="importDataInput" class="import-textarea" placeholder='{"profile":{...},"recurring":[...],"savings":[...],"events":[...],"ui":{...}}'></textarea>
-            <div class="notice" id="importStatus"></div>
-            <div class="actions">
-              <button id="cancelImportBtn" class="secondary-btn">Cancel</button>
-              <button id="confirmImportBtn" class="danger-btn">Import &amp; Overwrite</button>
-            </div>
-          </div>
-        </div>
       </div>
       <div class="actions" style="justify-content:flex-start;"><button id="analyseExpenseBtn" class="primary-btn">Analyse</button></div>
       <div id="previewArea"></div>
       <div class="actions"><button id="cancelPreviewBtn" class="secondary-btn">Cancel</button><button id="recordExpenseBtn" class="danger-btn" disabled>Record Event</button></div>
+    </div>
+  </div>
+
+  <div id="importModalWrap" class="modal-wrap" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+    <div class="modal">
+      <h2 id="importTitle">Import Data</h2>
+      <p class="tiny">Paste exported JSON below. Import will overwrite all currently stored data.</p>
+      <textarea id="importDataInput" class="import-textarea" placeholder='{"profile":{...},"recurring":[...],"savings":[...],"events":[...],"ui":{...}}'></textarea>
+      <div class="notice" id="importStatus"></div>
+      <div class="actions">
+        <button id="cancelImportBtn" class="secondary-btn">Cancel</button>
+        <button id="confirmImportBtn" class="danger-btn">Import &amp; Overwrite</button>
+      </div>
     </div>
   </div>
 
