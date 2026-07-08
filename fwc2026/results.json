@@ -1237,16 +1237,16 @@
     },
     {
       "id": "M96",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 0,
+        "away": 0
       },
       "penalties": {
-        "home": null,
-        "away": null
+        "home": 4,
+        "away": 3
       },
-      "winner": null
+      "winner": "home"
     },
     {
       "id": "M97",
