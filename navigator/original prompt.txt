@@ -1,0 +1,616 @@
+You are a senior UX designer, product designer and senior full-stack engineer helping me build a Minimum Provable Feeling (MPF) prototype for a web application called Financial Navigator.
+
+================================================================================
+THE PRODUCT
+================================================================================
+
+Financial Navigator is NOT a budgeting application.
+
+It is NOT accounting software.
+
+It is NOT a spending tracker.
+
+It is "Waze for Personal Finances."
+
+The application helps people confidently navigate from one payday to the next.
+
+The user has a single destination:
+
+Reach payday safely.
+
+Every design decision should reinforce this metaphor.
+
+Unexpected expenses are like traffic accidents.
+
+Overspending is a detour.
+
+A salary is a clear road.
+
+A bonus is a shortcut.
+
+Recurring bills are checkpoints.
+
+Savings are fuel reserves.
+
+An emergency fund is the spare tyre.
+
+The application continuously recalculates the safest route to payday.
+
+Think navigation software, NOT accounting software.
+
+================================================================================
+THE EMOTIONAL GOAL
+================================================================================
+
+The application exists to reduce financial anxiety.
+
+The application should make the user feel like someone competent is quietly watching over their finances.
+
+The emotional experience should be similar to checking Waze before driving home.
+
+The user should open the application and immediately know:
+
+• Am I okay?
+• Can I relax?
+• Can I afford this?
+• If I made a mistake, how do I recover?
+
+The application should never make the user feel guilty.
+
+It should only make the user feel informed.
+
+When the user makes poor financial decisions the application should calmly recalculate rather than criticize.
+
+Think:
+
+"Okay... let's figure this out."
+
+Not:
+
+"You exceeded your entertainment budget."
+
+================================================================================
+THE PERSONALITY
+================================================================================
+
+Imagine the application as a financially responsible friend.
+
+Not an accountant.
+
+Not a financial advisor.
+
+Not a motivational coach.
+
+Not a therapist.
+
+Characteristics:
+
+• Calm
+• Practical
+• Honest
+• Supportive
+• Intelligent
+• Trustworthy
+• Brief
+• Emotionally aware
+
+Never use guilt.
+
+Never lecture.
+
+Never celebrate excessively.
+
+Never shame.
+
+Instead use language like:
+
+"You're still on course."
+
+"This changes things slightly."
+
+"I'd be a little more careful until payday."
+
+"We should make one adjustment."
+
+"I'd probably wait until next payday."
+
+"This is recoverable."
+
+"I'd go ahead."
+
+================================================================================
+TECHNOLOGY
+================================================================================
+
+This is ONLY an MPF prototype.
+
+Use:
+
+• Single index.html
+• Vanilla JavaScript
+• Vanilla CSS
+• No frameworks
+• No npm
+• No React
+• No Vue
+• No Angular
+• No backend
+• No build tools
+
+Everything should run simply by opening index.html.
+
+Persist data using localStorage.
+
+Keep the code clean and modular.
+
+Separate HTML, CSS and JavaScript sections clearly.
+
+================================================================================
+DESIGN STYLE
+================================================================================
+
+Minimalist.
+
+Modern.
+
+Large typography.
+
+Lots of whitespace.
+
+Rounded cards.
+
+Soft shadows.
+
+Calm colour palette.
+
+Avoid dashboards full of information.
+
+Avoid clutter.
+
+Avoid charts.
+
+Avoid pie graphs.
+
+Avoid accounting terminology.
+
+Avoid spreadsheets.
+
+Use only a few accent colours.
+
+Green = Healthy
+
+Amber = Needs Attention
+
+Red = Action Required
+
+Everything should feel reassuring.
+
+================================================================================
+THE NORTH STAR
+================================================================================
+
+The application answers ONE question.
+
+"Can I still get safely to payday?"
+
+If a feature does not help answer that question it probably does not belong in Version 1.
+
+================================================================================
+HOME SCREEN
+================================================================================
+
+The application opens directly onto a dashboard.
+
+Large heading.
+
+Example
+
+Good Evening, Kobus
+
+------------------------------------------------
+
+Journey Status
+
+🟢 On Course
+
+Destination
+
+Payday
+
+14 days remaining
+
+------------------------------------------------
+
+Current Bank Balance
+
+R13 245
+
+------------------------------------------------
+
+Financial Safety Margin
+
+R4 820
+
+------------------------------------------------
+
+Financial Stress
+
+🙂 Low
+
+------------------------------------------------
+
+Journey Health
+
+Cash Flow
+🟢 Healthy
+
+Essential Bills
+🟢 Protected
+
+Emergency Fund
+🟢 Healthy
+
+Holiday Savings
+🟡 Slightly Behind
+
+Retirement
+🟡 Opportunity To Increase
+
+------------------------------------------------
+
+Upcoming Checkpoints
+
+Insurance
+Tomorrow
+
+Internet
+Friday
+
+Bond
+8 days
+
+------------------------------------------------
+
+Recent Events
+
+Salary
+
+Insurance Paid
+
+Vet Bill
+
+Pub Night
+
+------------------------------------------------
+
+Large primary button
+
+"I Need To Pay For Something"
+
+================================================================================
+THE CORE CALCULATION
+================================================================================
+
+Everything revolves around Financial Safety Margin.
+
+Financial Safety Margin =
+
+Current Bank Balance
+
+minus
+
+Remaining recurring commitments
+
+minus
+
+Required savings contributions
+
+minus
+
+Emergency reserve
+
+This is the most important number in the application.
+
+It represents money the user can safely spend without affecting important commitments.
+
+================================================================================
+THE CURRENT BALANCE
+================================================================================
+
+The application trusts reality.
+
+The user manually updates their current bank balance.
+
+No bank integrations.
+
+No Open Banking.
+
+No assumptions.
+
+Current balance is the anchor for every calculation.
+
+================================================================================
+JOURNEY HEALTH
+================================================================================
+
+Display small health indicators.
+
+Cash Flow
+
+Essential Bills
+
+Emergency Fund
+
+Savings Goals
+
+Upcoming Commitments
+
+Retirement
+
+Each health indicator should display simple states.
+
+Healthy
+
+Protected
+
+Needs Attention
+
+Behind Schedule
+
+Never expose accounting jargon.
+
+================================================================================
+JOURNEY STATUS
+================================================================================
+
+Display an overall navigation state.
+
+Possible values.
+
+🟢 On Course
+
+🟡 Minor Detour
+
+🟠 Caution Ahead
+
+🔴 Off Course
+
+This is navigation language.
+
+NOT budgeting language.
+
+================================================================================
+FINANCIAL STRESS
+================================================================================
+
+Stress is intentionally emotional.
+
+🙂 Low
+
+😐 Medium
+
+😟 High
+
+Stress is based primarily on Financial Safety Margin.
+
+================================================================================
+EVENTS
+================================================================================
+
+Everything is an Event.
+
+Examples
+
+Salary
+
+Bonus
+
+Unexpected Expense
+
+Vet Bill
+
+House Repair
+
+Pub Night
+
+Insurance Paid
+
+Bond Paid
+
+Investment Contribution
+
+Refund
+
+Holiday Booking
+
+Tyres
+
+Medical Expense
+
+Every event simply changes the current financial state.
+
+After every event the application recalculates.
+
+================================================================================
+TIMELINE
+================================================================================
+
+Display a simple timeline.
+
+Salary
+
+Bond Paid
+
+Vet Bill
+
+Insurance
+
+Upcoming
+
+Internet
+
+Spotify
+
+Holiday Deposit
+
+Avoid ledger style.
+
+Avoid debit/credit language.
+
+================================================================================
+"I NEED TO PAY FOR SOMETHING"
+================================================================================
+
+This is the primary workflow.
+
+Click button.
+
+Open modal dialog.
+
+Description
+
+Amount
+
+Analyse
+
+DO NOT immediately record the expense.
+
+================================================================================
+THE PREVIEW
+================================================================================
+
+This is the killer feature.
+
+Before recording any event the application generates a Before/After preview.
+
+Show:
+
+CURRENT
+
+Journey Status
+
+Financial Safety Margin
+
+Stress
+
+AFTER
+
+Projected Journey Status
+
+Projected Financial Safety Margin
+
+Projected Stress
+
+Then explain:
+
+What changed?
+
+Which goals are delayed?
+
+Which commitments become risky?
+
+Will emergency savings be required?
+
+Finally provide one calm recommendation.
+
+Examples
+
+"I'd go ahead."
+
+"This creates some pressure but you're still comfortably on course."
+
+"I'd wait until after payday."
+
+"I'd use a small amount of your emergency fund."
+
+"This is recoverable."
+
+Then provide two buttons.
+
+Record Event
+
+Cancel
+
+This interaction should feel exactly like Waze showing multiple routes before navigation starts.
+
+The application helps the user make a confident decision BEFORE committing to the expense.
+
+================================================================================
+RECOVERY SUGGESTIONS
+================================================================================
+
+If an expense creates problems suggest practical recovery routes.
+
+Examples
+
+Delay holiday savings.
+
+Reduce discretionary spending.
+
+Skip eating out.
+
+Wait until next payday.
+
+Use emergency savings.
+
+Reduce retirement contribution this month.
+
+Never shame.
+
+Always reassure.
+
+================================================================================
+MVP SCOPE
+================================================================================
+
+Build only enough functionality to prove the emotional experience.
+
+Include:
+
+Editable salary
+
+Editable payday
+
+Editable current balance
+
+Recurring commitments
+
+Savings goals
+
+Emergency reserve
+
+Timeline of events
+
+Upcoming commitments
+
+Journey Health
+
+Journey Status
+
+Financial Stress
+
+Financial Safety Margin
+
+Expense preview
+
+Record event
+
+Persist data with localStorage
+
+================================================================================
+SUCCESS CRITERIA
+================================================================================
+
+The prototype is successful if, after using it with real financial numbers, the user feels less anxious than before.
+
+The application is not trying to help users budget.
+
+It is helping them navigate.
+
+Every feature should answer this question:
+
+"Does this help someone get safely to payday?"
+
+If the answer is no, leave it out.
+
+The final prototype should feel polished, calming, intuitive and trustworthy.

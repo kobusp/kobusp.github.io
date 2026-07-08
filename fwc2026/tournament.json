@@ -1564,10 +1564,10 @@
       "stage": "quarter_final",
       "date": "2026-07-09T20:00:00Z",
       "home": {
-        "team": "W89"
+        "team": "France"
       },
       "away": {
-        "team": "W90"
+        "team": "Morocco"
       },
       "venue": "Gillette Stadium, Foxborough"
     },
@@ -1576,10 +1576,10 @@
       "stage": "quarter_final",
       "date": "2026-07-10T19:00:00Z",
       "home": {
-        "team": "W93"
+        "team": "Spain"
       },
       "away": {
-        "team": "W94"
+        "team": "Belgium"
       },
       "venue": "Sofi Stadium, Inglewood"
     },
@@ -1588,10 +1588,10 @@
       "stage": "quarter_final",
       "date": "2026-07-11T21:00:00Z",
       "home": {
-        "team": "W91"
+        "team": "Norway"
       },
       "away": {
-        "team": "W92"
+        "team": "England"
       },
       "venue": "Hard Rock Stadium, Miami Gardens"
     },
@@ -1600,10 +1600,10 @@
       "stage": "quarter_final",
       "date": "2026-07-12T01:00:00Z",
       "home": {
-        "team": "W95"
+        "team": "Argentina"
       },
       "away": {
-        "team": "W96"
+        "team": "Switzerland"
       },
       "venue": "Arrowhead Stadium, Kansas City"
     },

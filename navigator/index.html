@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Financial Navigator</title>
+  <style>
+    :root {
+      --bg: #f4f7f5;
+      --surface: #ffffff;
+      --text: #122019;
+      --muted: #5f6e65;
+      --green: #2f9d63;
+      --amber: #d39f3c;
+      --red: #d25252;
+      --shadow: 0 12px 28px rgba(19, 37, 27, 0.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(180deg, #f7faf8 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.4;
+      padding: 2rem 1rem 4rem;
+    }
+    .app { max-width: 1080px; margin: 0 auto; display: grid; gap: 1rem; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -0.02em; }
+    h2 { margin: 0 0 0.5rem; font-size: 1.05rem; color: var(--muted); font-weight: 600; }
+    .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.1rem 1.2rem; }
+    .hero { display: grid; gap: 1rem; }
+    .status-line { font-size: 1.65rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .cycle-controls { display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap; }
+    .cycle-label { font-size: 0.86rem; color: var(--muted); padding: 0.25rem 0.5rem; background: #edf3ef; border-radius: 999px; }
+    .meta-row { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+    .metric-label { color: var(--muted); font-size: 0.92rem; margin-bottom: 0.22rem; }
+    .metric-value { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.02em; }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .health-list, .checkpoint-list, .timeline-list, .event-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.55rem; }
+    .line-item { display: flex; justify-content: space-between; align-items: center; gap: 0.7rem; font-size: 0.95rem; }
+    .badge { padding: 0.16rem 0.58rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+    .healthy { background: #e8f6ef; color: #1c7b4a; }
+    .attention { background: #fef3e0; color: #94650c; }
+    .action { background: #fdecec; color: #9a2d2d; }
+    .pill-row { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+    .pill { background: #edf2ef; border-radius: 999px; padding: 0.34rem 0.7rem; font-size: 0.83rem; color: #2b3d33; }
+    .primary-btn, .secondary-btn, .danger-btn { border: 0; border-radius: 12px; padding: 0.78rem 1rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
+    .primary-btn { background: #194f98; color: #fff; }
+    .secondary-btn { background: #ecf1f5; color: #17314f; }
+    .danger-btn { background: #e85555; color: #fff; }
+    .settings-grid { display: grid; gap: 0.65rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .field label { display: block; margin-bottom: 0.3rem; font-size: 0.84rem; color: var(--muted); }
+    input, select { width: 100%; border: 1px solid #dae4dd; border-radius: 10px; padding: 0.62rem 0.72rem; font-size: 0.93rem; background: #fff; color: var(--text); }
+    .item-grid { display: grid; gap: 0.45rem; margin-top: 0.6rem; }
+    .item-row { display: grid; gap: 0.5rem; grid-template-columns: 1fr 95px 85px 76px; align-items: center; }
+    .editable-row { display: grid; gap: 0.5rem; grid-template-columns: 1fr 110px 90px 82px; align-items: center; }
+    .editable-savings-row { grid-template-columns: 1fr 110px 120px 82px; }
+    .editable-event-row { grid-template-columns: 1fr 100px 110px 140px 82px; }
+    .mini-input { padding: 0.48rem 0.58rem; font-size: 0.88rem; }
+    .mini-btn { padding: 0.5rem 0.65rem; font-size: 0.82rem; }
+    .tiny { font-size: 0.8rem; color: var(--muted); }
+    .section-totals { display: grid; gap: 0.2rem; margin-top: 0.5rem; }
+    .modal-wrap { position: fixed; inset: 0; background: rgba(12, 22, 15, 0.52); padding: 1rem; display: none; align-items: center; justify-content: center; z-index: 10; }
+    .modal-wrap.open { display: flex; }
+    .modal { width: min(740px, 100%); max-height: 95vh; overflow: auto; background: #fff; border-radius: 18px; box-shadow: 0 25px 50px rgba(9, 21, 13, 0.28); padding: 1rem; }
+    .preview-grid { display: grid; gap: 0.8rem; margin-top: 0.8rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .preview-card { border: 1px solid #e3ebe5; border-radius: 12px; padding: 0.75rem; background: #fbfdfb; }
+    .analysis-block { margin-top: 0.8rem; background: #f5f8f6; border: 1px solid #e2e9e3; border-radius: 12px; padding: 0.75rem; }
+    .analysis-block p { margin: 0.25rem 0; font-size: 0.9rem; }
+    .actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.8rem; }
+    .import-textarea {
+      width: 100%;
+      min-height: 240px;
+      border: 1px solid #dae4dd;
+      border-radius: 10px;
+      padding: 0.72rem;
+      font-size: 0.9rem;
+      font-family: Consolas, "Courier New", monospace;
+      resize: vertical;
+    }
+    .notice { margin-top: 0.5rem; font-size: 0.82rem; color: var(--muted); }
+    .status-green { color: var(--green); }
+    .status-amber { color: var(--amber); }
+    .status-red { color: var(--red); }
+    @media (max-width: 760px) { .item-row, .editable-row, .editable-savings-row, .editable-event-row { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero card">
+      <h1 id="greeting">Good Evening</h1>
+      <div>
+        <h2>Journey Status</h2>
+        <div id="journeyStatus" class="status-line"></div>
+        <div class="tiny" id="paydayLine"></div>
+        <div class="cycle-controls">
+          <button id="cyclePrevBtn" class="secondary-btn mini-btn">Previous</button>
+          <button id="cycleTodayBtn" class="secondary-btn mini-btn">Current</button>
+          <button id="cycleNextBtn" class="secondary-btn mini-btn">Next</button>
+          <span id="cycleLabel" class="cycle-label"></span>
+        </div>
+      </div>
+      <div class="meta-row">
+        <div><div id="currentBalanceLabel" class="metric-label">Current Bank Balance</div><div id="currentBalance" class="metric-value"></div></div>
+        <div><div class="metric-label">Financial Safety Margin</div><div id="safetyMargin" class="metric-value"></div></div>
+        <div><div class="metric-label">Financial Stress</div><div id="stressLevel" class="metric-value"></div></div>
+      </div>
+      <button class="primary-btn" id="openExpenseBtn">I Need To Pay For Something</button>
+    </section>
+
+    <section class="grid">
+      <article class="card"><h2>Journey Health</h2><ul class="health-list" id="healthList"></ul></article>
+      <article class="card"><h2>Upcoming Checkpoints</h2><ul class="checkpoint-list" id="checkpointList"></ul></article>
+      <article class="card"><h2>Recent Events</h2><div class="pill-row" id="recentEvents"></div></article>
+      <article class="card"><h2>Timeline</h2><ul class="timeline-list" id="timelineList"></ul></article>
+    </section>
+
+    <section class="card">
+      <h2>Navigation Inputs</h2>
+      <div class="settings-grid">
+        <div class="field"><label for="nameInput">Name</label><input id="nameInput" type="text" /></div>
+        <div class="field"><label for="salaryInput">Salary (monthly)</label><input id="salaryInput" type="number" min="0" step="100" /></div>
+        <div class="field"><label for="paydayInput">Next Payday</label><input id="paydayInput" type="date" /></div>
+        <div class="field"><label for="balanceInput">Current Balance</label><input id="balanceInput" type="number" min="0" step="10" /></div>
+        <div class="field"><label for="reserveInput">Emergency Reserve</label><input id="reserveInput" type="number" min="0" step="10" /></div>
+      </div>
+      <div class="actions">
+        <button id="clearDefaultsBtn" class="secondary-btn">Clear Starter Defaults</button>
+        <button id="exportDataBtn" class="secondary-btn">Export Data</button>
+        <button id="openImportBtn" class="secondary-btn">Import Data</button>
+        <button id="saveInputsBtn" class="secondary-btn">Save Inputs</button>
+      </div>
+      <div class="notice" id="dataTransferStatus"></div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Recurring Commitments</h2>
+        <div class="item-row">
+          <input id="commitmentName" placeholder="e.g. Bond" />
+          <input id="commitmentAmount" type="number" min="0" step="10" placeholder="Amount" />
+          <input id="commitmentDay" type="number" min="1" max="31" placeholder="Due day" />
+          <button id="addCommitmentBtn" class="secondary-btn">Add</button>
+        </div>
+        <div class="tiny">Due day is the day of the month.</div>
+        <div class="tiny" id="commitmentTotal"></div>
+        <div class="item-grid" id="commitmentItems"></div>
+      </article>
+      <article class="card">
+        <h2>Savings Goals</h2>
+        <div class="item-row">
+          <input id="savingName" placeholder="e.g. Holiday Savings" />
+          <input id="savingAmount" type="number" min="0" step="10" placeholder="Amount" />
+          <select id="savingPriority"><option value="essential">Essential</option><option value="flexible">Flexible</option></select>
+          <button id="addSavingBtn" class="secondary-btn">Add</button>
+        </div>
+        <div class="tiny" id="savingsTotal"></div>
+        <div class="item-grid" id="savingsItems"></div>
+      </article>
+    </section>
+
+    <section class="card">
+      <h2>Recorded &amp; Planned Payments</h2>
+      <div class="tiny">Edit each payment event in place.</div>
+      <div class="section-totals tiny">
+        <div id="paymentsTotal"></div>
+        <div id="plannedCurrentTotal"></div>
+        <div id="plannedFutureTotal"></div>
+      </div>
+      <div class="item-grid" id="paymentItems"></div>
+    </section>
+  </main>
+
+  <div id="expenseModalWrap" class="modal-wrap" role="dialog" aria-modal="true" aria-labelledby="expenseTitle">
+    <div class="modal">
+      <h2 id="expenseTitle">Before you pay, let&apos;s preview the route</h2>
+      <div class="settings-grid">
+        <div class="field"><label for="expenseDescription">Description</label><input id="expenseDescription" type="text" placeholder="e.g. Vet Bill" /></div>
+        <div class="field"><label for="expenseAmount">Amount</label><input id="expenseAmount" type="number" min="1" step="10" /></div>
+        <div class="field">
+          <label for="expenseCycleSelect">Pay From</label>
+          <select id="expenseCycleSelect">
+            <option value="current">This salary cycle</option>
+            <option value="next">Next salary cycle</option>
+          </select>
+        </div>
+
+        <div id="importModalWrap" class="modal-wrap" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+          <div class="modal">
+            <h2 id="importTitle">Import Data</h2>
+            <p class="tiny">Paste exported JSON below. Import will overwrite all currently stored data.</p>
+            <textarea id="importDataInput" class="import-textarea" placeholder='{"profile":{...},"recurring":[...],"savings":[...],"events":[...],"ui":{...}}'></textarea>
+            <div class="notice" id="importStatus"></div>
+            <div class="actions">
+              <button id="cancelImportBtn" class="secondary-btn">Cancel</button>
+              <button id="confirmImportBtn" class="danger-btn">Import &amp; Overwrite</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="actions" style="justify-content:flex-start;"><button id="analyseExpenseBtn" class="primary-btn">Analyse</button></div>
+      <div id="previewArea"></div>
+      <div class="actions"><button id="cancelPreviewBtn" class="secondary-btn">Cancel</button><button id="recordExpenseBtn" class="danger-btn" disabled>Record Event</button></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "financial-navigator-v1";
+    const DEFAULT_SIGNATURES = {
+      recurring: [
+        { name: "Insurance", amount: 820 },
+        { name: "Internet", amount: 749 },
+        { name: "Bond", amount: 8900 }
+      ],
+      savings: [
+        { name: "Emergency Fund", amount: 1000, priority: "essential" },
+        { name: "Holiday Savings", amount: 900, priority: "flexible" },
+        { name: "Retirement", amount: 1200, priority: "flexible" }
+      ],
+      events: [
+        { description: "Salary", amount: 32000, type: "income" },
+        { description: "Insurance Paid", amount: 820, type: "expense" },
+        { description: "Vet Bill", amount: 1450, type: "expense" },
+        { description: "Pub Night", amount: 620, type: "expense" }
+      ]
+    };
+    const state = loadState();
+    const els = bindElements();
+    renderAll();
+    attachEvents();
+
+    function loadState() {
+      const existing = localStorage.getItem(STORAGE_KEY);
+      if (existing) {
+        const parsed = JSON.parse(existing);
+        parsed.recurring = markLegacySeededEntries(
+          Array.isArray(parsed.recurring) ? parsed.recurring : [],
+          DEFAULT_SIGNATURES.recurring,
+          (item) => `${item.name}|${num(item.amount)}`
+        );
+        parsed.savings = markLegacySeededEntries(
+          Array.isArray(parsed.savings) ? parsed.savings : [],
+          DEFAULT_SIGNATURES.savings,
+          (item) => `${item.name}|${num(item.amount)}|${item.priority}`
+        );
+        parsed.events = markLegacySeededEntries(
+          Array.isArray(parsed.events) ? parsed.events : [],
+          DEFAULT_SIGNATURES.events,
+          (item) => `${item.description}|${num(item.amount)}|${item.type}`
+        );
+        parsed.profile = parsed.profile || { name: "Kobus", salary: 0, payday: "", currentBalance: 0, emergencyReserve: 0 };
+        parsed.ui = parsed.ui || { viewCycleOffset: 0 };
+        parsed.ui.viewCycleOffset = clampCycleOffset(parsed.ui.viewCycleOffset);
+        return parsed;
+      }
+      const payday = new Date();
+      payday.setDate(payday.getDate() + 14);
+      const defaults = {
+        profile: { name: "Kobus", salary: 32000, payday: payday.toISOString().slice(0, 10), currentBalance: 13245, emergencyReserve: 3500 },
+        recurring: [
+          { id: uid(), name: "Insurance", amount: 820, dueDay: nextDueDay(1), isSeeded: true },
+          { id: uid(), name: "Internet", amount: 749, dueDay: nextDueDay(4), isSeeded: true },
+          { id: uid(), name: "Bond", amount: 8900, dueDay: nextDueDay(8), isSeeded: true }
+        ],
+        savings: [
+          { id: uid(), name: "Emergency Fund", amount: 1000, priority: "essential", isSeeded: true },
+          { id: uid(), name: "Holiday Savings", amount: 900, priority: "flexible", isSeeded: true },
+          { id: uid(), name: "Retirement", amount: 1200, priority: "flexible", isSeeded: true }
+        ],
+        events: [event("Salary", 32000, "income", true), event("Insurance Paid", 820, "expense", true), event("Vet Bill", 1450, "expense", true), event("Pub Night", 620, "expense", true)],
+        ui: { viewCycleOffset: 0 }
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+      return defaults;
+    }
+
+    function bindElements() {
+      return {
+        greeting: q("#greeting"), journeyStatus: q("#journeyStatus"), paydayLine: q("#paydayLine"), cycleLabel: q("#cycleLabel"), currentBalanceLabel: q("#currentBalanceLabel"),
+        cyclePrevBtn: q("#cyclePrevBtn"), cycleTodayBtn: q("#cycleTodayBtn"), cycleNextBtn: q("#cycleNextBtn"), currentBalance: q("#currentBalance"),
+        safetyMargin: q("#safetyMargin"), stressLevel: q("#stressLevel"), healthList: q("#healthList"), checkpointList: q("#checkpointList"),
+        recentEvents: q("#recentEvents"), timelineList: q("#timelineList"), nameInput: q("#nameInput"), salaryInput: q("#salaryInput"),
+        paydayInput: q("#paydayInput"), balanceInput: q("#balanceInput"), reserveInput: q("#reserveInput"), clearDefaultsBtn: q("#clearDefaultsBtn"),
+        exportDataBtn: q("#exportDataBtn"), openImportBtn: q("#openImportBtn"), saveInputsBtn: q("#saveInputsBtn"), dataTransferStatus: q("#dataTransferStatus"),
+        commitmentName: q("#commitmentName"), commitmentAmount: q("#commitmentAmount"), commitmentDay: q("#commitmentDay"), addCommitmentBtn: q("#addCommitmentBtn"),
+        commitmentItems: q("#commitmentItems"), commitmentTotal: q("#commitmentTotal"), savingName: q("#savingName"), savingAmount: q("#savingAmount"), savingPriority: q("#savingPriority"),
+        addSavingBtn: q("#addSavingBtn"), savingsItems: q("#savingsItems"), savingsTotal: q("#savingsTotal"), paymentItems: q("#paymentItems"),
+        paymentsTotal: q("#paymentsTotal"), plannedCurrentTotal: q("#plannedCurrentTotal"), plannedFutureTotal: q("#plannedFutureTotal"),
+        openExpenseBtn: q("#openExpenseBtn"), expenseModalWrap: q("#expenseModalWrap"),
+        expenseDescription: q("#expenseDescription"), expenseAmount: q("#expenseAmount"), expenseCycleSelect: q("#expenseCycleSelect"), analyseExpenseBtn: q("#analyseExpenseBtn"),
+        previewArea: q("#previewArea"), cancelPreviewBtn: q("#cancelPreviewBtn"), recordExpenseBtn: q("#recordExpenseBtn"),
+        importModalWrap: q("#importModalWrap"), importDataInput: q("#importDataInput"), importStatus: q("#importStatus"),
+        cancelImportBtn: q("#cancelImportBtn"), confirmImportBtn: q("#confirmImportBtn")
+      };
+    }
+
+    function attachEvents() {
+      els.saveInputsBtn.addEventListener("click", saveInputs);
+      els.clearDefaultsBtn.addEventListener("click", clearSeededDefaults);
+      els.exportDataBtn.addEventListener("click", exportDataToClipboard);
+      els.openImportBtn.addEventListener("click", openImportModal);
+      els.cyclePrevBtn.addEventListener("click", () => shiftCycleView(-1));
+      els.cycleTodayBtn.addEventListener("click", () => setCycleView(0));
+      els.cycleNextBtn.addEventListener("click", () => shiftCycleView(1));
+      els.addCommitmentBtn.addEventListener("click", addCommitment);
+      els.addSavingBtn.addEventListener("click", addSavingGoal);
+      els.openExpenseBtn.addEventListener("click", openExpenseModal);
+      els.cancelPreviewBtn.addEventListener("click", closeExpenseModal);
+      els.expenseModalWrap.addEventListener("click", (e) => { if (e.target === els.expenseModalWrap) closeExpenseModal(); });
+      els.analyseExpenseBtn.addEventListener("click", analyseExpensePreview);
+      els.recordExpenseBtn.addEventListener("click", recordExpense);
+      els.cancelImportBtn.addEventListener("click", closeImportModal);
+      els.confirmImportBtn.addEventListener("click", importDataAndOverwrite);
+      els.importModalWrap.addEventListener("click", (e) => { if (e.target === els.importModalWrap) closeImportModal(); });
+    }
+
+    function renderAll() {
+      const metrics = calculateMetricsForOffset(state.ui.viewCycleOffset);
+      renderHeader(metrics);
+      renderHealth(metrics);
+      renderCheckpoints(metrics);
+      renderRecentEvents(metrics);
+      renderTimeline(metrics);
+      renderInputValues();
+      renderCommitments();
+      renderSavings();
+      renderPaymentsPanel();
+      persist();
+    }
+
+    function renderHeader(metrics) {
+      const name = state.profile.name || "there";
+      els.greeting.textContent = `${dayGreeting()}, ${name}`;
+      els.journeyStatus.textContent = metrics.status.label;
+      els.journeyStatus.className = "status-line " + metrics.status.className;
+      els.paydayLine.textContent = `Destination: Payday · ${metrics.daysRemaining} day${metrics.daysRemaining === 1 ? "" : "s"} remaining`;
+      els.cycleLabel.textContent = metrics.cycleLabel;
+      els.cyclePrevBtn.disabled = state.ui.viewCycleOffset <= -1;
+      els.cycleNextBtn.disabled = state.ui.viewCycleOffset >= 3;
+      els.currentBalanceLabel.textContent = state.ui.viewCycleOffset === 0 ? "Current Bank Balance" : "Projected Cycle Start";
+      els.currentBalance.textContent = fmtCurrency(metrics.referenceBalance);
+      els.safetyMargin.textContent = fmtCurrency(metrics.safetyMargin);
+      els.stressLevel.textContent = metrics.stress.label;
+      els.stressLevel.className = `metric-value ${metrics.stress.className}`;
+    }
+
+    function renderHealth(metrics) {
+      const items = buildHealthItems(metrics);
+      els.healthList.innerHTML = items.map((item) => `<li class="line-item"><span>${item.name}</span><span class="badge ${item.badgeClass}">${item.value}</span></li>`).join("");
+    }
+
+    function renderCheckpoints(metrics) {
+      if (!metrics.upcoming.length) { els.checkpointList.innerHTML = "<li class='tiny'>No checkpoints before payday.</li>"; return; }
+      els.checkpointList.innerHTML = metrics.upcoming.slice(0, 6).map((item) => `<li class="line-item"><span>${item.name}</span><span>${item.when}</span></li>`).join("");
+    }
+
+    function renderRecentEvents(metrics) {
+      const recent = [...state.events]
+        .filter((eventItem) => isWithinRange(new Date(eventItem.date), metrics.cycleStart, metrics.cycleEnd))
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, 6);
+      els.recentEvents.innerHTML = recent.length ? recent.map((e) => `<span class="pill">${escapeHtml(e.description)}</span>`).join("") : "<span class='tiny'>No events yet.</span>";
+    }
+
+    function renderTimeline(metrics) {
+      const cycleEvents = [...state.events]
+        .filter((eventItem) => isWithinRange(new Date(eventItem.date), metrics.cycleStart, metrics.cycleEnd))
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .map((e) => ({ label: e.description, detail: `${fmtSignedAmount(e)} · ${formatDate(e.date)}${new Date(e.date) > new Date() ? " · Planned" : ""}` }));
+      const upcoming = metrics.upcoming.slice(0, 6).map((u) => ({ label: `${u.name} checkpoint`, detail: `${fmtCurrency(u.amount)} · ${u.when}` }));
+      const rows = [...cycleEvents, ...upcoming].slice(0, 10);
+      els.timelineList.innerHTML = rows.map((row) => `<li class="line-item"><span>${escapeHtml(row.label)}</span><span class="tiny">${row.detail}</span></li>`).join("");
+    }
+
+    function renderInputValues() {
+      els.nameInput.value = state.profile.name;
+      els.salaryInput.value = state.profile.salary;
+      els.paydayInput.value = state.profile.payday;
+      els.balanceInput.value = state.profile.currentBalance;
+      els.reserveInput.value = state.profile.emergencyReserve;
+    }
+
+    function renderCommitments() {
+      const commitmentsTotal = sum(state.recurring.map((item) => item.amount));
+      els.commitmentTotal.textContent = `Total commitments: ${fmtCurrency(commitmentsTotal)}`;
+      if (!state.recurring.length) { els.commitmentItems.innerHTML = "<div class='tiny'>No commitments added.</div>"; return; }
+      els.commitmentItems.innerHTML = state.recurring.map((item) => `
+        <div class="editable-row" data-commitment-id="${item.id}">
+          <input class="mini-input" data-commitment-field="name" value="${escapeHtml(item.name)}" />
+          <input class="mini-input" data-commitment-field="amount" type="number" min="0" step="10" value="${num(item.amount)}" />
+          <input class="mini-input" data-commitment-field="dueDay" type="number" min="1" max="31" value="${num(item.dueDay)}" />
+          <button class="secondary-btn mini-btn" data-remove-commitment="${item.id}">Remove</button>
+        </div>
+      `).join("");
+      els.commitmentItems.querySelectorAll("[data-remove-commitment]").forEach((btn) => btn.addEventListener("click", () => { state.recurring = state.recurring.filter((c) => c.id !== btn.dataset.removeCommitment); renderAll(); }));
+      els.commitmentItems.querySelectorAll("[data-commitment-field]").forEach((input) => {
+        input.addEventListener("change", () => {
+          const row = input.closest("[data-commitment-id]");
+          if (!row) return;
+          const item = state.recurring.find((c) => c.id === row.dataset.commitmentId);
+          if (!item) return;
+          const field = input.dataset.commitmentField;
+          if (field === "name") {
+            const trimmed = input.value.trim();
+            item.name = trimmed || item.name;
+            input.value = item.name;
+          }
+          if (field === "amount") {
+            item.amount = Math.max(0, num(input.value));
+            input.value = String(item.amount);
+          }
+          if (field === "dueDay") {
+            item.dueDay = Math.max(1, Math.min(31, parseInt(input.value, 10) || item.dueDay || 1));
+            input.value = String(item.dueDay);
+          }
+          renderAll();
+        });
+      });
+    }
+
+    function renderSavings() {
+      const savingsTotal = sum(state.savings.map((item) => item.amount));
+      els.savingsTotal.textContent = `Total savings goals: ${fmtCurrency(savingsTotal)}`;
+      if (!state.savings.length) { els.savingsItems.innerHTML = "<div class='tiny'>No goals added.</div>"; return; }
+      els.savingsItems.innerHTML = state.savings.map((item) => `
+        <div class="editable-row editable-savings-row" data-saving-id="${item.id}">
+          <input class="mini-input" data-saving-field="name" value="${escapeHtml(item.name)}" />
+          <input class="mini-input" data-saving-field="amount" type="number" min="0" step="10" value="${num(item.amount)}" />
+          <select class="mini-input" data-saving-field="priority">
+            <option value="essential" ${item.priority === "essential" ? "selected" : ""}>Essential</option>
+            <option value="flexible" ${item.priority === "flexible" ? "selected" : ""}>Flexible</option>
+          </select>
+          <button class="secondary-btn mini-btn" data-remove-saving="${item.id}">Remove</button>
+        </div>
+      `).join("");
+      els.savingsItems.querySelectorAll("[data-remove-saving]").forEach((btn) => btn.addEventListener("click", () => { state.savings = state.savings.filter((s) => s.id !== btn.dataset.removeSaving); renderAll(); }));
+      els.savingsItems.querySelectorAll("[data-saving-field]").forEach((input) => {
+        input.addEventListener("change", () => {
+          const row = input.closest("[data-saving-id]");
+          if (!row) return;
+          const item = state.savings.find((s) => s.id === row.dataset.savingId);
+          if (!item) return;
+          const field = input.dataset.savingField;
+          if (field === "name") {
+            const trimmed = input.value.trim();
+            item.name = trimmed || item.name;
+            input.value = item.name;
+          }
+          if (field === "amount") {
+            item.amount = Math.max(0, num(input.value));
+            input.value = String(item.amount);
+          }
+          if (field === "priority") item.priority = input.value === "essential" ? "essential" : "flexible";
+          renderAll();
+        });
+      });
+    }
+
+    function renderPaymentsPanel() {
+      const allEvents = [...state.events].sort((a, b) => new Date(b.date) - new Date(a.date));
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const currentCycleEnd = getCycleBounds(0).end;
+      const expenseEvents = allEvents.filter((item) => item.type === "expense");
+      const plannedExpenseEvents = expenseEvents.filter((item) => new Date(item.date) >= todayStart);
+      const plannedCurrent = plannedExpenseEvents.filter((item) => new Date(item.date) < currentCycleEnd);
+      const plannedFuture = plannedExpenseEvents.filter((item) => new Date(item.date) >= currentCycleEnd);
+      els.paymentsTotal.textContent = `Total payments (expenses): ${fmtCurrency(sum(expenseEvents.map((item) => item.amount)))}`;
+      els.plannedCurrentTotal.textContent = `Planned this cycle: ${fmtCurrency(sum(plannedCurrent.map((item) => item.amount)))}`;
+      els.plannedFutureTotal.textContent = `Planned future cycles: ${fmtCurrency(sum(plannedFuture.map((item) => item.amount)))}`;
+      if (!allEvents.length) { els.paymentItems.innerHTML = "<div class='tiny'>No payments recorded.</div>"; return; }
+      els.paymentItems.innerHTML = allEvents.map((item) => `
+        <div class="editable-row editable-event-row" data-event-id="${item.id}">
+          <input class="mini-input" data-event-field="description" value="${escapeHtml(item.description)}" />
+          <select class="mini-input" data-event-field="type">
+            <option value="expense" ${item.type === "expense" ? "selected" : ""}>Expense</option>
+            <option value="income" ${item.type === "income" ? "selected" : ""}>Income</option>
+          </select>
+          <input class="mini-input" data-event-field="amount" type="number" min="0" step="10" value="${num(item.amount)}" />
+          <input class="mini-input" data-event-field="date" type="date" value="${toDateInputValue(item.date)}" />
+          <button class="secondary-btn mini-btn" data-remove-event="${item.id}">Remove</button>
+        </div>
+      `).join("");
+      els.paymentItems.querySelectorAll("[data-remove-event]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.events = state.events.filter((e) => e.id !== btn.dataset.removeEvent);
+          renderAll();
+        });
+      });
+      els.paymentItems.querySelectorAll("[data-event-field]").forEach((input) => {
+        input.addEventListener("change", () => {
+          const row = input.closest("[data-event-id]");
+          if (!row) return;
+          const item = state.events.find((e) => e.id === row.dataset.eventId);
+          if (!item) return;
+          const field = input.dataset.eventField;
+          if (field === "description") {
+            const trimmed = input.value.trim();
+            item.description = trimmed || item.description;
+            input.value = item.description;
+          }
+          if (field === "type") item.type = input.value === "income" ? "income" : "expense";
+          if (field === "amount") {
+            item.amount = Math.max(0, num(input.value));
+            input.value = String(item.amount);
+          }
+          if (field === "date" && input.value) item.date = new Date(`${input.value}T12:00:00`).toISOString();
+          renderAll();
+        });
+      });
+    }
+
+    function saveInputs() {
+      state.profile.name = els.nameInput.value.trim() || "Kobus";
+      state.profile.salary = num(els.salaryInput.value);
+      state.profile.payday = els.paydayInput.value || state.profile.payday;
+      state.profile.currentBalance = num(els.balanceInput.value);
+      state.profile.emergencyReserve = num(els.reserveInput.value);
+      renderAll();
+    }
+
+    function addCommitment() {
+      const name = els.commitmentName.value.trim();
+      const amount = num(els.commitmentAmount.value);
+      const day = Math.max(1, Math.min(31, parseInt(els.commitmentDay.value, 10) || 1));
+      if (!name || amount <= 0) return;
+      state.recurring.push({ id: uid(), name, amount, dueDay: day, isSeeded: false });
+      els.commitmentName.value = "";
+      els.commitmentAmount.value = "";
+      els.commitmentDay.value = "";
+      renderAll();
+    }
+
+    function addSavingGoal() {
+      const name = els.savingName.value.trim();
+      const amount = num(els.savingAmount.value);
+      const priority = els.savingPriority.value;
+      if (!name || amount <= 0) return;
+      state.savings.push({ id: uid(), name, amount, priority, isSeeded: false });
+      els.savingName.value = "";
+      els.savingAmount.value = "";
+      renderAll();
+    }
+
+    function openExpenseModal() {
+      els.expenseDescription.value = "";
+      els.expenseAmount.value = "";
+      els.expenseCycleSelect.value = "current";
+      els.previewArea.innerHTML = "";
+      els.recordExpenseBtn.disabled = true;
+      els.expenseModalWrap.classList.add("open");
+    }
+
+    function closeExpenseModal() {
+      els.expenseModalWrap.classList.remove("open");
+      els.previewArea.innerHTML = "";
+      els.recordExpenseBtn.disabled = true;
+    }
+
+    async function exportDataToClipboard() {
+      const payload = JSON.stringify(state, null, 2);
+      const copied = await copyTextToClipboard(payload);
+      els.dataTransferStatus.textContent = copied
+        ? "Data copied to clipboard."
+        : "Clipboard copy was blocked. Copy from the Import screen text area after opening it.";
+      if (!copied) {
+        openImportModal(payload);
+        els.importStatus.textContent = "Copy from this box manually if needed.";
+      }
+    }
+
+    function openImportModal(prefillText) {
+      els.importStatus.textContent = "";
+      els.importDataInput.value = typeof prefillText === "string" ? prefillText : "";
+      els.importModalWrap.classList.add("open");
+    }
+
+    function closeImportModal() {
+      els.importModalWrap.classList.remove("open");
+      els.importDataInput.value = "";
+      els.importStatus.textContent = "";
+    }
+
+    function importDataAndOverwrite() {
+      const raw = els.importDataInput.value.trim();
+      if (!raw) {
+        els.importStatus.textContent = "Paste exported JSON before importing.";
+        return;
+      }
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (error) {
+        els.importStatus.textContent = "Invalid JSON. Please paste a valid export.";
+        return;
+      }
+      const normalized = normalizeImportedState(parsed);
+      replaceState(normalized);
+      persist();
+      closeImportModal();
+      els.dataTransferStatus.textContent = "Data imported and previous storage overwritten.";
+      renderAll();
+    }
+
+    function analyseExpensePreview() {
+      const description = els.expenseDescription.value.trim();
+      const amount = num(els.expenseAmount.value);
+      const selectedCycleOffset = els.expenseCycleSelect.value === "next" ? 1 : 0;
+      if (!description || amount <= 0) return;
+      const current = calculateMetricsForOffset(selectedCycleOffset);
+      const projected = calculateMetricsForOffset(selectedCycleOffset, { offset: selectedCycleOffset, amount, type: "expense" });
+      const analysis = createAnalysis(current, projected, amount);
+      els.previewArea.innerHTML = `
+        <div class="preview-grid">
+          <div class="preview-card"><div class="tiny">CURRENT (${escapeHtml(current.cycleShortLabel)})</div><p><strong>${current.status.label}</strong></p><p>Safety Margin: ${fmtCurrency(current.safetyMargin)}</p><p>Stress: ${current.stress.label}</p></div>
+          <div class="preview-card"><div class="tiny">AFTER</div><p><strong>${projected.status.label}</strong></p><p>Safety Margin: ${fmtCurrency(projected.safetyMargin)}</p><p>Stress: ${projected.stress.label}</p></div>
+        </div>
+        <div class="analysis-block">
+          <p><strong>What changed:</strong> ${analysis.changeText}</p>
+          <p><strong>Goals delayed:</strong> ${analysis.delayedGoals}</p>
+          <p><strong>Commitment risk:</strong> ${analysis.commitmentRisk}</p>
+          <p><strong>Emergency reserve:</strong> ${analysis.emergencyUse}</p>
+          ${analysis.recovery.length ? `<p><strong>Recovery routes:</strong> ${analysis.recovery.join(" · ")}</p>` : ""}
+          <p><strong>Recommendation:</strong> ${analysis.recommendation}</p>
+        </div>`;
+      els.recordExpenseBtn.dataset.description = description;
+      els.recordExpenseBtn.dataset.amount = String(amount);
+      els.recordExpenseBtn.dataset.cycleOffset = String(selectedCycleOffset);
+      els.recordExpenseBtn.disabled = false;
+    }
+
+    function recordExpense() {
+      const description = els.recordExpenseBtn.dataset.description || "";
+      const amount = num(els.recordExpenseBtn.dataset.amount);
+      const cycleOffset = parseInt(els.recordExpenseBtn.dataset.cycleOffset || "0", 10);
+      if (!description || amount <= 0) return;
+      const cycleBounds = getCycleBounds(cycleOffset);
+      const eventDate = cycleOffset <= 0 ? new Date() : cycleBounds.start;
+      state.events.push(event(description, amount, "expense", false, eventDate.toISOString()));
+      if (cycleOffset === 0) state.profile.currentBalance = state.profile.currentBalance - amount;
+      closeExpenseModal();
+      renderAll();
+    }
+
+    function clearSeededDefaults() {
+      state.recurring = state.recurring.filter((item) => item.isSeeded !== true);
+      state.savings = state.savings.filter((item) => item.isSeeded !== true);
+      state.events = state.events.filter((item) => item.isSeeded !== true);
+      renderAll();
+    }
+
+    function replaceState(nextState) {
+      Object.keys(state).forEach((key) => { delete state[key]; });
+      Object.assign(state, nextState);
+    }
+
+    function normalizeImportedState(source) {
+      const raw = source && typeof source === "object" ? source : {};
+      const normalized = {
+        profile: {
+          name: String(raw.profile && raw.profile.name ? raw.profile.name : "Kobus"),
+          salary: num(raw.profile && raw.profile.salary),
+          payday: raw.profile && raw.profile.payday ? String(raw.profile.payday) : new Date().toISOString().slice(0, 10),
+          currentBalance: num(raw.profile && raw.profile.currentBalance),
+          emergencyReserve: num(raw.profile && raw.profile.emergencyReserve)
+        },
+        recurring: Array.isArray(raw.recurring) ? raw.recurring.map((item) => ({
+          id: item && item.id ? String(item.id) : uid(),
+          name: String(item && item.name ? item.name : "Commitment"),
+          amount: Math.max(0, num(item && item.amount)),
+          dueDay: Math.max(1, Math.min(31, parseInt(item && item.dueDay, 10) || 1)),
+          isSeeded: Boolean(item && item.isSeeded)
+        })) : [],
+        savings: Array.isArray(raw.savings) ? raw.savings.map((item) => ({
+          id: item && item.id ? String(item.id) : uid(),
+          name: String(item && item.name ? item.name : "Savings Goal"),
+          amount: Math.max(0, num(item && item.amount)),
+          priority: item && item.priority === "essential" ? "essential" : "flexible",
+          isSeeded: Boolean(item && item.isSeeded)
+        })) : [],
+        events: Array.isArray(raw.events) ? raw.events.map((item) => ({
+          id: item && item.id ? String(item.id) : uid(),
+          description: String(item && item.description ? item.description : "Event"),
+          amount: Math.max(0, num(item && item.amount)),
+          type: item && item.type === "income" ? "income" : "expense",
+          isSeeded: Boolean(item && item.isSeeded),
+          date: normalizeDateIso(item && item.date)
+        })) : [],
+        ui: {
+          viewCycleOffset: clampCycleOffset(raw.ui && raw.ui.viewCycleOffset)
+        }
+      };
+      return normalized;
+    }
+
+    function shiftCycleView(delta) {
+      state.ui.viewCycleOffset = clampCycleOffset(state.ui.viewCycleOffset + delta);
+      renderAll();
+    }
+
+    function setCycleView(offset) {
+      state.ui.viewCycleOffset = clampCycleOffset(offset);
+      renderAll();
+    }
+
+    function calculateMetricsForOffset(offset, scenario) {
+      const safeOffset = clampCycleOffset(offset);
+      if (safeOffset < 0) return calculateHistoricalMetrics(safeOffset, scenario);
+      const projections = projectForwardCycles(safeOffset, scenario);
+      return projections[safeOffset];
+    }
+
+    function projectForwardCycles(maxOffset, scenario) {
+      const result = {};
+      let previousClosing = state.profile.currentBalance;
+      for (let offset = 0; offset <= maxOffset; offset += 1) {
+        const bounds = getCycleBounds(offset);
+        const now = new Date();
+        const openingBalance = offset === 0 ? state.profile.currentBalance : previousClosing + state.profile.salary;
+        const recurringItems = getCycleCommitments(bounds.start, bounds.end, offset === 0);
+        const remainingRecurring = sum(recurringItems.map((c) => c.amount));
+        const requiredSavings = sum(state.savings.map((s) => s.amount));
+        const reserve = state.profile.emergencyReserve;
+        const eventsImpact = getCycleEventImpact(bounds.start, bounds.end);
+        const scenarioImpact = scenario && scenario.offset === offset ? -Math.abs(num(scenario.amount)) : 0;
+        const safetyMargin = openingBalance - remainingRecurring - requiredSavings - reserve + eventsImpact + scenarioImpact;
+        const closingBalance = openingBalance - remainingRecurring - requiredSavings + eventsImpact + scenarioImpact;
+        const cashFlow = state.profile.salary - sum(state.recurring.map((c) => c.amount)) - requiredSavings;
+        const upcoming = recurringItems.map((c) => ({
+          ...c,
+          when: offset === 0 ? formatRelativeDay(diffInDays(now, c.dueDate), c.dueDate) : formatDateWithWeekday(c.dueDate),
+          daysUntil: diffInDays(now, c.dueDate)
+        }));
+        result[offset] = {
+          daysRemaining: offset === 0 ? Math.max(0, diffInDays(now, bounds.end)) : Math.max(0, diffInDays(bounds.start, bounds.end)),
+          upcoming,
+          remainingRecurring,
+          requiredSavings,
+          reserve,
+          currentBalance: openingBalance,
+          referenceBalance: openingBalance,
+          cashFlow,
+          safetyMargin,
+          closingBalance,
+          cycleStart: bounds.start,
+          cycleEnd: bounds.end,
+          cycleLabel: cycleLabelFor(offset, bounds),
+          cycleShortLabel: cycleShortLabel(bounds),
+          stress: classifyStress(safetyMargin),
+          status: classifyStatus(safetyMargin, reserve)
+        };
+        previousClosing = closingBalance;
+      }
+      return result;
+    }
+
+    function calculateHistoricalMetrics(offset, scenario) {
+      const bounds = getCycleBounds(offset);
+      const recurringItems = getCycleCommitments(bounds.start, bounds.end, false);
+      const remainingRecurring = sum(recurringItems.map((c) => c.amount));
+      const requiredSavings = sum(state.savings.map((s) => s.amount));
+      const reserve = state.profile.emergencyReserve;
+      const openingBalance = state.profile.salary;
+      const eventsImpact = getCycleEventImpact(bounds.start, bounds.end);
+      const scenarioImpact = scenario && scenario.offset === offset ? -Math.abs(num(scenario.amount)) : 0;
+      const safetyMargin = openingBalance - remainingRecurring - requiredSavings - reserve + eventsImpact + scenarioImpact;
+      const closingBalance = openingBalance - remainingRecurring - requiredSavings + eventsImpact + scenarioImpact;
+      const cashFlow = state.profile.salary - sum(state.recurring.map((c) => c.amount)) - requiredSavings;
+      return {
+        daysRemaining: Math.max(0, diffInDays(bounds.start, bounds.end)),
+        upcoming: recurringItems.map((c) => ({ ...c, when: formatDateWithWeekday(c.dueDate), daysUntil: diffInDays(new Date(), c.dueDate) })),
+        remainingRecurring,
+        requiredSavings,
+        reserve,
+        currentBalance: openingBalance,
+        referenceBalance: openingBalance,
+        cashFlow,
+        safetyMargin,
+        closingBalance,
+        cycleStart: bounds.start,
+        cycleEnd: bounds.end,
+        cycleLabel: cycleLabelFor(offset, bounds),
+        cycleShortLabel: cycleShortLabel(bounds),
+        stress: classifyStress(safetyMargin),
+        status: classifyStatus(safetyMargin, reserve)
+      };
+    }
+
+    function buildHealthItems(metrics) {
+      const retirementGoal = state.savings.find((s) => /retirement/i.test(s.name));
+      const retirementPercent = retirementGoal && state.profile.salary > 0 ? (retirementGoal.amount / state.profile.salary) * 100 : 0;
+      const nearCommitments = metrics.upcoming.filter((u) => u.daysUntil <= 3).length;
+      return [
+        statusItem("Cash Flow", metrics.cashFlow >= 0 ? "Healthy" : "Needs Attention"),
+        statusItem("Essential Bills", metrics.currentBalance - metrics.remainingRecurring >= 0 ? "Protected" : "Needs Attention"),
+        statusItem("Emergency Fund", metrics.currentBalance >= metrics.reserve ? "Healthy" : "Needs Attention"),
+        statusItem("Savings Goals", metrics.safetyMargin >= 0 ? "Protected" : "Behind Schedule"),
+        statusItem("Upcoming Commitments", nearCommitments && metrics.safetyMargin < 500 ? "Needs Attention" : "Healthy"),
+        statusItem("Retirement", retirementPercent >= 10 ? "Healthy" : "Opportunity To Increase")
+      ];
+    }
+
+    function createAnalysis(current, projected, amount) {
+      const delta = projected.safetyMargin - current.safetyMargin;
+      const delayed = projected.safetyMargin < 0 ? state.savings.filter((s) => s.priority === "flexible").map((s) => s.name) : [];
+      const commitmentRisk = projected.currentBalance - projected.remainingRecurring < 0 ? "Some commitments become exposed before payday." : "Essential commitments stay protected.";
+      const emergencyNeeded = Math.max(0, -projected.safetyMargin);
+      let recommendation = "I'd go ahead.";
+      if (projected.safetyMargin < 0 && projected.safetyMargin >= -projected.reserve * 0.5) recommendation = "This creates some pressure, but this is recoverable.";
+      else if (projected.safetyMargin < -projected.reserve * 0.5 && projected.safetyMargin >= -projected.reserve) recommendation = "I'd be a little more careful until payday.";
+      else if (projected.safetyMargin < -projected.reserve) recommendation = "I'd probably wait until next payday.";
+      const recovery = [];
+      if (projected.safetyMargin < 0) {
+        recovery.push("Delay holiday savings", "Reduce discretionary spending");
+        if (emergencyNeeded > 0) recovery.push("Use emergency savings");
+        if (amount > current.safetyMargin) recovery.push("Wait until next payday");
+      }
+      return {
+        changeText: `Safety margin shifts by ${fmtCurrency(delta)} after this event.`,
+        delayedGoals: delayed.length ? delayed.join(", ") : "None expected.",
+        commitmentRisk,
+        emergencyUse: emergencyNeeded > 0 ? `A buffer of about ${fmtCurrency(emergencyNeeded)} may be needed.` : "No emergency reserve needed.",
+        recommendation,
+        recovery
+      };
+    }
+
+    function statusItem(name, value) {
+      let badgeClass = "healthy";
+      if (/Behind|Needs|Opportunity/i.test(value)) badgeClass = "attention";
+      if (/Off|Action/i.test(value)) badgeClass = "action";
+      return { name, value, badgeClass };
+    }
+
+    function classifyStatus(safetyMargin, reserve) {
+      if (safetyMargin >= 1000) return { label: "🟢 On Course", className: "status-green" };
+      if (safetyMargin >= 0) return { label: "🟡 Minor Detour", className: "status-amber" };
+      if (safetyMargin >= -reserve * 0.5) return { label: "🟠 Caution Ahead", className: "status-amber" };
+      return { label: "🔴 Off Course", className: "status-red" };
+    }
+
+    function classifyStress(safetyMargin) {
+      if (safetyMargin >= 1000) return { label: "🙂 Low", className: "status-green" };
+      if (safetyMargin >= 0) return { label: "😐 Medium", className: "status-amber" };
+      return { label: "😟 High", className: "status-red" };
+    }
+
+    function persist() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function event(description, amount, type, isSeeded, dateIso) { return { id: uid(), description, amount, type, isSeeded: Boolean(isSeeded), date: dateIso || new Date().toISOString() }; }
+    function markLegacySeededEntries(items, defaults, signature) {
+      const counts = defaults.reduce((acc, entry) => {
+        const key = signature(entry);
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+      return items.map((item) => {
+        if (typeof item.isSeeded === "boolean") return item;
+        const key = signature(item);
+        if (counts[key] > 0) {
+          counts[key] -= 1;
+          return { ...item, isSeeded: true };
+        }
+        return { ...item, isSeeded: false };
+      });
+    }
+    async function copyTextToClipboard(text) {
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (error) {}
+      }
+      const input = document.createElement("textarea");
+      input.value = text;
+      input.style.position = "fixed";
+      input.style.opacity = "0";
+      document.body.appendChild(input);
+      input.focus();
+      input.select();
+      let copied = false;
+      try {
+        copied = document.execCommand("copy");
+      } catch (error) {}
+      input.remove();
+      return copied;
+    }
+    function normalizeDateIso(inputDate) {
+      const date = new Date(inputDate);
+      if (Number.isNaN(date.getTime())) return new Date().toISOString();
+      return date.toISOString();
+    }
+    function formatRelativeDay(days, date) { if (days <= 0) return "Today"; if (days === 1) return "Tomorrow"; if (days <= 6) return date.toLocaleDateString(undefined, { weekday: "long" }); return `${days} days`; }
+    function formatDateWithWeekday(date) { return new Date(date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" }); }
+    function toDateInputValue(dateIso) { return new Date(dateIso).toISOString().slice(0, 10); }
+    function fmtCurrency(value) { return new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR", maximumFractionDigits: 0 }).format(value || 0); }
+    function fmtSignedAmount(entry) { const sign = entry.type === "expense" ? "-" : "+"; return sign + fmtCurrency(entry.amount); }
+    function formatDate(iso) { return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" }); }
+    function nextOccurrence(day, fromDate) {
+      const d = new Date(fromDate);
+      let y = d.getFullYear();
+      let m = d.getMonth();
+      let candidate = new Date(y, m, clampDay(day, y, m));
+      if (candidate < d) { m += 1; if (m > 11) { y += 1; m = 0; } candidate = new Date(y, m, clampDay(day, y, m)); }
+      return candidate;
+    }
+    function clampDay(day, year, month) { const end = new Date(year, month + 1, 0).getDate(); return Math.min(Math.max(day, 1), end); }
+    function addMonthsClamped(date, months) {
+      const source = new Date(date);
+      const targetMonthIndex = source.getMonth() + months;
+      const targetYear = source.getFullYear() + Math.floor(targetMonthIndex / 12);
+      const normalizedMonth = ((targetMonthIndex % 12) + 12) % 12;
+      const day = clampDay(source.getDate(), targetYear, normalizedMonth);
+      return new Date(targetYear, normalizedMonth, day);
+    }
+    function normalizePayday() {
+      let payday = new Date(`${state.profile.payday}T00:00:00`);
+      if (Number.isNaN(payday.getTime())) {
+        payday = new Date();
+        payday.setDate(payday.getDate() + 14);
+        state.profile.payday = payday.toISOString().slice(0, 10);
+      }
+      const today = new Date();
+      while (payday < new Date(today.getFullYear(), today.getMonth(), today.getDate())) payday = addMonthsClamped(payday, 1);
+      return payday;
+    }
+    function getCycleBounds(offset) {
+      const normalizedOffset = clampCycleOffset(offset);
+      const nextPayday = normalizePayday();
+      const cycleEnd = addMonthsClamped(nextPayday, normalizedOffset);
+      const cycleStart = addMonthsClamped(nextPayday, normalizedOffset - 1);
+      return { start: cycleStart, end: cycleEnd };
+    }
+    function getCycleCommitments(cycleStart, cycleEnd, onlyRemaining) {
+      const today = new Date();
+      return state.recurring
+        .map((item) => {
+          const dueDate = dueDateWithinCycle(item.dueDay, cycleStart, cycleEnd);
+          return dueDate ? { ...item, dueDate } : null;
+        })
+        .filter((item) => item && (!onlyRemaining || item.dueDate >= new Date(today.getFullYear(), today.getMonth(), today.getDate())))
+        .sort((a, b) => a.dueDate - b.dueDate);
+    }
+    function dueDateWithinCycle(dueDay, cycleStart, cycleEnd) {
+      for (let monthShift = 0; monthShift <= 2; monthShift += 1) {
+        const probeMonth = cycleStart.getMonth() + monthShift;
+        const probeYear = cycleStart.getFullYear() + Math.floor(probeMonth / 12);
+        const normalizedMonth = ((probeMonth % 12) + 12) % 12;
+        const candidate = new Date(probeYear, normalizedMonth, clampDay(num(dueDay), probeYear, normalizedMonth));
+        if (candidate >= cycleStart && candidate < cycleEnd) return candidate;
+      }
+      return null;
+    }
+    function getCycleEventImpact(cycleStart, cycleEnd) {
+      return state.events
+        .filter((eventItem) => isWithinRange(new Date(eventItem.date), cycleStart, cycleEnd))
+        .reduce((acc, eventItem) => acc + (eventItem.type === "income" ? num(eventItem.amount) : -num(eventItem.amount)), 0);
+    }
+    function isWithinRange(date, start, end) {
+      return date >= start && date < end;
+    }
+    function cycleShortLabel(bounds) {
+      return `${bounds.start.toLocaleDateString(undefined, { day: "numeric", month: "short" })} - ${bounds.end.toLocaleDateString(undefined, { day: "numeric", month: "short" })}`;
+    }
+    function cycleLabelFor(offset, bounds) {
+      if (offset === 0) return `Current cycle · ${cycleShortLabel(bounds)}`;
+      if (offset === 1) return `Next cycle · ${cycleShortLabel(bounds)}`;
+      if (offset === -1) return `Past cycle · ${cycleShortLabel(bounds)}`;
+      return `Future cycle (${offset > 0 ? "+" : ""}${offset}) · ${cycleShortLabel(bounds)}`;
+    }
+    function clampCycleOffset(offset) {
+      const value = parseInt(offset, 10) || 0;
+      if (value < -1) return -1;
+      if (value > 3) return 3;
+      return value;
+    }
+    function nextDueDay(offset) { const d = new Date(); d.setDate(d.getDate() + offset); return d.getDate(); }
+    function diffInDays(a, b) { const aa = new Date(a.getFullYear(), a.getMonth(), a.getDate()); const bb = new Date(b.getFullYear(), b.getMonth(), b.getDate()); return Math.round((bb - aa) / 86400000); }
+    function dayGreeting() { const h = new Date().getHours(); if (h < 12) return "Good Morning"; if (h < 18) return "Good Afternoon"; return "Good Evening"; }
+    function sum(values) { return values.reduce((acc, value) => acc + (Number(value) || 0), 0); }
+    function num(value) { return Number(value) || 0; }
+    function uid() { return Math.random().toString(36).slice(2, 10); }
+    function escapeHtml(input) { return String(input).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[m])); }
+    function q(selector) { return document.querySelector(selector); }
+  </script>
+</body>
+</html>
