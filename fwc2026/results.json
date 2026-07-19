@@ -1328,16 +1328,16 @@
     },
     {
       "id": "M103",
-      "status": "scheduled",
+      "status": "completed",
       "score": {
-        "home": null,
-        "away": null
+        "home": 4,
+        "away": 6
       },
       "penalties": {
         "home": null,
         "away": null
       },
-      "winner": null
+      "winner": "away"
     },
     {
       "id": "M104",
