@@ -2126,6 +2126,28 @@ class WorldCupApp {
        `;
     }
 
+    html += `
+        <div class="prize-card">
+          <div class="prize-header">
+              <div class="prize-title">Correct Guess: Teams in the Final</div>
+              <div class="prize-share">R50</div>
+              <div class="prize-status assigned">Assigned</div>
+              <div class="prize-winner">Aiden, Lindsay</div>
+              <div class="prize-info">Each player who correctly guessed the two teams in the final gets this prize.</div>
+          </div>
+        </div>
+
+        <div class="prize-card">
+          <div class="prize-header">
+              <div class="prize-title">Correct Guess: Winning Team of the World Cup 2026</div>
+              <div class="prize-share">R100</div>
+              <div class="prize-status assigned">Assigned</div>
+              <div class="prize-winner">Cameron, Gary, Gizelle, Jo, Kobus</div>
+              <div class="prize-info">Each player who correctly guessed the winning team of the World Cup 2026 gets this prize.</div>
+          </div>
+        </div>
+    `
+
     html += '</div>';
     document.getElementById('prizesDisplay').innerHTML = html;
     page.classList.remove('hidden');
