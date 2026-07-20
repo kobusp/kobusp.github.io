@@ -1446,28 +1446,28 @@ class WorldCupApp {
         title: '1st Place Finisher',
         amount: prizePool * payoutShares.first,
         assigned: firstSecondAssigned,
-        winner: firstSecondAssigned && rankedPlayers[0] ? rankedPlayers[0].name : null,
+        winner: 'Jo',
         info: 'Assigned when the final is completed.'
       },
       {
         title: '2nd Place Finisher',
         amount: prizePool * payoutShares.second,
         assigned: firstSecondAssigned,
-        winner: firstSecondAssigned && rankedPlayers[1] ? rankedPlayers[1].name : null,
+        winner: 'Seth',
         info: 'Assigned when the final is completed.'
       },
       {
         title: '3rd Place Finisher',
         amount: prizePool * payoutShares.third,
         assigned: thirdPlaceAssigned,
-        winner: thirdPlaceAssigned && rankedPlayers[2] ? rankedPlayers[2].name : null,
+        winner: 'Lindsay',
         info: 'Assigned when the 3rd-place playoff is completed.'
       },
       {
         title: 'Most Group Stage Points',
         amount: prizePool * payoutShares.group,
         assigned: groupStageAssigned && !!groupStageWinner,
-        winner: groupStageAssigned && groupStageWinner ? `${groupStageWinner.winnerName} (${groupStageWinner.points} pts)` : null,
+        winner: 'Gary',
         info: groupStageWinner && groupStageWinner.tieBreakApplied
           ? 'Tie-break applied: first player to reach the top score wins.'
           : 'Assigned when the tournament enters the Round of 32.'
